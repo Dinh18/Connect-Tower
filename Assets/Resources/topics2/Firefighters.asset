@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c5ed26078d810f4b848d959c0654f42, type: 3}
+  m_Name: Firefighters
+  m_EditorClassIdentifier: Assembly-CSharp::BlockTopic
+  topicName: Firefighters
+  blockColor: 9
+  topicID: 10
+  blocksSprite:
+  - {fileID: 21300000, guid: 63e8005ca787a6349bfded22cb226fee, type: 3}
+  - {fileID: 21300000, guid: 53358528dad16414c9b5ba7f1881be0a, type: 3}
+  - {fileID: 21300000, guid: 53358528dad16414c9b5ba7f1881be0a, type: 3}
+  - {fileID: 21300000, guid: 53358528dad16414c9b5ba7f1881be0a, type: 3}

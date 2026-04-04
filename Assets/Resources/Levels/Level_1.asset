@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25ab7f7f03bb8b7468efbe24131e7b4a, type: 3}
+  m_Name: Level_1
+  m_EditorClassIdentifier: Assembly-CSharp::LevelDataSO
+  level: 1
+  numsTopic: 2
+  difficult: 0
+  moves: 10
+  row1: 3
+  row2: 0
+  slots:
+  - slotType: 0
+    questionTopic: {fileID: 0}
+    blocks:
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 27d30a38d595de94591d1f11cbc32f07, type: 2}
+      indexSprite: 0
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 27d30a38d595de94591d1f11cbc32f07, type: 2}
+      indexSprite: 1
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 27d30a38d595de94591d1f11cbc32f07, type: 2}
+      indexSprite: 2
+  - slotType: 0
+    questionTopic: {fileID: 0}
+    blocks:
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 6d25b8a301d4f9e449a604f093872108, type: 2}
+      indexSprite: 0
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 6d25b8a301d4f9e449a604f093872108, type: 2}
+      indexSprite: 1
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 6d25b8a301d4f9e449a604f093872108, type: 2}
+      indexSprite: 2
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 27d30a38d595de94591d1f11cbc32f07, type: 2}
+      indexSprite: 3
+  - slotType: 0
+    questionTopic: {fileID: 0}
+    blocks:
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 6d25b8a301d4f9e449a604f093872108, type: 2}
+      indexSprite: 3
