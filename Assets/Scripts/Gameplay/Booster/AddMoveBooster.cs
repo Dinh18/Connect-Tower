@@ -14,6 +14,7 @@ public class AddMoveBooster : MonoBehaviour ,IBooster
         if(DataManager.Instance.GetAmountOfBoosterByID((int)Constants.BoosterType.AddMove) <= 0) return;
         GameManager.Instance.AddMove(amount);
         DataManager.Instance.UseBooster((int)Constants.BoosterType.AddMove);
+        AudioManager.Instance.PlayAddMoveAudio();
         Debug.Log("Da them luot di chuyen");
     }
 

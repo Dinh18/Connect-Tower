@@ -5,13 +5,20 @@ public class BoosterButton : MonoBehaviour
 {
     private Button boosterButton;
     private IBooster booster;
+    void OnEnable()
+    {
+        boosterButton.onClick.AddListener(OnButtonClicked);
+    }
+    void OnDisable()
+    {
+        boosterButton.onClick.RemoveListener(OnButtonClicked);
+    }
     void Awake()
     {
         boosterButton = GetComponent<Button>();
 
         booster = GetComponentInChildren<IBooster>();
 
-        boosterButton.onClick.AddListener(OnButtonClicked);
     }
 
     public void OnButtonClicked()

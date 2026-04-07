@@ -5,6 +5,17 @@ public class BlocksManager : MonoBehaviour
 {
     private Dictionary<int, List<BlockController>> blocksByTopicID = new Dictionary<int, List<BlockController>>();
     public Dictionary<int, List<BlockController>> GetAllBlocks() => blocksByTopicID;
+    private List<GameObject> blockPool;
+    public void PoolBlock(int numsBlock)
+    {
+        blockPool = new List<GameObject>();
+        GameObject blockObj = Resources.Load<GameObject>(Constants.BLOCK_TEST_1_PATH);
+        for(int i = 0; i < numsBlock; i++)
+        {
+            GameObject block = Instantiate(blockObj, this.transform.position,Quaternion.identity, this.transform);
+            block.SetActive(false);
+        }
+    }
     public void BlocksGenerate(List<SlotSetupData> slotSetups, List<SlotController> slots)
     {
         foreach(Transform child in this.transform)

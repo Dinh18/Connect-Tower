@@ -36,11 +36,32 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
     [SerializeField] private LevelUI nextLevel1;
     [SerializeField] private LevelUI nextLevel2;
 
-    void Awake()
+    void OnEnable()
     {
         DataManager.OnChangeLevel+=ShowLevels;
         DataManager.OnChangeHeart+=UpdateHeartCountText;
         DataManager.OnChangeCoins+=UpdateCoinsText;
+
+        homeButton.onClick.AddListener(OnClickHome);
+        shopButton.onClick.AddListener(OnClickShop);
+        playButton.onClick.AddListener(OnClickPlay);
+        AddCoins.onClick.AddListener(OnClickShop);
+        Setting.onClick.AddListener(uIManager.OpenSetting);
+        addHeartButton.onClick.AddListener(OnClickAddHeart);
+    }
+
+    void OnDisable()
+    {
+        DataManager.OnChangeLevel-=ShowLevels;
+        DataManager.OnChangeHeart-=UpdateHeartCountText;
+        DataManager.OnChangeCoins-=UpdateCoinsText;
+
+        homeButton.onClick.RemoveListener(OnClickHome);
+        shopButton.onClick.RemoveListener(OnClickShop);
+        playButton.onClick.RemoveListener(OnClickPlay);
+        AddCoins.onClick.RemoveListener(OnClickShop);
+        Setting.onClick.RemoveListener(uIManager.OpenSetting);
+        addHeartButton.onClick.RemoveListener(OnClickAddHeart);
     }
 
     public void Setup(UIManager uIManager)
@@ -50,13 +71,6 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
 
         this.uIManager = uIManager;
         refillHeartPopup.Setup(uIManager);
-
-        homeButton.onClick.AddListener(OnClickHome);
-        shopButton.onClick.AddListener(OnClickShop);
-        playButton.onClick.AddListener(OnClickPlay);
-        AddCoins.onClick.AddListener(OnClickShop);
-        Setting.onClick.AddListener(uIManager.OpenSetting);
-        addHeartButton.onClick.AddListener(OnClickAddHeart);
 
         oldCoins = DataManager.Instance.playerData.totalCoins;
         coinText.text = DataManager.Instance.playerData.totalCoins.ToString();
@@ -111,7 +125,7 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
 
         // Dừng các hiệu ứng đang chạy (nếu người chơi bấm nhận thưởng liên tục)
         DOTween.Kill("GoldCounter"); 
-
+        AudioManager.Instance.PlayCoinCollectAudio();
         // DOTween sẽ chạy một biến ảo (Virtual) từ số cũ lên số mới
         DOVirtual.Int(oldCoins, currCoins, countDuration, (value) => 
         {

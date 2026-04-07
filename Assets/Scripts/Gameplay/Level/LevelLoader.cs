@@ -23,6 +23,9 @@ public class LevelLoader : MonoBehaviour
     // [SerializeField] DataLevel dataTest;
     public List<SlotController> slots;
     public GameDifficult gameDifficult;
+    private int numsTopic;
+
+    public int GetNumsTopic() => numsTopic;
 
     void Awake()
     {
@@ -54,7 +57,7 @@ public class LevelLoader : MonoBehaviour
         int row1 = levelData.row1;
         int row2 = levelData.row2;
         List<SlotSetupData> slotSetup = levelData.slots;
-        int numsTopic = levelData.numsTopic;
+        numsTopic = levelData.numsTopic;
         gameDifficult = (GameDifficult)levelData.difficult;
 
         slots = new List<SlotController>();

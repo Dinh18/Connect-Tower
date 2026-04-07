@@ -7,14 +7,26 @@ public class SettingPopup : MonoBehaviour, IMenu
     private UIManager uIManager;
     [SerializeField] private Button closeButton;
     [SerializeField] private Button backHomeButton;
-    void Awake()
+    void OnEnable()
     {
         backHomeButton.onClick.AddListener(uIManager.OnClickBackHome);
-        closeButton.onClick.AddListener(Hide);
+        closeButton.onClick.AddListener(OnClickClose);
+    }
+    void OnDisable()
+    {
+        backHomeButton.onClick.RemoveListener(uIManager.OnClickBackHome);
+        closeButton.onClick.RemoveListener(Hide);
     }
     public void Hide()
     {
         this.gameObject.SetActive(false);
+
+    }
+
+    private void OnClickClose()
+    {
+        Hide();
+        GameManager.Instance.ChangeState(GameManager.GameState.Playing);
     }
 
     public void Setup(UIManager uIManager)
@@ -25,5 +37,6 @@ public class SettingPopup : MonoBehaviour, IMenu
     public void Show()
     {
         this.gameObject.SetActive(true);
+        GameManager.Instance.ChangeState(GameManager.GameState.Pause);
     }
 }

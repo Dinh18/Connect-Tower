@@ -42,7 +42,6 @@ public class SlotController : MonoBehaviour
     public BlockTopic blockTopic = null;
     [Header("Ice Slot Settings")]
     [SerializeField] private GameObject BaseSlot;
-    
     [SerializeField] private GameObject iceRod;
     [SerializeField] private GameObject iceVFX;
     private float baseIceRodLocalY;
@@ -101,7 +100,7 @@ public class SlotController : MonoBehaviour
                 || !block.isRevealed) break;
             block.ChangeState(BlockController.BlockState.Selected);
             Vector3 targetPosition = new Vector3(stackAnchor.position.x, stackAnchor.position.y + (blocks.Count - i) * Constants.BLOCK_HEIGHT, stackAnchor.position.z);
-            MoveBlockSmoothly(block.gameObject, new List<Vector3>{targetPosition}, selectDuration);
+            block.transform.DOMove(targetPosition, selectDuration).SetEase(Ease.OutQuad);
             i++;
         }
         return true;
@@ -210,7 +209,8 @@ public class SlotController : MonoBehaviour
                 || !block.isRevealed) break;
             block.ChangeState(BlockController.BlockState.None);
             Vector3 targetPosition = new Vector3(stackAnchor.position.x, stackAnchor.position.y + (blocks.Count - 1 - i) * Constants.BLOCK_HEIGHT, stackAnchor.position.z);
-            MoveBlockSmoothly(block.gameObject, new List<Vector3>{targetPosition}, selectDuration);
+            // MoveBlockSmoothly(block.gameObject, new List<Vector3>{targetPosition}, selectDuration);
+            block.transform.DOMove(targetPosition, selectDuration).SetEase(Ease.OutQuad);
             i++;
         }
         return true;
@@ -243,13 +243,14 @@ public class SlotController : MonoBehaviour
                 || !block.isRevealed) return;
         }
         isFinished = true;
+        AudioManager.Instance.PlaySlotFinishedAudio();
         if(slotType == SlotType.Ice)
         {
             iceRod.SetActive(false);
             iceVFX.SetActive(false);
             BaseSlot.GetComponent<MeshFilter>().mesh = Resources.Load<Mesh>(Constants.MESH_BASE_PATH);
             BaseSlot.GetComponent<MeshRenderer>().material = Resources.Load<Material>(Constants.MATERIAL_BASE_PATH);
-            
+            AudioManager.Instance.PlayBlockIceFinishedAudio();
         } 
         foreach(BlockController block in blocks)
         {
@@ -265,6 +266,7 @@ public class SlotController : MonoBehaviour
     private void BlockStartMoving()
     {
         movingBlocksCount++;
+        AudioManager.Instance.PlayMoveWooshAudio();
         isMoving = true;
     }
     private void BlockReachedDestination(BlockController b,SlotController otherSlot, bool isSameType)
@@ -288,7 +290,12 @@ public class SlotController : MonoBehaviour
                     block.FallEffect(i);
                     i++;
                 }
+                AudioManager.Instance.PlayPopMovedAudio(i);
             } 
+            else
+            {
+                AudioManager.Instance.PlayBlockFailAudio();
+            }
             movingBlocksCount = 0;
 
             if(slotType == SlotType.Ice)
@@ -298,6 +305,7 @@ public class SlotController : MonoBehaviour
                 iceRod.transform.DOMove(new Vector3(iceRod.transform.position.x,
                                         blocks.Count * Constants.BLOCK_HEIGHT + Constants.BLOCK_HEIGHT + Constants.SLOT_HEIGHT * row, 
                                         iceRod.transform.position.z), 0.5f);
+                AudioManager.Instance.PlayFreezeUpAudio();
             } 
 
             if (otherSlot != null && otherSlot.blocks.Count > 0)
@@ -308,11 +316,11 @@ public class SlotController : MonoBehaviour
                     }
                 }
 
-            if(blocks.Count == 4) CheckSlotComplete();
 
             float delay = (isSameType) ? 0.5f : 0f;
 
             StartCoroutine(WaitAndFinishMoving(delay, otherSlot));
+            if(blocks.Count == 4) CheckSlotComplete();
         } 
     }
     private IEnumerator WaitAndFinishMoving(float delay, SlotController otherSlot)
@@ -330,7 +338,7 @@ public class SlotController : MonoBehaviour
         Quaternion originRot = hideSlotHolder.transform.rotation;
 
         Sequence sequence = DOTween.Sequence();
-
+        AudioManager.Instance.PlayClothAudio();
         sequence.Append(hideSlotHolder.transform.DOMoveY(originPos.y + 10f, 1f));
 
         sequence.Join(hideSlotHolder.transform.DORotate(new Vector3(0, 0, 15f), 0.5f));
@@ -388,7 +396,7 @@ public class SlotController : MonoBehaviour
                                           stackAnchor.position.y + Constants.BLOCK_HEIGHT * blocks.Count,
                                           stackAnchor.position.z);
         List<Vector3> path = new List<Vector3>{arcPeak.position, destination};
-        MoveBlockSmoothly(block.gameObject,path,0.5f);
+        block.transform.DOPath(path.ToArray(), 0.5f, PathType.CatmullRom);
         blocks.Push(block);
     }
 }

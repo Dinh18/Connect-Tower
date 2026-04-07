@@ -92,6 +92,7 @@ public class SlotsManager : MonoBehaviour
                 return;
             }
         }
+        // AudioManager.Instance.PlayLVLWinAudio();
         GameManager.Instance.ChangeState(GameManager.GameState.Win);
         levelLoader.LevelUp();
     }

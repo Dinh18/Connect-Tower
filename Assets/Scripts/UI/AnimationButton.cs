@@ -23,7 +23,7 @@ public class AnimationButton : MonoBehaviour, IPointerDownHandler, IPointerUpHan
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        
+        AudioManager.Instance.PlayButtonAudio();
         transform.DOKill();
         transform.DOScale(originalScale, releaseDuration).SetEase(Ease.OutQuad).SetUpdate(true);
     }

@@ -13,7 +13,11 @@ public class HintBooster : MonoBehaviour, IBooster
         if(DataManager.Instance.GetAmountOfBoosterByID((int)Constants.BoosterType.Hint) <= 0) return;
         DataManager.Instance.UseBooster((int)Constants.BoosterType.Hint);
         bool searched = boosterManager.SearchedBlocks();
-        if(searched) Debug.Log("Thuc hien Hint thanh cong");
+        if(searched)
+        {
+            AudioManager.Instance.PlayHintBoosterAudio();
+            Debug.Log("Thuc hien Hint thanh cong");
+        } 
         else Debug.Log("Hint khong thanh cong");
     }
 

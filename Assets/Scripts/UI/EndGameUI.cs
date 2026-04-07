@@ -8,12 +8,14 @@ public class EndGameUI : MonoBehaviour
     
     public void ShowLevelCompletedPanel()
     {
+        AudioManager.Instance.PlayLVLWinAudio();
         this.gameObject.SetActive(true);
         levelCompletedPanel.SetActive(true);
         levelFailedPanel.SetActive(false);
     }
     public void ShowLevelFailedPanel()
     {
+        AudioManager.Instance.PlayLVLLoseAudio();
         this.gameObject.SetActive(true);
         levelCompletedPanel.SetActive(false);
         levelFailedPanel.SetActive(true);

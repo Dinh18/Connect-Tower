@@ -33,15 +33,31 @@ public class InGameUIManager : MonoBehaviour, IMenu
     [SerializeField] private Text shuffleCountText;
     [SerializeField] private Text hintCountText;
     private UIManager uIManager;
-    void Awake()
+    void OnEnable()
     {
         GameManager.OnChangeMoves+=UpdateMovesText;
-        // DataManager.OnChangeCoins+=UpdateCoinsText;
-        // DataManager.OnChangeLevel+=UpdateLevelText;
-
         SlotsManager.OnChangeFinishedSlots+=UpdateProgressText;
         SlotsManager.OnChangeFinishedSlots+=UpdateFinishedSlotsSlider;
         DataManager.OnChangeCountBooster+=UpdateBoosterCountText;
+
+        SettingButton.onClick.AddListener(uIManager.OpenSetting);
+        continueButton.onClick.AddListener(uIManager.OnClickBackHome);
+        backMainMenuButton.onClick.AddListener(uIManager.OnClickBackHome);
+        tryAgainButton.onClick.AddListener(OnClickTryAgain);
+        coinsButton.onClick.AddListener(uIManager.OpenShop);
+    }
+    void OnDisable()
+    {
+        GameManager.OnChangeMoves-=UpdateMovesText;
+        SlotsManager.OnChangeFinishedSlots-=UpdateProgressText;
+        SlotsManager.OnChangeFinishedSlots-=UpdateFinishedSlotsSlider;
+        DataManager.OnChangeCountBooster-=UpdateBoosterCountText;
+
+        SettingButton.onClick.RemoveListener(uIManager.OpenSetting);
+        continueButton.onClick.RemoveListener(uIManager.OnClickBackHome);
+        backMainMenuButton.onClick.RemoveListener(uIManager.OnClickBackHome);
+        tryAgainButton.onClick.RemoveListener(OnClickTryAgain);
+        coinsButton.onClick.RemoveListener(uIManager.OpenShop);
     }
     public void Hide()
     {
@@ -51,17 +67,6 @@ public class InGameUIManager : MonoBehaviour, IMenu
     public void Setup(UIManager uIManager)
     {
         this.uIManager = uIManager;
-        SettingButton.onClick.AddListener(uIManager.OpenSetting);
-
-        continueButton.onClick.AddListener(uIManager.OnClickBackHome);
-        backMainMenuButton.onClick.AddListener(uIManager.OnClickBackHome);
-        tryAgainButton.onClick.AddListener(OnClickTryAgain);
-        coinsButton.onClick.AddListener(uIManager.OpenShop);
-
-        movesText.color = normalColor;
-        addMovesCountText.text = DataManager.Instance.GetAmountOfBoosterByID((int) Constants.BoosterType.AddMove).ToString();
-        shuffleCountText.text = DataManager.Instance.GetAmountOfBoosterByID((int) Constants.BoosterType.Shuffle).ToString();
-        hintCountText.text = DataManager.Instance.GetAmountOfBoosterByID((int) Constants.BoosterType.Hint).ToString();
     }
 
     public void Show()
@@ -69,6 +74,13 @@ public class InGameUIManager : MonoBehaviour, IMenu
         this.gameObject.SetActive(true);
         coinsText.text = DataManager.Instance.playerData.totalCoins.ToString();
         levelText.text = "Level " + (DataManager.Instance.playerData.currentLevel + 1).ToString();
+        movesText.color = normalColor;
+
+        addMovesCountText.text = DataManager.Instance.GetAmountOfBoosterByID((int) Constants.BoosterType.AddMove).ToString();
+        shuffleCountText.text = DataManager.Instance.GetAmountOfBoosterByID((int) Constants.BoosterType.Shuffle).ToString();
+        hintCountText.text = DataManager.Instance.GetAmountOfBoosterByID((int) Constants.BoosterType.Hint).ToString();
+        UpdateFinishedSlotsSlider(0, LevelLoader.Instance.GetNumsTopic());
+        UpdateProgressText(0, LevelLoader.Instance.GetNumsTopic());
         if(LevelLoader.Instance.gameDifficult == LevelLoader.GameDifficult.Hard)
         {
             levelDifficultImgae.sprite = Resources.Load<Sprite>(Constants.HARD_TEXT_UI);
@@ -136,16 +148,6 @@ public class InGameUIManager : MonoBehaviour, IMenu
     {
         GameManager.Instance.ChangeState(GameManager.GameState.Playing);
     }
-
-    // private void UpdateCoinsText(int totalCoins)
-    // {
-    //     coinsText.text = totalCoins.ToString();
-    // }
-
-    // private void UpdateLevelText(int level)
-    // {
-    //     levelText.text = "Level " + level.ToString();
-    // }
 
     private void UpdateFinishedSlotsSlider(int finishedSlots, int numSlots)
     {

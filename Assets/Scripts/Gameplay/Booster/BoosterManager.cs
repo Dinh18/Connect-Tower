@@ -40,7 +40,7 @@ public class BoosterManager : MonoBehaviour
             slot.MoveToShuffle(slotsManager.gameObject.transform,diffcultBLocks,sameBlocks);
         }
 
-        yield return new WaitForSeconds(0.7f);
+        yield return new WaitForSeconds(1f);
         
 
         List<SlotController> randomSlots = new List<SlotController>(slotsManager.GetAllSlots());
