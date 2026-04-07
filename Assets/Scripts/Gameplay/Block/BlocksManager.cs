@@ -28,7 +28,7 @@ public class BlocksManager : MonoBehaviour
                 
                 itemImageBlock.AddImage(slotSetups[i].blocks[j].blockTopic.blocksSprite[0]);
                 b.Setup(slotSetups[i].blocks[j].blockTopic.blockColor, 
-                    slotSetups[i].blocks[j].blockTopic.topicID, 
+                    slotSetups[i].blocks[j].blockTopic, 
                     slotSetups[i].blocks[j].typeBlock,
                     slotSetups[i].blocks[j].blockTopic.blocksSprite[slotSetups[i].blocks[j].indexSprite],
                     slots[i]);

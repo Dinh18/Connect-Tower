@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private LevelLoader levelLoader;
     [SerializeField] private SlotsManager slotsManager;
     [SerializeField] private BlocksManager blocksManager;
+    [SerializeField] private HeartManager heartManager;
     [SerializeField] private CameraController cameraController;
     public static event Action<int> OnChangeMoves;
     void Awake()
@@ -27,9 +28,9 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        uIManager.Setup(this);
         cameraController.Setup();
         levelLoader.Setup(this, slotsManager, blocksManager);
+        uIManager.Setup(this);
         ChangeState(GameState.MainMenu);
     }
 
@@ -37,11 +38,12 @@ public class GameManager : MonoBehaviour
     {
         return slotsManager;
     }
+
+    public GameState GetCurrState() => state;
     public void SetupLevel(int maxMoves)
     {
         moves = maxMoves;
         OnChangeMoves?.Invoke(moves);
-
         cameraController.FitCamera(slotsManager.row1, slotsManager.row2);
     }
     public void Move()
@@ -51,6 +53,8 @@ public class GameManager : MonoBehaviour
         if(moves <= 0)
         {
             ChangeState(GameState.Lose);
+            // DataManager.Instance.UseHeart();
+            heartManager.UseHeart();
         }
     }
     public void AddMove(int moves)
@@ -58,15 +62,15 @@ public class GameManager : MonoBehaviour
         this.moves += moves;
         OnChangeMoves?.Invoke(this.moves);
     }
-    public GameState GetCurrState() => state;
+    
     public void ChangeState(GameState gameState)
     {
         if(gameState == GameState.Playing)
         {
             levelLoader.LoadLevel();
         }
-        this.state = gameState;
         uIManager.UpdateUI(gameState);
+        this.state = gameState;
         Debug.Log("CurrState: " + this.state);
     }
 }

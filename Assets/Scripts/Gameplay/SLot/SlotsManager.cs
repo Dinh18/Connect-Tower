@@ -54,7 +54,7 @@ public class SlotsManager : MonoBehaviour
             slot.transform.localPosition = new Vector3(startX_Row1 + (i * Constants.SLOT_WIDTH), 0, 0);
 
             SlotController s = slot.GetComponent<SlotController>();
-            s.Setup(slotSetup[j].slotType, slotSetup[j].questionTopic ? slotSetup[j].questionTopic : null);
+            s.Setup(slotSetup[j].slotType, 0,slotSetup[j].questionTopic ? slotSetup[j].questionTopic : null);
             slots.Add(s);
             j++;
         }
@@ -68,7 +68,7 @@ public class SlotsManager : MonoBehaviour
             slot.transform.localPosition = new Vector3(startX_Row2 + (i * Constants.SLOT_WIDTH), Constants.SLOT_HEIGHT, 0);
 
             SlotController s = slot.GetComponent<SlotController>();
-            s.Setup(slotSetup[j].slotType, slotSetup[j].questionTopic ? slotSetup[j].questionTopic : null);
+            s.Setup(slotSetup[j].slotType, 1,slotSetup[j].questionTopic ? slotSetup[j].questionTopic : null);
             slots.Add(s);
             j++;
         }

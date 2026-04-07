@@ -15,7 +15,7 @@ public class LevelLoader : MonoBehaviour
         Hard = 1,
         VeryHard = 2
     }
-    // public static LevelLoader Instance;
+    public static LevelLoader Instance;
     [SerializeField] private SlotsManager slotsManager;
     [SerializeField] private BlocksManager blocksManager;
     [SerializeField] private GameManager gameManager;
@@ -23,6 +23,15 @@ public class LevelLoader : MonoBehaviour
     // [SerializeField] DataLevel dataTest;
     public List<SlotController> slots;
     public GameDifficult gameDifficult;
+
+    void Awake()
+    {
+        Instance = this;
+    }
+
+    public int GetNumsLevel() => levelDatas.Length;
+
+    public int GetDifficultLevel(int lvl) => levelDatas[lvl].difficult;
 
     public void Setup(GameManager gameManager, SlotsManager slotsManager, BlocksManager blocksManager)
     {
@@ -36,10 +45,7 @@ public class LevelLoader : MonoBehaviour
 
     public void LevelUp()
     {
-        if(DataManager.Instance.playerData.currentLevel < levelDatas.Length)
-        {
-            DataManager.Instance.LevelUp(gameDifficult);
-        }
+        DataManager.Instance.LevelUp(gameDifficult, levelDatas.Length - 1); 
     }
     public void LoadLevel()
     {

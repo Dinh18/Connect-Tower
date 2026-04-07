@@ -1,10 +1,12 @@
 using DG.Tweening;
+using TMPro;
 using UnityEngine;
 
 public class HeaderSlot : MonoBehaviour
 {
     private BorderHeaderSlot border;
     private SlotController slot;
+    [SerializeField] private TextMeshProUGUI topicText;
     [SerializeField] private float duration = 0.5f;
 
     public void Setup(SlotController slot)
@@ -25,6 +27,7 @@ public class HeaderSlot : MonoBehaviour
     }
     public void Show()
     {
+        topicText.SetText(slot.blocks.Peek().GetTopicName());
         border.SetColor(GetColor());
         this.gameObject.SetActive(true);
     }

@@ -8,6 +8,7 @@ public class PlayerData
     public int currentLevel = 0;
     public int totalCoins = 10000;
     public int heart = 5;
+    public string nextHeartTime;
     public List<BoosterData> boosters = new List<BoosterData>{new BoosterData(0, "Add Move", 2),
                                                               new BoosterData(1, "Shuffle", 2),
                                                               new BoosterData(2, "Hint", 2)};

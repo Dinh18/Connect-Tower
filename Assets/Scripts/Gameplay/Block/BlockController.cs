@@ -29,7 +29,7 @@ public class BlockController : MonoBehaviour
         Selected,
         Collde
     }
-    private int topicID;
+    private BlockTopic topic;
     private BlockType type;
     private Sprite itemImage;
     private BlockState currState = BlockState.None;
@@ -43,8 +43,8 @@ public class BlockController : MonoBehaviour
     [SerializeField] private GameObject iceVFX;
     [SerializeField] private GameObject iceImage;
     public bool isRevealed;
-    public int GetTopicID() => topicID;
-    public int SetTopicID(int topicID) => this.topicID = topicID; 
+    public int GetTopicID() => topic.topicID;
+    public string GetTopicName() => topic.name;
 
     public ColorBlock GetColorBlock() => colorBlock;
     public void SetTypeBlock(ColorBlock colorBlock) => this.colorBlock = colorBlock;
@@ -52,10 +52,10 @@ public class BlockController : MonoBehaviour
     public BlockType GetBlockType() => type;
     public void SetBlockType(BlockType type) => this.type = type;
 
-    public void Setup(int color, int topicID, BlockType type, Sprite itemImage, SlotController slot)
+    public void Setup(int color, BlockTopic topic, BlockType type, Sprite itemImage, SlotController slot)
     {
         this.colorBlock = (ColorBlock) color;
-        this.topicID = topicID;
+        this.topic = topic;
         this.type = type;
         this.itemImage = itemImage;
         if(slot.slotType == SlotController.SlotType.Ice)

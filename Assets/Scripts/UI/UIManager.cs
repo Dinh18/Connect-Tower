@@ -31,18 +31,22 @@ public class UIManager : MonoBehaviour
     {
         endGameUI.Hide();
         mainMenu.Hide();
-        ingame.Hide();
+        if(gameState == GameManager.GameState.MainMenu) ingame.Hide();
         switch(gameState)
         {
             case GameManager.GameState.MainMenu:
+                if(gameManager.GetCurrState() == GameManager.GameState.Win)
+                {
+                    mainMenu.AddCoin();
+                }
                 mainMenu.Show();
                 break;
             case GameManager.GameState.Win:
-                ingame.Show();
+                // ingame.Show();
                 endGameUI.ShowLevelCompletedPanel();
                 break;
             case GameManager.GameState.Lose:
-                ingame.Show();
+                // ingame.Show();
                 endGameUI.ShowLevelFailedPanel();
                 break;
             case GameManager.GameState.Playing:

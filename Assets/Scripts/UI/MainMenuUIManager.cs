@@ -11,6 +11,16 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
     [SerializeField] private Button playButton;
     [SerializeField] private Button homeButton;
     [SerializeField] private Button shopButton;
+    [Header("Coins Text Setting")]
+    [SerializeField] private Text coinText;
+    [SerializeField] private float countDuration = 1.5f;
+    [Header("Header Setting")]
+    [SerializeField] private Text heartCountText;
+    [SerializeField] private Image heartIcon;
+    [SerializeField] private Button addHeartButton;
+    [SerializeField] private RefillHeartPopup refillHeartPopup;
+    private bool enableAddHeartButton;
+    private int oldCoins;
     // [SerializeField] private Button settingButton;
     [Header("Animation Setting")]
     private Vector3 originPosHomeButton;
@@ -21,7 +31,17 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
     [Header("UI References")]
     [SerializeField] private GameObject homeButtonBackground;
     [SerializeField] private GameObject shopButtonBackground;
-   
+    [Header("Level References")]
+    [SerializeField] private LevelUI currLevel;
+    [SerializeField] private LevelUI nextLevel1;
+    [SerializeField] private LevelUI nextLevel2;
+
+    void Awake()
+    {
+        DataManager.OnChangeLevel+=ShowLevels;
+        DataManager.OnChangeHeart+=UpdateHeartCountText;
+        DataManager.OnChangeCoins+=UpdateCoinsText;
+    }
 
     public void Setup(UIManager uIManager)
     {
@@ -29,14 +49,33 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         originPosHomeButton = homeButton.transform.position;
 
         this.uIManager = uIManager;
+        refillHeartPopup.Setup(uIManager);
 
         homeButton.onClick.AddListener(OnClickHome);
         shopButton.onClick.AddListener(OnClickShop);
         playButton.onClick.AddListener(OnClickPlay);
         AddCoins.onClick.AddListener(OnClickShop);
         Setting.onClick.AddListener(uIManager.OpenSetting);
+        addHeartButton.onClick.AddListener(OnClickAddHeart);
+
+        oldCoins = DataManager.Instance.playerData.totalCoins;
+        coinText.text = DataManager.Instance.playerData.totalCoins.ToString();
+        // heartCountText.text = DataManager.Instance.playerData.heart.ToString();
+        UpdateHeartCountText(DataManager.Instance.playerData.heart);
+
+        ShowLevels(DataManager.Instance.playerData.currentLevel);
+
+        if(DataManager.Instance.playerData.heart < 5) enableAddHeartButton = true;
+        else enableAddHeartButton = false;
 
         OnClickHome();
+    }
+
+    public void ShowLevels(int level)
+    {
+        currLevel.ShowLevel(level);
+        nextLevel1.ShowLevel(level);
+        nextLevel2.ShowLevel(level);
     }
 
     private void OnClickHome()
@@ -64,6 +103,52 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
     private void OnClickPlay()
     {
         GameManager.Instance.ChangeState(GameManager.GameState.Playing);
+    }
+
+    public void AddCoin()
+    {
+        int currCoins = DataManager.Instance.playerData.totalCoins;
+
+        // Dừng các hiệu ứng đang chạy (nếu người chơi bấm nhận thưởng liên tục)
+        DOTween.Kill("GoldCounter"); 
+
+        // DOTween sẽ chạy một biến ảo (Virtual) từ số cũ lên số mới
+        DOVirtual.Int(oldCoins, currCoins, countDuration, (value) => 
+        {
+            coinText.text = value.ToString();
+        })
+        .SetId("GoldCounter")
+        .SetEase(Ease.OutQuad); 
+
+        oldCoins = currCoins;
+    }
+
+    public void UpdateCoinsText(int coins)
+    {
+        coinText.text = coins.ToString();
+    }
+
+    private void UpdateHeartCountText(int heart)
+    {
+        heartCountText.text = heart.ToString();
+        if(heart < 5)
+        {
+            heartIcon.sprite = Resources.Load<Sprite>(Constants.ADD_HEART_ICON);
+            enableAddHeartButton = true;
+        }
+        else
+        {
+            heartIcon.sprite = Resources.Load<Sprite>(Constants.HEART_ICON);
+            enableAddHeartButton = false;
+        }
+    }
+
+    private void OnClickAddHeart()
+    {
+        if(enableAddHeartButton)
+        {
+            refillHeartPopup.Show();
+        }
     }
 
 

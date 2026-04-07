@@ -10,6 +10,8 @@ public class DataManager : MonoBehaviour
     private string saveFilePath;
     public static event Action<int> OnChangeCoins;
     public static event Action<int> OnChangeLevel;
+    public static event Action<int,int> OnChangeCountBooster;
+    public static event Action<int> OnChangeHeart;
     void Awake()
     {
         if(Instance == null)
@@ -25,7 +27,6 @@ public class DataManager : MonoBehaviour
         }
 
         saveFilePath = Path.Combine(Application.persistentDataPath, "saveData.json");
-        
         LoadGame();
     }
 
@@ -86,10 +87,11 @@ public class DataManager : MonoBehaviour
             if(playerData.boosters[i].id == id)
             {
                 playerData.boosters[i].count--;
-                break;
+                SaveGame();
+                OnChangeCountBooster?.Invoke(id, playerData.boosters[i].count);
+                return;
             }
         }
-        SaveGame();
     }
 
     public void AddBooster(int id, int amount)
@@ -99,9 +101,12 @@ public class DataManager : MonoBehaviour
             if(playerData.boosters[i].id == id)
             {
                 playerData.boosters[i].count += amount;
+                SaveGame();
+                OnChangeCountBooster?.Invoke(id, playerData.boosters[i].count);
+                return;
             }
         }
-        SaveGame();
+        
     }
 
     public void AddCoins(int amount)
@@ -110,29 +115,51 @@ public class DataManager : MonoBehaviour
         SaveGame();
         OnChangeCoins?.Invoke(playerData.totalCoins);
     }
-    public void useCoins(int amount)
+    public void UseCoins(int amount)
     {
         playerData.totalCoins -= amount;
         SaveGame();
         OnChangeCoins?.Invoke(playerData.totalCoins);
     }
-
-    public void LevelUp(LevelLoader.GameDifficult gameDifficult)
+    public void UseHeart(string nextHeartTime)
     {
-        playerData.currentLevel++;
+        if(playerData.heart > 0)
+        {
+            playerData.heart--;
+            playerData.nextHeartTime = nextHeartTime;
+            SaveGame();
+            OnChangeHeart?.Invoke(playerData.heart);
+        }
+    }
+
+    public void AddHeart(int amount, string nextHeartTime)
+    {
+        playerData.heart = Math.Min(playerData.heart+=amount, 5);
+        playerData.nextHeartTime = nextHeartTime;
+        SaveGame();
+        OnChangeHeart?.Invoke(playerData.heart);
+    }
+
+
+    public void LevelUp(LevelLoader.GameDifficult gameDifficult, int maxLevel)
+    {
+        if(playerData.currentLevel < maxLevel)
+        {
+            playerData.currentLevel++;
+        }
         switch(gameDifficult)
         {
             case LevelLoader.GameDifficult.Easy:
-                playerData.totalCoins += 40;
+                AddCoins(40);
                 break;
             case LevelLoader.GameDifficult.Hard:
-                playerData.totalCoins += 80;
+                AddCoins(80);
                 break;
             case LevelLoader.GameDifficult.VeryHard:
-                playerData.totalCoins += 120;
+                AddCoins(120);
                 break;
         }
         SaveGame();
-        OnChangeLevel?.Invoke(playerData.currentLevel + 1);
+        OnChangeLevel?.Invoke(playerData.currentLevel);
     }
 }

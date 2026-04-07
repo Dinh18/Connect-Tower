@@ -70,4 +70,18 @@ public static class Constants
         Shuffle = 1,
         Hint = 2
     }
+    // level images
+    public const string NORMAL_LVL_NEXT_STAGE = "Sprite/NORMAL_LVL_NEXT_STAGE";
+    public const string HARD_LVL_NEXT_STAGE = "Sprite/HARD_LVL_NEXT_STAGE";
+    public const string SUPERHARD_LVL_NEXT_STAGE = "Sprite/SUPERHARD_LVL_NEXT_STAGE";
+    public const string NORMAL_LVL_STAGE_CURRENT = "Sprite/NORMAL_LVL_STAGE_CURRENT";
+    public const string HARD_LVL_STAGE_CURRENT = "Sprite/HARD_LVL_STAGE_CURRENT";
+    public const string SUPERHARD_LVL_STAGE_CURRENT = "Sprite/SUPERHARD_LVL_STAGE_CURRENT";
+    public const string HARD_LVL_SKULL = "Sprite/HARD_LVL_SKULL";
+    public const string SUPERHARD_LVL_SKULL = "Sprite/SUPERHARD_LVL_SKULL";
+    public const string HARD_TEXT_UI = "Sprite/HARD_TEXT_UI (1)";
+    public const string SUPERHARD_TEXT_UI = "Sprite/SUPERHARD_TEXT_UI (1)";
+    // Heart Icon
+    public const string ADD_HEART_ICON = "Sprite/LIVES_ICON_0";
+    public const string HEART_ICON = "Sprite/LIVE_ICON";
 }

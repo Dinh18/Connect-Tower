@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using DG.Tweening;
+using TMPro;
 using Unity.Android.Gradle;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
@@ -45,10 +46,12 @@ public class SlotController : MonoBehaviour
     [SerializeField] private GameObject iceRod;
     [SerializeField] private GameObject iceVFX;
     private float baseIceRodLocalY;
+    private int row;
     [SerializeField] private float delayBetweenBlocks = 0.1f;
     public static event Action<int> OnSlotCompleted;
-    public void Setup(SlotType slotType, BlockTopic blockTopic = null)
+    public void Setup(SlotType slotType, int row, BlockTopic blockTopic = null)
     {
+        this.row = row;
         blocks = new Stack<BlockController>();
         this.slotType = slotType;
         if(blockTopic != null) this.blockTopic = blockTopic;
@@ -76,12 +79,11 @@ public class SlotController : MonoBehaviour
 
             iceVFX.SetActive(true);
 
-            baseIceRodLocalY = iceRod.transform.localPosition.y;
+            // baseIceRodLocalY = iceRod.transform.localPosition.y;
 
-            if(blocks.Count > 0)
+             if(blocks.Count > 0)
             {
-                float startY = baseIceRodLocalY + (blocks.Count * Constants.BLOCK_HEIGHT) + Constants.BLOCK_HEIGHT;
-                iceRod.transform.localPosition = new Vector3(iceRod.transform.localPosition.x, startY, iceRod.transform.localPosition.z);
+                iceRod.transform.position = new Vector3(iceRod.transform.position.x, blocks.Count * Constants.BLOCK_HEIGHT + Constants.BLOCK_HEIGHT + Constants.SLOT_HEIGHT * row, iceRod.transform.position.z);
             }
         }
     }
@@ -293,17 +295,16 @@ public class SlotController : MonoBehaviour
             {
                 // float startLocalY = (blocks.Count * Constants.BLOCK_HEIGHT) + Constants.BLOCK_HEIGHT;
                 // iceRod.transform.DOMove(new Vector3(iceRod.transform.position.x,blocks.Count * Constants.BLOCK_HEIGHT + Constants.BLOCK_HEIGHT, iceRod.transform.position.z), 0.5f);
-                float targetY = baseIceRodLocalY + (blocks.Count * Constants.BLOCK_HEIGHT) + Constants.BLOCK_HEIGHT;
-                
-                // Dùng DOLocalMoveY để nó tự trượt lên mượt mà
-                iceRod.transform.DOLocalMoveY(targetY, 0.5f);
+                iceRod.transform.DOMove(new Vector3(iceRod.transform.position.x,
+                                        blocks.Count * Constants.BLOCK_HEIGHT + Constants.BLOCK_HEIGHT + Constants.SLOT_HEIGHT * row, 
+                                        iceRod.transform.position.z), 0.5f);
             } 
 
             if (otherSlot != null && otherSlot.blocks.Count > 0)
                 {
                     if (!otherSlot.blocks.Peek().isRevealed) 
                     {
-                        otherSlot.blocks.Peek().Reveal();
+                        otherSlot.blocks.Peek().Reveal();   
                     }
                 }
 

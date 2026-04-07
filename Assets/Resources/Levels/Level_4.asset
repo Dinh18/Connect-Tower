@@ -45,9 +45,6 @@ MonoBehaviour:
       indexSprite: 1
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: de389e6fe64ae4345ab422e49a1df06b, type: 2}
-      indexSprite: 0
-    - typeBlock: 0
-      blockTopic: {fileID: 11400000, guid: de389e6fe64ae4345ab422e49a1df06b, type: 2}
       indexSprite: 1
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: de389e6fe64ae4345ab422e49a1df06b, type: 2}
@@ -75,7 +72,10 @@ MonoBehaviour:
       indexSprite: 1
   - slotType: 2
     questionTopic: {fileID: 0}
-    blocks: []
+    blocks:
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: de389e6fe64ae4345ab422e49a1df06b, type: 2}
+      indexSprite: 0
   - slotType: 0
     questionTopic: {fileID: 0}
     blocks:

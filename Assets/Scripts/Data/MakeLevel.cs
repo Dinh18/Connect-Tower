@@ -69,7 +69,7 @@ public class MakeLevel : MonoBehaviour
             // Xếp từ trái sang phải dựa vào startX
             newSlot.transform.localPosition = new Vector3(startX_Row1 + (i * Constants.SLOT_WIDTH), 0, 0);
             // setup.slotController = newSlot.GetComponent<SlotController>();
-            newSlot.GetComponent<SlotController>().Setup(slots[j].slotType, slots[j].questionTopic ? slots[j].questionTopic : null);
+            newSlot.GetComponent<SlotController>().Setup(slots[j].slotType, 0,slots[j].questionTopic ? slots[j].questionTopic : null);
             stackHolders.Add(newSlot.gameObject.GetComponentInChildren<StackHolder>().transform);
             j++;
         }
@@ -82,7 +82,7 @@ public class MakeLevel : MonoBehaviour
 
             newSlot.transform.localPosition = new Vector3(startX_Row2 + (i * Constants.SLOT_WIDTH), Constants.SLOT_HEIGHT, 0);
 
-            newSlot.GetComponent<SlotController>().Setup(slots[j].slotType, slots[j].questionTopic ? slots[j].questionTopic : null);
+            newSlot.GetComponent<SlotController>().Setup(slots[j].slotType, 1,slots[j].questionTopic ? slots[j].questionTopic : null);
             stackHolders.Add(newSlot.gameObject.GetComponentInChildren<StackHolder>().transform);
             j++;
         }

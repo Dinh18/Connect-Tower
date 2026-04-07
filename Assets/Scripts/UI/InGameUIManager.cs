@@ -12,8 +12,11 @@ public class InGameUIManager : MonoBehaviour, IMenu
     [SerializeField] private Text coinsText;
     [SerializeField] private Button coinsButton;
     [SerializeField] private Text levelText;
+    [Header("Progress Bar")]
     [SerializeField] private Slider finishedSlotsSlider;
     [SerializeField] private Text progressText;
+    [SerializeField] private Image levelDifficultImgae;
+    [SerializeField] private Text levelDifficultLevelText;
     [SerializeField] private Color normalColor = Color.white;
     [SerializeField] private Color warningColor = Color.red;
     [SerializeField] private float normalFontSize = 50;
@@ -25,15 +28,20 @@ public class InGameUIManager : MonoBehaviour, IMenu
     [SerializeField] private Button continueButton;
     [SerializeField] private Button backMainMenuButton;
     [SerializeField] private Button tryAgainButton;
+    [Header("Booster UI References")]
+    [SerializeField] private Text addMovesCountText;
+    [SerializeField] private Text shuffleCountText;
+    [SerializeField] private Text hintCountText;
     private UIManager uIManager;
     void Awake()
     {
         GameManager.OnChangeMoves+=UpdateMovesText;
-        DataManager.OnChangeCoins+=UpdateCoinsText;
-        DataManager.OnChangeLevel+=UpdateLevelText;
+        // DataManager.OnChangeCoins+=UpdateCoinsText;
+        // DataManager.OnChangeLevel+=UpdateLevelText;
 
         SlotsManager.OnChangeFinishedSlots+=UpdateProgressText;
         SlotsManager.OnChangeFinishedSlots+=UpdateFinishedSlotsSlider;
+        DataManager.OnChangeCountBooster+=UpdateBoosterCountText;
     }
     public void Hide()
     {
@@ -51,13 +59,38 @@ public class InGameUIManager : MonoBehaviour, IMenu
         coinsButton.onClick.AddListener(uIManager.OpenShop);
 
         movesText.color = normalColor;
-        coinsText.text = DataManager.Instance.playerData.totalCoins.ToString();
-        levelText.text = "Level " + (DataManager.Instance.playerData.currentLevel + 1).ToString();
+        addMovesCountText.text = DataManager.Instance.GetAmountOfBoosterByID((int) Constants.BoosterType.AddMove).ToString();
+        shuffleCountText.text = DataManager.Instance.GetAmountOfBoosterByID((int) Constants.BoosterType.Shuffle).ToString();
+        hintCountText.text = DataManager.Instance.GetAmountOfBoosterByID((int) Constants.BoosterType.Hint).ToString();
     }
 
     public void Show()
     {
         this.gameObject.SetActive(true);
+        coinsText.text = DataManager.Instance.playerData.totalCoins.ToString();
+        levelText.text = "Level " + (DataManager.Instance.playerData.currentLevel + 1).ToString();
+        if(LevelLoader.Instance.gameDifficult == LevelLoader.GameDifficult.Hard)
+        {
+            levelDifficultImgae.sprite = Resources.Load<Sprite>(Constants.HARD_TEXT_UI);
+            levelDifficultLevelText.text = "Hard";
+
+            levelDifficultImgae.gameObject.SetActive(true);
+            levelDifficultLevelText.gameObject.SetActive(true);
+        }
+        else if(LevelLoader.Instance.gameDifficult == LevelLoader.GameDifficult.VeryHard)
+        {
+            levelDifficultImgae.sprite = Resources.Load<Sprite>(Constants.SUPERHARD_TEXT_UI);
+            levelDifficultLevelText.text = "Super Hard";
+
+            levelDifficultImgae.gameObject.SetActive(true);
+            levelDifficultLevelText.gameObject.SetActive(true);
+        }
+        else
+        {
+            levelDifficultImgae.gameObject.SetActive(false);
+            levelDifficultLevelText.gameObject.SetActive(false);
+        }
+
     }
 
     public void UpdateMovesText(int moves)
@@ -70,10 +103,10 @@ public class InGameUIManager : MonoBehaviour, IMenu
                 flashCoroutine = StartCoroutine(FlashRoutine());
             }
         }
-        else if(moves <= 0)
+        else if(moves <= 0 || moves > 5)
         {
             StopFlashing();
-        }
+        }   
     }
 
     private IEnumerator FlashRoutine()
@@ -104,15 +137,15 @@ public class InGameUIManager : MonoBehaviour, IMenu
         GameManager.Instance.ChangeState(GameManager.GameState.Playing);
     }
 
-    private void UpdateCoinsText(int totalCoins)
-    {
-        coinsText.text = totalCoins.ToString();
-    }
+    // private void UpdateCoinsText(int totalCoins)
+    // {
+    //     coinsText.text = totalCoins.ToString();
+    // }
 
-    private void UpdateLevelText(int level)
-    {
-        levelText.text = "Level " + level.ToString();
-    }
+    // private void UpdateLevelText(int level)
+    // {
+    //     levelText.text = "Level " + level.ToString();
+    // }
 
     private void UpdateFinishedSlotsSlider(int finishedSlots, int numSlots)
     {
@@ -123,6 +156,22 @@ public class InGameUIManager : MonoBehaviour, IMenu
     private void UpdateProgressText(int finishedSlots, int numSlots)
     {
         progressText.text = finishedSlots.ToString() + "/" + numSlots.ToString();
+    }
+
+    private void UpdateBoosterCountText(int id, int numsBooster)
+    {
+        switch (id)
+        {
+            case (int) Constants.BoosterType.AddMove:
+                addMovesCountText.text = numsBooster.ToString();
+                break;
+            case (int) Constants.BoosterType.Shuffle:
+                shuffleCountText.text = numsBooster.ToString();
+                break;
+            case (int) Constants.BoosterType.Hint:
+                hintCountText.text = numsBooster.ToString();
+                break;
+        }
     }
 
 }
