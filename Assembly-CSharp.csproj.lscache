@@ -91,15 +91,23 @@ Assets/Scripts/
    StackHolder.cs
    TopicHeaderSlot.cs
  UI/
+  AddBoosterUI.cs
+  AddMoveEffect.cs
   AnimationButton.cs
+  BackgroundButton.cs
   BoosterButton.cs
+  CoinEffect.cs
+  CoinFlyEffect.cs
   EndGameUI.cs
+  HintEffect.cs
   HomeButton.cs
+  IBoosterEffect.cs
   IMenu.cs
   InGameUIManager.cs
   LevelCompletedUI.cs
   LevelFailedUI.cs
-  LevelUI.cs
+  LevelUIController.cs
+  LevelUIManager.cs
   MainMenuUIManager.cs
   PlayButton.cs
   RefillHeartPopup.cs
@@ -107,7 +115,7 @@ Assets/Scripts/
   SettingPopup.cs
   ShopButton.cs
   ShopPanel.cs
-  ShopUI.cs
+  ShuffleEffect.cs
   UIManager.cs
  Utilities/Constants.cs
 Temp/obj/Assembly-CSharp/.NETStandard,Version=v2.1.AssemblyAttributes.cs
@@ -368,16 +376,18 @@ Temp/obj/Assembly-CSharp/.NETStandard,Version=v2.1.AssemblyAttributes.cs
  UnityEditor.iOS.Extensions.Common.dll
  UnityEditor.iOS.Extensions.Xcode.dll
 Assets/Plugins/Demigiant/DOTween/DOTween.dll
-Library/
- PackageCache/com.unity.ext.nunit@031a54704bff/net40/unity-custom/nunit.framework.dll
- ScriptAssemblies/
-  Unity.2D.Sprite.AIIntegration.Editor.dll
-  Unity.2D.Sprite.Editor.dll
-  Unity.TextMeshPro.dll
-  Unity.TextMeshPro.Editor.dll
-  Unity.VisualStudio.Editor.dll
-  UnityEditor.UI.dll
-  UnityEngine.UI.dll
+Library/PackageCache/
+ com.coffee.ui-particle@92fb173507ec/Runtime/Coffee.UIParticle.R.dll
+ com.unity.ext.nunit@031a54704bff/net40/unity-custom/nunit.framework.dll
+Library/ScriptAssemblies/
+ Coffee.UIParticle.dll
+ Unity.2D.Sprite.AIIntegration.Editor.dll
+ Unity.2D.Sprite.Editor.dll
+ Unity.TextMeshPro.dll
+ Unity.TextMeshPro.Editor.dll
+ Unity.VisualStudio.Editor.dll
+ UnityEditor.UI.dll
+ UnityEngine.UI.dll
 Temp/bin/Debug/
  Assembly-CSharp-firstpass.dll
  NaughtyAttributes.Core.dll

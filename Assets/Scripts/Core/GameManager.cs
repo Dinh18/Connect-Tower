@@ -12,7 +12,8 @@ public class GameManager : MonoBehaviour
         Win,
         Lose
     }
-    public int moves;
+    private int moves;
+    private int maxMoves;
     private GameState state;
     [SerializeField] private UIManager uIManager;
     [SerializeField] private LevelLoader levelLoader;
@@ -23,7 +24,8 @@ public class GameManager : MonoBehaviour
     public static event Action<int> OnChangeMoves;
     void Awake()
     {
-        Instance = this;   
+        Instance = this;  
+         
     }
 
     void Start()
@@ -40,9 +42,12 @@ public class GameManager : MonoBehaviour
     }
 
     public GameState GetCurrState() => state;
+    public int GetMaxMoves() => maxMoves;
+    public int GetMoves() => moves;
     public void SetupLevel(int maxMoves)
     {
         moves = maxMoves;
+        this.maxMoves = maxMoves;
         OnChangeMoves?.Invoke(moves);
         cameraController.FitCamera(slotsManager.row1, slotsManager.row2);
     }

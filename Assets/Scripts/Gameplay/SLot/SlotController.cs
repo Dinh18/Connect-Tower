@@ -1,12 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using DG.Tweening;
-using TMPro;
-using Unity.Android.Gradle;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 using UnityEngine.UI;
 
 public class SlotController : MonoBehaviour
@@ -53,10 +49,11 @@ public class SlotController : MonoBehaviour
         this.row = row;
         blocks = new Stack<BlockController>();
         this.slotType = slotType;
+        isFinished = false;
+        iceVFX.SetActive(false);
         if(blockTopic != null) this.blockTopic = blockTopic;
         if(header != null) header.Setup(this);
         if(slotVFX != null) slotVFX.Setup();
-
         if(slotType == SlotType.Hide)
         {
             isRevealed = false;
@@ -77,8 +74,6 @@ public class SlotController : MonoBehaviour
             iceRod.SetActive(true);
 
             iceVFX.SetActive(true);
-
-            // baseIceRodLocalY = iceRod.transform.localPosition.y;
 
              if(blocks.Count > 0)
             {
@@ -134,12 +129,14 @@ public class SlotController : MonoBehaviour
         }
             // Loại block di chuyển
         bool isSameType = false;
+        bool isSlotEmpty = false;
         if(this.blocks.Count > 0)
         {    
             BlockController peekThisSLot = this.blocks.Peek();
             BlockController peekOtherSlot = otherSlot.blocks.Peek();
             if(peekThisSLot.GetTopicID() == peekOtherSlot.GetTopicID()) isSameType = true;
         }
+        else isSlotEmpty = true;
         int topicID = otherSlot.blocks.Peek().GetComponent<BlockController>().GetTopicID();
         // Số lượng block có thể di chuyển
         int blockCount = 0;
@@ -180,7 +177,7 @@ public class SlotController : MonoBehaviour
             // block.transform.SetParent(this.stackAnchor);
             // Di chuyển block theo đường đi đã tính toán
             float delay = i * delayBetweenBlocks;
-            MoveBlockSmoothly(block.gameObject, path, moveDuration, otherSlot, isSameType, delay);     
+            MoveBlockSmoothly(block.gameObject, path, moveDuration, otherSlot, isSameType, isSlotEmpty, delay);     
         }
         // if(blocks.Count == 4) CheckSlotComplete();
         // Di chuyển các block còn lại ở slot đầu về vị trí ban đầu
@@ -216,7 +213,7 @@ public class SlotController : MonoBehaviour
         return true;
     }
     // Di chuyển block mượt mà theo đường đi đã tính toán
-    private void MoveBlockSmoothly(GameObject block, List<Vector3> path, float duration, SlotController slot = null, bool isSameType = false, float delay = 0f)
+    private void MoveBlockSmoothly(GameObject block, List<Vector3> path, float duration, SlotController slot = null, bool isSameType = false, bool isSlotEmpty = false, float delay = 0f)
     {
         BlockStartMoving();
         Vector3[] pathArr = path.ToArray();
@@ -229,7 +226,7 @@ public class SlotController : MonoBehaviour
             .OnComplete(() => 
             {
                 // Gọi hàm này khi DOTween chạy xong
-                BlockReachedDestination(block.GetComponent<BlockController>(),slot, isSameType); 
+                BlockReachedDestination(block.GetComponent<BlockController>(),slot, isSameType, isSlotEmpty); 
             });
     }
 
@@ -269,7 +266,7 @@ public class SlotController : MonoBehaviour
         AudioManager.Instance.PlayMoveWooshAudio();
         isMoving = true;
     }
-    private void BlockReachedDestination(BlockController b,SlotController otherSlot, bool isSameType)
+    private void BlockReachedDestination(BlockController b,SlotController otherSlot, bool isSameType, bool isSlotEmpty)
     {
         
         movingBlocksCount--;
@@ -295,6 +292,7 @@ public class SlotController : MonoBehaviour
             else
             {
                 AudioManager.Instance.PlayBlockFailAudio();
+                if(!isSameType) b.PlayDifVFX();
             }
             movingBlocksCount = 0;
 
@@ -320,6 +318,7 @@ public class SlotController : MonoBehaviour
             float delay = (isSameType) ? 0.5f : 0f;
 
             StartCoroutine(WaitAndFinishMoving(delay, otherSlot));
+            
             if(blocks.Count == 4) CheckSlotComplete();
         } 
     }

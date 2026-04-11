@@ -3,14 +3,18 @@ using UnityEngine;
 public class HintBooster : MonoBehaviour, IBooster
 {
     private BoosterManager boosterManager;
+    private Constants.BoosterType boosterType = Constants.BoosterType.Hint;
+    private string boosterName = "Hint";
+    private int price = 900;
+    public Constants.BoosterType GetBoosterType() => boosterType;
+
     public void AddBooster(int amount)
     {
-        DataManager.Instance.AddBooster((int) Constants.BoosterType.Hint,amount);
+        DataManager.Instance.AddBooster((int) Constants.BoosterType.Hint,amount, price);
     }
 
     public void Excute()
     {
-        if(DataManager.Instance.GetAmountOfBoosterByID((int)Constants.BoosterType.Hint) <= 0) return;
         DataManager.Instance.UseBooster((int)Constants.BoosterType.Hint);
         bool searched = boosterManager.SearchedBlocks();
         if(searched)
@@ -21,8 +25,23 @@ public class HintBooster : MonoBehaviour, IBooster
         else Debug.Log("Hint khong thanh cong");
     }
 
+    public int GetNumsBooster()
+    {
+        return DataManager.Instance.GetAmountOfBoosterByID((int)Constants.BoosterType.Hint);
+    }
+
     public void Setup(BoosterManager boosterManager)
     {
         this.boosterManager = boosterManager;
+    }
+
+    public int GetPrice()
+    {
+        return price;
+    }
+
+    public string GetName()
+    {
+        return boosterName;
     }
 }

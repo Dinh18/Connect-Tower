@@ -20,12 +20,17 @@ public class UIManager : MonoBehaviour
     {
         this.gameManager = gameManager;
 
+        setting.Setup(this);
+        shop.Setup(this);
         mainMenu.Setup(this);
         ingame.Setup(this);
 
-        setting.Setup(this);
-        shop.Setup(this);
     }
+
+    // public void ChangeWin(int m)
+    // {
+        
+    // }
 
     public void UpdateUI(GameManager.GameState gameState)
     {
@@ -35,18 +40,21 @@ public class UIManager : MonoBehaviour
         switch(gameState)
         {
             case GameManager.GameState.MainMenu:
+                mainMenu.Show();
                 if(gameManager.GetCurrState() == GameManager.GameState.Win)
                 {
-                    mainMenu.AddCoin();
+                    int coinWin;
+                    if(LevelLoader.Instance.gameDifficult == LevelLoader.GameDifficult.Easy) coinWin = 40;
+                    else if(LevelLoader.Instance.gameDifficult == LevelLoader.GameDifficult.Hard) coinWin = 80;
+                    else coinWin = 120;
+                    mainMenu.AddCoin(coinWin);
                 }
-                mainMenu.Show();
+               
                 break;
             case GameManager.GameState.Win:
-                // ingame.Show();
-                endGameUI.ShowLevelCompletedPanel();
+                StartCoroutine(endGameUI.ShowLevelCompletedPanel());
                 break;
             case GameManager.GameState.Lose:
-                // ingame.Show();
                 endGameUI.ShowLevelFailedPanel();
                 break;
             case GameManager.GameState.Playing:
@@ -68,14 +76,24 @@ public class UIManager : MonoBehaviour
         setting.Show();
     }
 
-    public void OpenShop()
+    public void OpenShop(bool inMainMenu = false)
     {
         shop.Show();
+        if(inMainMenu)
+        {
+            shop.HideCloseButton();
+        }
+        else
+        {
+            shop.ShowCloseButton();
+            GameManager.Instance.ChangeState(GameManager.GameState.Pause);
+        }
     }
 
     public void CloseShop()
     {
         shop.Hide();
+        
     }
     
 }

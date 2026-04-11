@@ -327,18 +327,20 @@ Temp/obj/Assembly-CSharp-Editor/.NETStandard,Version=v2.1.AssemblyAttributes.cs
 Assets/Plugins/Demigiant/DOTween/
  DOTween.dll
  Editor/DOTweenEditor.dll
-Library/
- PackageCache/com.unity.ext.nunit@031a54704bff/net40/unity-custom/nunit.framework.dll
- ScriptAssemblies/
-  Unity.2D.Sprite.AIIntegration.Editor.dll
-  Unity.2D.Sprite.Editor.dll
-  Unity.TextMeshPro.dll
-  Unity.TextMeshPro.Editor.dll
-  Unity.VisualStudio.Editor.dll
-  UnityEditor.TestRunner.dll
-  UnityEditor.UI.dll
-  UnityEngine.TestRunner.dll
-  UnityEngine.UI.dll
+Library/PackageCache/
+ com.coffee.ui-particle@92fb173507ec/Runtime/Coffee.UIParticle.R.dll
+ com.unity.ext.nunit@031a54704bff/net40/unity-custom/nunit.framework.dll
+Library/ScriptAssemblies/
+ Coffee.UIParticle.dll
+ Unity.2D.Sprite.AIIntegration.Editor.dll
+ Unity.2D.Sprite.Editor.dll
+ Unity.TextMeshPro.dll
+ Unity.TextMeshPro.Editor.dll
+ Unity.VisualStudio.Editor.dll
+ UnityEditor.TestRunner.dll
+ UnityEditor.UI.dll
+ UnityEngine.TestRunner.dll
+ UnityEngine.UI.dll
 Temp/bin/Debug/
  Assembly-CSharp-firstpass.dll
  Assembly-CSharp.dll

@@ -1,3 +1,4 @@
+using System.Collections;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,24 +24,17 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
     private int oldCoins;
     // [SerializeField] private Button settingButton;
     [Header("Animation Setting")]
-    private Vector3 originPosHomeButton;
-    private Vector3 originPosShopButton;
-    [SerializeField] private float startY = -1000f;
-    [SerializeField] private float duration = 0.5f;
-    [SerializeField] private float newPos;
+    private BackgroundButton shopBackGround;
+    private BackgroundButton homeBackGround;
     [Header("UI References")]
     [SerializeField] private GameObject homeButtonBackground;
     [SerializeField] private GameObject shopButtonBackground;
-    [Header("Level References")]
-    [SerializeField] private LevelUI currLevel;
-    [SerializeField] private LevelUI nextLevel1;
-    [SerializeField] private LevelUI nextLevel2;
 
     void OnEnable()
     {
-        DataManager.OnChangeLevel+=ShowLevels;
+        // DataManager.OnChangeLevel+=ShowLevels;
+        // DataManager.OnChangeCoins+=UpdateCoinsText;
         DataManager.OnChangeHeart+=UpdateHeartCountText;
-        DataManager.OnChangeCoins+=UpdateCoinsText;
 
         homeButton.onClick.AddListener(OnClickHome);
         shopButton.onClick.AddListener(OnClickShop);
@@ -52,9 +46,9 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
 
     void OnDisable()
     {
-        DataManager.OnChangeLevel-=ShowLevels;
+        // DataManager.OnChangeLevel-=ShowLevels;
+        // DataManager.OnChangeCoins-=UpdateCoinsText;
         DataManager.OnChangeHeart-=UpdateHeartCountText;
-        DataManager.OnChangeCoins-=UpdateCoinsText;
 
         homeButton.onClick.RemoveListener(OnClickHome);
         shopButton.onClick.RemoveListener(OnClickShop);
@@ -66,80 +60,99 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
 
     public void Setup(UIManager uIManager)
     {
-        originPosShopButton = shopButton.transform.position;
-        originPosHomeButton = homeButton.transform.position;
-
         this.uIManager = uIManager;
         refillHeartPopup.Setup(uIManager);
 
         oldCoins = DataManager.Instance.playerData.totalCoins;
-        coinText.text = DataManager.Instance.playerData.totalCoins.ToString();
-        // heartCountText.text = DataManager.Instance.playerData.heart.ToString();
-        UpdateHeartCountText(DataManager.Instance.playerData.heart);
+        // coinText.text = DataManager.Instance.playerData.totalCoins.ToString();
 
-        ShowLevels(DataManager.Instance.playerData.currentLevel);
+        UpdateHeartCountText(DataManager.Instance.playerData.heart);
 
         if(DataManager.Instance.playerData.heart < 5) enableAddHeartButton = true;
         else enableAddHeartButton = false;
 
+        shopBackGround = shopButton.GetComponent<BackgroundButton>();
+        homeBackGround = homeButton.GetComponent<BackgroundButton>();
+
         OnClickHome();
     }
 
-    public void ShowLevels(int level)
-    {
-        currLevel.ShowLevel(level);
-        nextLevel1.ShowLevel(level);
-        nextLevel2.ShowLevel(level);
-    }
 
     private void OnClickHome()
     {
-        shopButtonBackground.SetActive(false);
-        shopButton.transform.position = originPosShopButton;
-        
-        uIManager.CloseShop();
-
-        homeButtonBackground.SetActive(true);
-        homeButtonBackground.GetComponent<RectTransform>().DOAnchorPosY(startY,duration).From();
-        homeButton.gameObject.transform.position = originPosHomeButton + new Vector3(0, newPos, 0);
+        homeBackGround.Select();
+        uIManager.CloseShop();   
+        shopBackGround.UnSelect();
     }
     private void OnClickShop()
     {
-        shopButtonBackground.SetActive(true);
-        shopButton.gameObject.transform.position = originPosShopButton + new Vector3(0, newPos, 0);
-        shopButtonBackground.GetComponent<RectTransform>().DOAnchorPosY(startY,duration).From();
-        
-        uIManager.OpenShop();
-
-        homeButtonBackground.SetActive(false);
-        homeButton.gameObject.transform.position = originPosHomeButton;
+        shopBackGround.Select();
+        uIManager.OpenShop(true);
+        homeBackGround.UnSelect();
     }
     private void OnClickPlay()
     {
         GameManager.Instance.ChangeState(GameManager.GameState.Playing);
     }
 
-    public void AddCoin()
+    public void AddCoin(int winAmount)
     {
-        int currCoins = DataManager.Instance.playerData.totalCoins;
+        // 1. Lấy tổng tiền cuối cùng (Đã trừ tiền mua Booster, đã cộng tiền Win)
+        int finalCoins = DataManager.Instance.playerData.totalCoins;
+        
+        // 2. Tính ra số tiền ở "Trạng thái trung gian" (Chỉ trừ Booster, chưa cộng Win)
+        int coinsBeforeWin = finalCoins - winAmount; 
 
-        // Dừng các hiệu ứng đang chạy (nếu người chơi bấm nhận thưởng liên tục)
-        DOTween.Kill("GoldCounter"); 
-        AudioManager.Instance.PlayCoinCollectAudio();
-        // DOTween sẽ chạy một biến ảo (Virtual) từ số cũ lên số mới
-        DOVirtual.Int(oldCoins, currCoins, countDuration, (value) => 
-        {
-            coinText.text = value.ToString();
-        })
-        .SetId("GoldCounter")
-        .SetEase(Ease.OutQuad); 
+        // 3. 💡 ÉP THẲNG SỐ TIỀN TRÊN UI VỀ MỨC ĐÃ GIẢM NGAY LẬP TỨC
+        oldCoins = coinsBeforeWin;
+        coinText.text = oldCoins.ToString();
 
-        oldCoins = currCoins;
+        // 4. Bắt đầu bắn đồng xu bay lên để cộng dần winAmount vào
+        StartCoroutine(SpawnWinCoinsRoutine(winAmount));
     }
 
-    public void UpdateCoinsText(int coins)
+    private IEnumerator SpawnWinCoinsRoutine(int winAmount)
     {
-        coinText.text = coins.ToString();
+        DOTween.Kill(coinText.transform);
+        // Chờ 0.5 giây để người chơi kịp nhìn thấy chữ "You Win!"
+        // yield return new WaitForSeconds(0.5f);
+
+        Vector2 screenCenter = new Vector2(Screen.width / 2f, Screen.height / 2f);
+        
+        int visualCoins = 10;
+        int coinValueBase = winAmount / visualCoins;
+        int coinValueRemainder = winAmount % visualCoins;
+
+        for (int i = 0; i < visualCoins; i++)
+        {
+            GameObject coinObj = CoinEffect.Instance.GetCoin();
+            CoinFlyEffect coinEffect = coinObj.GetComponent<CoinFlyEffect>();
+
+            // Tính toán xem ĐỒNG XU NÀY mang giá trị bao nhiêu tiền
+            int finalValueForThisCoin = coinValueBase + (i == visualCoins - 1 ? coinValueRemainder : 0);
+
+            coinEffect.StartBurstAndFly(screenCenter, coinText.GetComponent<RectTransform>(), () => 
+            {
+                OnCoinHitTarget(finalValueForThisCoin);
+            });
+
+            // CHÌA KHÓA NẰM Ở ĐÂY: Dừng 0.1 giây rồi mới vòng lại bắn đồng xu tiếp theo
+            yield return new WaitForSeconds(0.1f); 
+        }
+    }
+    private void OnCoinHitTarget(int amountAdded)
+    {
+        // Cộng dồn tiền thật
+        oldCoins += amountAdded; 
+        coinText.text = oldCoins.ToString();
+
+        // Chơi âm thanh ăn tiền (sẽ kêu "Ting ting ting" theo từng đồng rất đã tai)
+        AudioManager.Instance.PlayCoinCollectAudio();
+
+
+        Debug.Log("oldCoins: " + oldCoins);
+        // Làm icon text giật nảy lên một chút để có cảm giác va chạm
+        coinText.transform.DOPunchScale(new Vector3(0.2f, 0.2f, 0), 0.1f).SetEase(Ease.InOutBounce);
     }
 
     private void UpdateHeartCountText(int heart)
@@ -174,5 +187,8 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
     public void Show()
     {
         this.gameObject.SetActive(true);
+        oldCoins = DataManager.Instance.playerData.totalCoins;
+        coinText.text = oldCoins.ToString();
+        // coinText.text = DataManager.Instance.playerData.totalCoins.ToString();
     }
 }

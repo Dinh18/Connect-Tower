@@ -369,11 +369,12 @@ Temp/obj/NaughtyAttributes.Core/.NETStandard,Version=v2.1.AssemblyAttributes.cs
 Assets/Plugins/Demigiant/DOTween/
  DOTween.dll
  Editor/DOTweenEditor.dll
-Library/
- PackageCache/com.unity.ext.nunit@031a54704bff/net40/unity-custom/nunit.framework.dll
- ScriptAssemblies/
-  UnityEditor.UI.dll
-  UnityEngine.UI.dll
+Library/PackageCache/
+ com.coffee.ui-particle@92fb173507ec/Runtime/Coffee.UIParticle.R.dll
+ com.unity.ext.nunit@031a54704bff/net40/unity-custom/nunit.framework.dll
+Library/ScriptAssemblies/
+ UnityEditor.UI.dll
+ UnityEngine.UI.dll
 
 [analyzerReferences]
 ../Unity/Hub/Editor/6000.2.14f1/Editor/Data/Tools/Unity.SourceGenerators/

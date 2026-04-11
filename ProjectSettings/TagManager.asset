@@ -50,6 +50,9 @@ TagManager:
   - name: Slot
     uniqueID: 3546685229
     locked: 0
+  - name: UI
+    uniqueID: 2307422591
+    locked: 0
   - name: VFX
     uniqueID: 2767791871
     locked: 0

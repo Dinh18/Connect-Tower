@@ -5,40 +5,65 @@ public class BlocksManager : MonoBehaviour
 {
     private Dictionary<int, List<BlockController>> blocksByTopicID = new Dictionary<int, List<BlockController>>();
     public Dictionary<int, List<BlockController>> GetAllBlocks() => blocksByTopicID;
-    private List<GameObject> blockPool;
+    private Stack<GameObject> blockPool = new Stack<GameObject>();
+    private GameObject blockObj;
+    private Dictionary<string, Material> blockMaterialCache = new Dictionary<string, Material>();
+    void Awake()
+    {
+        blockObj = Resources.Load<GameObject>(Constants.BLOCK_TEST_1_PATH);
+    }
     public void PoolBlock(int numsBlock)
     {
-        blockPool = new List<GameObject>();
-        GameObject blockObj = Resources.Load<GameObject>(Constants.BLOCK_TEST_1_PATH);
         for(int i = 0; i < numsBlock; i++)
         {
-            GameObject block = Instantiate(blockObj, this.transform.position,Quaternion.identity, this.transform);
+            GameObject block = Instantiate(blockObj, this.transform);
             block.SetActive(false);
+            blockPool.Push(block);
         }
+    }
+
+    public Material GetMaterial(string materialPath)
+    {
+        if(!blockMaterialCache.ContainsKey(materialPath))
+        {
+            Material material = Resources.Load<Material>(materialPath);
+            blockMaterialCache[materialPath] = material;
+        }
+        return blockMaterialCache[materialPath];
     }
     public void BlocksGenerate(List<SlotSetupData> slotSetups, List<SlotController> slots)
     {
+        blocksByTopicID.Clear();
         foreach(Transform child in this.transform)
         {
-            Destroy(child.gameObject);
+            if(child.gameObject.activeSelf)
+            {    
+                child.gameObject.SetActive(false);
+                blockPool.Push(child.gameObject);
+            }
         }
-
-        GameObject blockObj = Resources.Load<GameObject>(Constants.BLOCK_TEST_1_PATH);
         
         for(int i = 0; i < slots.Count; i++)
         {
             for(int j = slotSetups[i].blocks.Count - 1; j >= 0; j--)
             {
-                GameObject block = GameObject.Instantiate(blockObj, 
-                                                        slots[i].stackAnchor.position + new Vector3(0, Constants.BLOCK_HEIGHT, 0) * (slotSetups[i].blocks.Count - 1 - j), 
-                                                        Quaternion.identity);
-                block.transform.SetParent(this.transform);
+                GameObject block;
+                if(blockPool.Count <= 0)
+                {
+                    block = Instantiate(blockObj, this.transform);
+                }
+                else
+                {
+                    block = blockPool.Pop();
+                } 
+                block.SetActive(true);
+                block.transform.position = slots[i].stackAnchor.position + new Vector3(0, Constants.BLOCK_HEIGHT, 0) * (slotSetups[i].blocks.Count - 1 - j);
 
                 BlockController b = block.GetComponent<BlockController>();
                 ItemImageBlock itemImageBlock = block.GetComponentInChildren<ItemImageBlock>();
                 
                 itemImageBlock.AddImage(slotSetups[i].blocks[j].blockTopic.blocksSprite[0]);
-                b.Setup(slotSetups[i].blocks[j].blockTopic.blockColor, 
+                b.Setup(this,slotSetups[i].blocks[j].blockTopic.blockColor, 
                     slotSetups[i].blocks[j].blockTopic, 
                     slotSetups[i].blocks[j].typeBlock,
                     slotSetups[i].blocks[j].blockTopic.blocksSprite[slotSetups[i].blocks[j].indexSprite],

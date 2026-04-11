@@ -4,22 +4,40 @@ public class AddMoveBooster : MonoBehaviour ,IBooster
 {
     [SerializeField] private int amount;
     private BoosterManager boosterManager;
+    private string boosterName = "Extra Moves";
+    private Constants.BoosterType boosterType = Constants.BoosterType.AddMove;
+    private int price = 900;
+    public Constants.BoosterType GetBoosterType() => boosterType;
     public void AddBooster(int amount)
     {
-        DataManager.Instance.AddBooster((int)Constants.BoosterType.AddMove,amount);
+        DataManager.Instance.AddBooster((int)Constants.BoosterType.AddMove,amount, price);
     }
 
     public void Excute()
     {
-        if(DataManager.Instance.GetAmountOfBoosterByID((int)Constants.BoosterType.AddMove) <= 0) return;
         GameManager.Instance.AddMove(amount);
         DataManager.Instance.UseBooster((int)Constants.BoosterType.AddMove);
         AudioManager.Instance.PlayAddMoveAudio();
         Debug.Log("Da them luot di chuyen");
     }
 
+    public int GetNumsBooster()
+    {
+        return DataManager.Instance.GetAmountOfBoosterByID((int)Constants.BoosterType.AddMove);
+    }
+
     public void Setup(BoosterManager boosterManager)
     {
         this.boosterManager = boosterManager;
+    }
+
+    public int GetPrice()
+    {
+        return price;
+    }
+
+    public string GetName()
+    {
+        return boosterName;
     }
 }

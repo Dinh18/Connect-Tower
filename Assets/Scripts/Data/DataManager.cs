@@ -94,13 +94,14 @@ public class DataManager : MonoBehaviour
         }
     }
 
-    public void AddBooster(int id, int amount)
+    public void AddBooster(int id, int amount, int price)
     {
         for(int i = 0; i < playerData.boosters.Count; i++)
         {
             if(playerData.boosters[i].id == id)
             {
                 playerData.boosters[i].count += amount;
+                UseCoins(price);
                 SaveGame();
                 OnChangeCountBooster?.Invoke(id, playerData.boosters[i].count);
                 return;
@@ -108,7 +109,6 @@ public class DataManager : MonoBehaviour
         }
         
     }
-
     public void AddCoins(int amount)
     {
         playerData.totalCoins += amount;

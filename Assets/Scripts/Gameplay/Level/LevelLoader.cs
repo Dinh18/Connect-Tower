@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Unity.Android.Gradle;
 using UnityEngine;
 /*
 - số lượng slot hàng 1, hàng 2
@@ -19,6 +18,7 @@ public class LevelLoader : MonoBehaviour
     [SerializeField] private SlotsManager slotsManager;
     [SerializeField] private BlocksManager blocksManager;
     [SerializeField] private GameManager gameManager;
+    // private int coinWin;
     private LevelDataSO[] levelDatas;
     // [SerializeField] DataLevel dataTest;
     public List<SlotController> slots;
@@ -42,13 +42,15 @@ public class LevelLoader : MonoBehaviour
         this.slotsManager = slotsManager;
         this.blocksManager = blocksManager;
         levelDatas = Resources.LoadAll<LevelDataSO>(Constants.LEVELS_PATH);
-        // LoadLevel(DataManager.Instance.playerData.currentLevel);
         slotsManager.Setup(this);
+        blocksManager.PoolBlock(40);
+        slotsManager.PoolSlot(10);
     }
 
     public void LevelUp()
     {
         DataManager.Instance.LevelUp(gameDifficult, levelDatas.Length - 1); 
+        // this.coinWin = coinWin;
     }
     public void LoadLevel()
     {

@@ -5,6 +5,7 @@ public static class Constants
 {
     public const string BLOCK_TEST_1_PATH = "Prefabs/Block_Test1";
     public const string SLOT_PREFAB_PATH = "Prefabs/Slot";
+    public const string COIN_EFFECT_PATH = "Prefabs/Coin";
     public const string MATERIAL_COLOR_1_PATH = "Material/Type_1";
     public const string MATERIAL_COLOR_2_PATH = "Material/Type_2";
     public const string MATERIAL_COLOR_3_PATH = "Material/Type_3";
@@ -53,12 +54,11 @@ public static class Constants
     // Block
     public static float BLOCK_HEIGHT = 0.65f;
     // Data Level
-    public const string DATALEVEL_TEST_PATH = "DataLevel/Level_1";
     public const string LEVELS_PATH = "Levels";
-    // Scene Name
-    public const string INITIALIZER_SCENE_NAME = "InitializerScene";
-    public const string MENU_SCENE_NAME = "MenuScene";
-    public const string INGAME_SCENE_NAME = "GameScene";
+    // // Scene Name
+    // public const string INITIALIZER_SCENE_NAME = "InitializerScene";
+    // public const string MENU_SCENE_NAME = "MenuScene";
+    // public const string INGAME_SCENE_NAME = "GameScene";
     // Setting size
     public const float SETTING_HEIGHT_MAINMENU = 830f;
     public const float SETTING_HEIGHT_INGAME = 950f;
@@ -71,12 +71,10 @@ public static class Constants
         Hint = 2
     }
     // level images
-    public const string NORMAL_LVL_NEXT_STAGE = "Sprite/NORMAL_LVL_NEXT_STAGE";
-    public const string HARD_LVL_NEXT_STAGE = "Sprite/HARD_LVL_NEXT_STAGE";
-    public const string SUPERHARD_LVL_NEXT_STAGE = "Sprite/SUPERHARD_LVL_NEXT_STAGE";
-    public const string NORMAL_LVL_STAGE_CURRENT = "Sprite/NORMAL_LVL_STAGE_CURRENT";
-    public const string HARD_LVL_STAGE_CURRENT = "Sprite/HARD_LVL_STAGE_CURRENT";
-    public const string SUPERHARD_LVL_STAGE_CURRENT = "Sprite/SUPERHARD_LVL_STAGE_CURRENT";
+    public const string LEVEL_PREFAB = "Prefabs/LevelPrefab";
+    public const string NORMAL_LVL = "Sprite/NORMAL_LVL_NEXT_STAGE";
+    public const string HARD_LVL = "Sprite/HARD_LVL_NEXT_STAGE";
+    public const string SUPERHARD_LVL = "Sprite/SUPERHARD_LVL_NEXT_STAGE";
     public const string HARD_LVL_SKULL = "Sprite/HARD_LVL_SKULL";
     public const string SUPERHARD_LVL_SKULL = "Sprite/SUPERHARD_LVL_SKULL";
     public const string HARD_TEXT_UI = "Sprite/HARD_TEXT_UI (1)";

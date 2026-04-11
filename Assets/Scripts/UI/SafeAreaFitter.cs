@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(RectTransform))]
 public class SafeAreaFitter : MonoBehaviour
@@ -8,6 +11,40 @@ public class SafeAreaFitter : MonoBehaviour
     void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
+        // Canvas[] canvas = GameObject.FindObjectsByType<Canvas>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        CanvasScaler scaler = GetComponentInParent<CanvasScaler>();
+        float sizeScreen = (float)Screen.width/ (float)Screen.height;
+        Debug.Log(sizeScreen);
+        // foreach(Canvas cv in canvas)
+        // {
+        //     CanvasScaler scaler = cv.GetComponent<CanvasScaler>();
+        //     scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        //     if(scaler == null) continue;
+        //     if(sizeScreen < 0.6)
+        //     {
+        //         scaler.matchWidthOrHeight = 0;
+        //     }
+        //     else if(sizeScreen >= 0.6)
+        //     {
+        //         scaler.matchWidthOrHeight = 1;
+        //     }
+        //     else
+        //     {
+        //         scaler.matchWidthOrHeight = 0.5f;
+        //     }
+        // }
+        if(sizeScreen < 0.6)
+        {
+            scaler.matchWidthOrHeight = 0;
+        }
+        else if(sizeScreen >= 0.6)
+        {
+            scaler.matchWidthOrHeight = 1;
+        }
+        else
+        {
+            scaler.matchWidthOrHeight = 0.5f;
+        }
         ApplySafeArea();
     }
 

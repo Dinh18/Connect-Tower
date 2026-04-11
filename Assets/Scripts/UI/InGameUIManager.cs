@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Reflection;
 using DG.Tweening;
 using TMPro;
 using UnityEngine;
@@ -29,35 +30,39 @@ public class InGameUIManager : MonoBehaviour, IMenu
     [SerializeField] private Button backMainMenuButton;
     [SerializeField] private Button tryAgainButton;
     [Header("Booster UI References")]
-    [SerializeField] private Text addMovesCountText;
-    [SerializeField] private Text shuffleCountText;
-    [SerializeField] private Text hintCountText;
+    private BoosterButton[] boosterButtons;
+    // [SerializeField] private Text addMovesCountText;
+    // [SerializeField] private Text shuffleCountText;
+    // [SerializeField] private Text hintCountText;
+    // [SerializeField] private GameObject addAddmoveImage;
+    // [SerializeField] private GameObject addShuffleImage;
+    // [SerializeField] private GameObject addHintImage;
     private UIManager uIManager;
     void OnEnable()
     {
         GameManager.OnChangeMoves+=UpdateMovesText;
         SlotsManager.OnChangeFinishedSlots+=UpdateProgressText;
         SlotsManager.OnChangeFinishedSlots+=UpdateFinishedSlotsSlider;
-        DataManager.OnChangeCountBooster+=UpdateBoosterCountText;
+        // DataManager.OnChangeCountBooster+=UpdateBoosterCountText;
 
         SettingButton.onClick.AddListener(uIManager.OpenSetting);
         continueButton.onClick.AddListener(uIManager.OnClickBackHome);
         backMainMenuButton.onClick.AddListener(uIManager.OnClickBackHome);
         tryAgainButton.onClick.AddListener(OnClickTryAgain);
-        coinsButton.onClick.AddListener(uIManager.OpenShop);
+        coinsButton.onClick.AddListener(() => uIManager.OpenShop(false));
     }
     void OnDisable()
     {
         GameManager.OnChangeMoves-=UpdateMovesText;
         SlotsManager.OnChangeFinishedSlots-=UpdateProgressText;
         SlotsManager.OnChangeFinishedSlots-=UpdateFinishedSlotsSlider;
-        DataManager.OnChangeCountBooster-=UpdateBoosterCountText;
+        // DataManager.OnChangeCountBooster-=UpdateBoosterCountText;
 
         SettingButton.onClick.RemoveListener(uIManager.OpenSetting);
         continueButton.onClick.RemoveListener(uIManager.OnClickBackHome);
         backMainMenuButton.onClick.RemoveListener(uIManager.OnClickBackHome);
         tryAgainButton.onClick.RemoveListener(OnClickTryAgain);
-        coinsButton.onClick.RemoveListener(uIManager.OpenShop);
+        coinsButton.onClick.RemoveListener(() => uIManager.OpenShop(false));
     }
     public void Hide()
     {
@@ -67,6 +72,12 @@ public class InGameUIManager : MonoBehaviour, IMenu
     public void Setup(UIManager uIManager)
     {
         this.uIManager = uIManager;
+        boosterButtons = FindObjectsOfType<BoosterButton>(true);
+        foreach(var booster in boosterButtons)
+        {
+            booster.Setup(uIManager);
+        }
+
     }
 
     public void Show()
@@ -75,12 +86,15 @@ public class InGameUIManager : MonoBehaviour, IMenu
         coinsText.text = DataManager.Instance.playerData.totalCoins.ToString();
         levelText.text = "Level " + (DataManager.Instance.playerData.currentLevel + 1).ToString();
         movesText.color = normalColor;
+        movesText.text = GameManager.Instance.GetMaxMoves().ToString();
+        foreach(var booster in boosterButtons)
+        {
+            booster.Show();
+        }
 
-        addMovesCountText.text = DataManager.Instance.GetAmountOfBoosterByID((int) Constants.BoosterType.AddMove).ToString();
-        shuffleCountText.text = DataManager.Instance.GetAmountOfBoosterByID((int) Constants.BoosterType.Shuffle).ToString();
-        hintCountText.text = DataManager.Instance.GetAmountOfBoosterByID((int) Constants.BoosterType.Hint).ToString();
         UpdateFinishedSlotsSlider(0, LevelLoader.Instance.GetNumsTopic());
         UpdateProgressText(0, LevelLoader.Instance.GetNumsTopic());
+        
         if(LevelLoader.Instance.gameDifficult == LevelLoader.GameDifficult.Hard)
         {
             levelDifficultImgae.sprite = Resources.Load<Sprite>(Constants.HARD_TEXT_UI);
@@ -158,22 +172,6 @@ public class InGameUIManager : MonoBehaviour, IMenu
     private void UpdateProgressText(int finishedSlots, int numSlots)
     {
         progressText.text = finishedSlots.ToString() + "/" + numSlots.ToString();
-    }
-
-    private void UpdateBoosterCountText(int id, int numsBooster)
-    {
-        switch (id)
-        {
-            case (int) Constants.BoosterType.AddMove:
-                addMovesCountText.text = numsBooster.ToString();
-                break;
-            case (int) Constants.BoosterType.Shuffle:
-                shuffleCountText.text = numsBooster.ToString();
-                break;
-            case (int) Constants.BoosterType.Hint:
-                hintCountText.text = numsBooster.ToString();
-                break;
-        }
     }
 
 }
