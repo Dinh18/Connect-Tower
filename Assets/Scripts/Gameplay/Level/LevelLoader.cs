@@ -50,7 +50,6 @@ public class LevelLoader : MonoBehaviour
     public void LevelUp()
     {
         DataManager.Instance.LevelUp(gameDifficult, levelDatas.Length - 1); 
-        // this.coinWin = coinWin;
     }
     public void LoadLevel()
     {
@@ -74,6 +73,13 @@ public class LevelLoader : MonoBehaviour
         {
             slot.SetupIceSlot();
         }
+    }
+
+    public int GetCurrentLevelReward()
+    {
+        if (gameDifficult == GameDifficult.Easy) return 40;
+        if (gameDifficult == GameDifficult.Hard) return 80;
+        return 120;
     }
 
     

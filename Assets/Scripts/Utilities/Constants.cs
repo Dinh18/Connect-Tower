@@ -71,10 +71,13 @@ public static class Constants
         Hint = 2
     }
     // level images
+    public const string NORMAL_NEXT_LVL = "Sprite/NORMAL_LVL_NEXT_STAGE";
+    public const string HARD_NEXT_LVL = "Sprite/HARD_LVL_NEXT_STAGE";
+    public const string SUPERHARD_NEXT_LVL = "Sprite/SUPERHARD_LVL_NEXT_STAGE";
+    public const string NORMAL_CURRENT_LVL = "Sprite/NORMAL_LVL_STAGE_CURRENT";
+    public const string HARD_CURRENT_LVL = "Sprite/HARD_LVL_STAGE_CURRENT";
+    public const string SUPERHARD_CURRENT_LVL = "Sprite/HARD_LVL_STAGE_CURRENT";
     public const string LEVEL_PREFAB = "Prefabs/LevelPrefab";
-    public const string NORMAL_LVL = "Sprite/NORMAL_LVL_NEXT_STAGE";
-    public const string HARD_LVL = "Sprite/HARD_LVL_NEXT_STAGE";
-    public const string SUPERHARD_LVL = "Sprite/SUPERHARD_LVL_NEXT_STAGE";
     public const string HARD_LVL_SKULL = "Sprite/HARD_LVL_SKULL";
     public const string SUPERHARD_LVL_SKULL = "Sprite/SUPERHARD_LVL_SKULL";
     public const string HARD_TEXT_UI = "Sprite/HARD_TEXT_UI (1)";

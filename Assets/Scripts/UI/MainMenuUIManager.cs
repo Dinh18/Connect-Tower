@@ -7,8 +7,8 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
 {
     private UIManager uIManager;
     [Header("Button References")]
-    [SerializeField] private Button AddCoins;
-    [SerializeField] private Button Setting;
+    [SerializeField] private Button addCoins;
+    [SerializeField] private Button setting;
     [SerializeField] private Button playButton;
     [SerializeField] private Button homeButton;
     [SerializeField] private Button shopButton;
@@ -20,6 +20,8 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
     [SerializeField] private Image heartIcon;
     [SerializeField] private Button addHeartButton;
     [SerializeField] private RefillHeartPopup refillHeartPopup;
+    [Header("Level UI")]
+    [SerializeField] private LevelUIManager levelUIManager;
     private bool enableAddHeartButton;
     private int oldCoins;
     // [SerializeField] private Button settingButton;
@@ -32,29 +34,19 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
 
     void OnEnable()
     {
-        // DataManager.OnChangeLevel+=ShowLevels;
-        // DataManager.OnChangeCoins+=UpdateCoinsText;
-        DataManager.OnChangeHeart+=UpdateHeartCountText;
-
         homeButton.onClick.AddListener(OnClickHome);
         shopButton.onClick.AddListener(OnClickShop);
         playButton.onClick.AddListener(OnClickPlay);
-        AddCoins.onClick.AddListener(OnClickShop);
-        Setting.onClick.AddListener(uIManager.OpenSetting);
+        addCoins.onClick.AddListener(OnClickShop);
         addHeartButton.onClick.AddListener(OnClickAddHeart);
     }
 
     void OnDisable()
     {
-        // DataManager.OnChangeLevel-=ShowLevels;
-        // DataManager.OnChangeCoins-=UpdateCoinsText;
-        DataManager.OnChangeHeart-=UpdateHeartCountText;
-
         homeButton.onClick.RemoveListener(OnClickHome);
         shopButton.onClick.RemoveListener(OnClickShop);
         playButton.onClick.RemoveListener(OnClickPlay);
-        AddCoins.onClick.RemoveListener(OnClickShop);
-        Setting.onClick.RemoveListener(uIManager.OpenSetting);
+        addCoins.onClick.RemoveListener(OnClickShop);
         addHeartButton.onClick.RemoveListener(OnClickAddHeart);
     }
 
@@ -64,7 +56,14 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         refillHeartPopup.Setup(uIManager);
 
         oldCoins = DataManager.Instance.playerData.totalCoins;
-        // coinText.text = DataManager.Instance.playerData.totalCoins.ToString();
+        coinText.text = DataManager.Instance.playerData.totalCoins.ToString();
+
+        setting.onClick.RemoveAllListeners();
+        setting.onClick.AddListener(uIManager.OpenSetting);
+
+        DataManager.OnChangeHeart-=UpdateHeartCountText;
+        DataManager.OnChangeHeart+=UpdateHeartCountText;
+
 
         UpdateHeartCountText(DataManager.Instance.playerData.heart);
 
@@ -73,6 +72,8 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
 
         shopBackGround = shopButton.GetComponent<BackgroundButton>();
         homeBackGround = homeButton.GetComponent<BackgroundButton>();
+
+        levelUIManager.Show();
 
         OnClickHome();
     }
@@ -84,7 +85,7 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         uIManager.CloseShop();   
         shopBackGround.UnSelect();
     }
-    private void OnClickShop()
+    public void OnClickShop()
     {
         shopBackGround.Select();
         uIManager.OpenShop(true);
@@ -103,7 +104,7 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         // 2. Tính ra số tiền ở "Trạng thái trung gian" (Chỉ trừ Booster, chưa cộng Win)
         int coinsBeforeWin = finalCoins - winAmount; 
 
-        // 3. 💡 ÉP THẲNG SỐ TIỀN TRÊN UI VỀ MỨC ĐÃ GIẢM NGAY LẬP TỨC
+        // 3. ÉP THẲNG SỐ TIỀN TRÊN UI VỀ MỨC ĐÃ GIẢM NGAY LẬP TỨC
         oldCoins = coinsBeforeWin;
         coinText.text = oldCoins.ToString();
 
@@ -174,7 +175,8 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
     {
         if(enableAddHeartButton)
         {
-            refillHeartPopup.Show();
+            refillHeartPopup.ConfigMainMenu(this);
+            uIManager.PushPopupToFront(refillHeartPopup);
         }
     }
 
@@ -189,6 +191,7 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         this.gameObject.SetActive(true);
         oldCoins = DataManager.Instance.playerData.totalCoins;
         coinText.text = oldCoins.ToString();
+        levelUIManager.Show();
         // coinText.text = DataManager.Instance.playerData.totalCoins.ToString();
     }
 }

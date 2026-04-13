@@ -5,13 +5,14 @@ public class ShopPanel : MonoBehaviour, IMenu
 {
     private UIManager uIManager;
     [SerializeField] private Button closeButton;
+    [SerializeField] private Text coinCountText;
     void OnEnable()
     {
-        closeButton.onClick.AddListener(Hide);
+        closeButton.onClick.AddListener(uIManager.CloseShop);
     }
     void OnDisable()
     {
-        closeButton.onClick.RemoveListener(Hide);
+        closeButton.onClick.RemoveListener(uIManager.CloseShop);
     }
     public void Hide()
     {
@@ -26,6 +27,7 @@ public class ShopPanel : MonoBehaviour, IMenu
     public void Show()
     {
         this.gameObject.SetActive(true);
+        coinCountText.text = DataManager.Instance.playerData.totalCoins.ToString();
     }
 
     public void ShowCloseButton()
@@ -37,5 +39,6 @@ public class ShopPanel : MonoBehaviour, IMenu
         closeButton.gameObject.SetActive(false);
         
     }
+    
 
 }

@@ -14,7 +14,8 @@ public class GameManager : MonoBehaviour
     }
     private int moves;
     private int maxMoves;
-    private GameState state;
+    private GameState currState;
+    private GameState prevState;
     [SerializeField] private UIManager uIManager;
     [SerializeField] private LevelLoader levelLoader;
     [SerializeField] private SlotsManager slotsManager;
@@ -25,7 +26,6 @@ public class GameManager : MonoBehaviour
     void Awake()
     {
         Instance = this;  
-         
     }
 
     void Start()
@@ -41,7 +41,8 @@ public class GameManager : MonoBehaviour
         return slotsManager;
     }
 
-    public GameState GetCurrState() => state;
+    public GameState GetCurrState() => currState;
+    public GameState GetPrevState() => prevState;
     public int GetMaxMoves() => maxMoves;
     public int GetMoves() => moves;
     public void SetupLevel(int maxMoves)
@@ -68,14 +69,22 @@ public class GameManager : MonoBehaviour
         OnChangeMoves?.Invoke(this.moves);
     }
     
-    public void ChangeState(GameState gameState)
+    public void ChangeState(GameState newState)
     {
-        if(gameState == GameState.Playing)
+        if(currState == newState) return;
+        
+        prevState = currState;
+        currState = newState;
+
+        if(currState == GameState.Playing)
         {
-            levelLoader.LoadLevel();
+            if(prevState != GameState.Pause)
+            {
+                levelLoader.LoadLevel();
+            }
         }
-        uIManager.UpdateUI(gameState);
-        this.state = gameState;
-        Debug.Log("CurrState: " + this.state);
+
+        uIManager.UpdateUI(currState);
+        Debug.Log($"State Changed: {prevState} -> {currState}");
     }
 }

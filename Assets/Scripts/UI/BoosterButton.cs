@@ -31,9 +31,12 @@ public class BoosterButton : MonoBehaviour
 
     }
 
+    public IBooster GetBooster() => booster;
+
     public void Setup(UIManager uIManager)
     {
         this.uIManager = uIManager;
+        addBoosterUI.Setup(uIManager);
     }
 
     public void Show()
@@ -62,9 +65,13 @@ public class BoosterButton : MonoBehaviour
         {
             string header = booster.GetName();
             string coin = booster.GetPrice().ToString();
-            addBoosterUI.Show(this,header, coin, booster.GetBoosterType());
+            // addBoosterUI.SetConfig(this,header, coin, booster.GetBoosterType());
+            // uIManager.PushPopupToFront(addBoosterUI);
+            uIManager.OpenAddBooster(addBoosterUI, this, header, coin, booster.GetBoosterType());
             return;
         }
+
+        if(GameManager.Instance.GetCurrState() == GameManager.GameState.Pause) return;
 
         boosterButton.interactable = false;
 
@@ -75,15 +82,11 @@ public class BoosterButton : MonoBehaviour
 
     public void OnClickAddBoosterButton()
     {
-        if(booster.GetPrice() > DataManager.Instance.playerData.totalCoins)
-        {
-            uIManager.OpenShop();
-            addBoosterUI.Hide();
-        }
-        else
-        {
-            booster.AddBooster(3);
-            addBoosterUI.Hide();
-        }
+        uIManager.OnClickAddBooster(this);
+    }
+
+    public void PlayAddEffect()
+    {
+        StartCoroutine(addBoosterUI.AddBoosterEffect(this.gameObject.GetComponent<RectTransform>()));
     }
 }

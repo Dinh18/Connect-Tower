@@ -18,6 +18,7 @@ public class InGameUIManager : MonoBehaviour, IMenu
     [SerializeField] private Text progressText;
     [SerializeField] private Image levelDifficultImgae;
     [SerializeField] private Text levelDifficultLevelText;
+    [Header("Move Count Text Setting")]
     [SerializeField] private Color normalColor = Color.white;
     [SerializeField] private Color warningColor = Color.red;
     [SerializeField] private float normalFontSize = 50;
@@ -26,43 +27,24 @@ public class InGameUIManager : MonoBehaviour, IMenu
     private Coroutine flashCoroutine;
     [Header("Button References")]
     [SerializeField] private Button SettingButton;
-    [SerializeField] private Button continueButton;
-    [SerializeField] private Button backMainMenuButton;
-    [SerializeField] private Button tryAgainButton;
     [Header("Booster UI References")]
     private BoosterButton[] boosterButtons;
-    // [SerializeField] private Text addMovesCountText;
-    // [SerializeField] private Text shuffleCountText;
-    // [SerializeField] private Text hintCountText;
-    // [SerializeField] private GameObject addAddmoveImage;
-    // [SerializeField] private GameObject addShuffleImage;
-    // [SerializeField] private GameObject addHintImage;
     private UIManager uIManager;
     void OnEnable()
     {
         GameManager.OnChangeMoves+=UpdateMovesText;
         SlotsManager.OnChangeFinishedSlots+=UpdateProgressText;
         SlotsManager.OnChangeFinishedSlots+=UpdateFinishedSlotsSlider;
-        // DataManager.OnChangeCountBooster+=UpdateBoosterCountText;
-
-        SettingButton.onClick.AddListener(uIManager.OpenSetting);
-        continueButton.onClick.AddListener(uIManager.OnClickBackHome);
-        backMainMenuButton.onClick.AddListener(uIManager.OnClickBackHome);
-        tryAgainButton.onClick.AddListener(OnClickTryAgain);
-        coinsButton.onClick.AddListener(() => uIManager.OpenShop(false));
+        DataManager.OnChangeCoins+=UpDateCoinText;
     }
     void OnDisable()
     {
         GameManager.OnChangeMoves-=UpdateMovesText;
         SlotsManager.OnChangeFinishedSlots-=UpdateProgressText;
         SlotsManager.OnChangeFinishedSlots-=UpdateFinishedSlotsSlider;
+        DataManager.OnChangeCoins-=UpDateCoinText;
         // DataManager.OnChangeCountBooster-=UpdateBoosterCountText;
 
-        SettingButton.onClick.RemoveListener(uIManager.OpenSetting);
-        continueButton.onClick.RemoveListener(uIManager.OnClickBackHome);
-        backMainMenuButton.onClick.RemoveListener(uIManager.OnClickBackHome);
-        tryAgainButton.onClick.RemoveListener(OnClickTryAgain);
-        coinsButton.onClick.RemoveListener(() => uIManager.OpenShop(false));
     }
     public void Hide()
     {
@@ -72,14 +54,20 @@ public class InGameUIManager : MonoBehaviour, IMenu
     public void Setup(UIManager uIManager)
     {
         this.uIManager = uIManager;
-        boosterButtons = FindObjectsOfType<BoosterButton>(true);
+
+        SettingButton.onClick.RemoveAllListeners();
+        SettingButton.onClick.AddListener(uIManager.OpenSetting);
+
+        coinsButton.onClick.RemoveAllListeners();
+        coinsButton.onClick.AddListener(() => uIManager.OpenShop(false));
+
+        boosterButtons = FindObjectsByType<BoosterButton>(FindObjectsInactive.Include, FindObjectsSortMode.None);
         foreach(var booster in boosterButtons)
         {
             booster.Setup(uIManager);
         }
 
     }
-
     public void Show()
     {
         this.gameObject.SetActive(true);
@@ -157,12 +145,6 @@ public class InGameUIManager : MonoBehaviour, IMenu
         movesText.color = normalColor;
     }
 
-
-    private void OnClickTryAgain()
-    {
-        GameManager.Instance.ChangeState(GameManager.GameState.Playing);
-    }
-
     private void UpdateFinishedSlotsSlider(int finishedSlots, int numSlots)
     {
         float value = (float) finishedSlots / numSlots;
@@ -172,6 +154,11 @@ public class InGameUIManager : MonoBehaviour, IMenu
     private void UpdateProgressText(int finishedSlots, int numSlots)
     {
         progressText.text = finishedSlots.ToString() + "/" + numSlots.ToString();
+    }
+
+    private void UpDateCoinText(int coins)
+    {
+        coinsText.text = coins.ToString();
     }
 
 }

@@ -5,7 +5,8 @@ using UnityEngine.UI;
 public class HeartManager : MonoBehaviour
 {
     [SerializeField] int restoreDuration = 120;
-    [SerializeField] private Text timerText;
+    [SerializeField] private Text timerTextMainMenu;
+    [SerializeField] private Text timerTextAddHeardPopup;
     private DateTime nextHeartTime;
     private DateTime lastHeartTime;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -23,7 +24,8 @@ public class HeartManager : MonoBehaviour
         }
         else
         {
-            timerText.text = "Max";
+            timerTextMainMenu.text = "Max";
+            timerTextAddHeardPopup.text = "Max";
         }
     }
 
@@ -43,7 +45,8 @@ public class HeartManager : MonoBehaviour
         {
             // Hiển thị định dạng mm:ss
             TimeSpan time = TimeSpan.FromSeconds(secondsLeft);
-            timerText.text = string.Format("{0:D2}:{1:D2}", time.Minutes, time.Seconds);
+            timerTextMainMenu.text = string.Format("{0:D2}:{1:D2}", time.Minutes, time.Seconds);
+            timerTextAddHeardPopup.text = string.Format("{0:D2}:{1:D2}", time.Minutes, time.Seconds);
         }
     }
 

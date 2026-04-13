@@ -5,36 +5,61 @@ using UnityEngine;
 public class EndGameUI : MonoBehaviour
 {
     [Header("Panel Refrences")]
-    [SerializeField] GameObject levelCompletedPanel;
-    [SerializeField] Transform headerLevelCompleted;
-    [SerializeField] GameObject levelFailedPanel;
-    
-    public IEnumerator ShowLevelCompletedPanel()
+    private LevelCompletedUI levelCompleted;
+    private LevelFailedUI levelFailed;
+
+    void Awake()
     {
-        AudioManager.Instance.PlayLVLWinAudio();
-        this.gameObject.SetActive(true);
-        levelCompletedPanel.SetActive(true);
-        levelFailedPanel.SetActive(false);
-        
-        this.transform.localScale = Vector3.zero;
-        this.transform.DOKill();
-        this.transform.DOScale(1, 0.5f).SetEase(Ease.OutBack);
-        foreach(Transform child in headerLevelCompleted)
+        InitPanels();
+    }
+
+    private void InitPanels()
+    {
+        if (levelCompleted == null) 
+            levelCompleted = GetComponentInChildren<LevelCompletedUI>(true);
+            
+        if (levelFailed == null) 
+            levelFailed = GetComponentInChildren<LevelFailedUI>(true);
+    }
+
+    public void Setup(UIManager uIManager)
+    {
+        InitPanels(); 
+
+        if (levelCompleted == null || levelFailed == null)
         {
-            child.DOKill();
-            child.localScale = Vector3.zero;
-            child.DOScale(1, 1f).SetEase(Ease.OutBack);
-            yield return new WaitForSeconds(0.1f);
+            Debug.LogError("LỖI: Không tìm thấy LevelCompletedUI hoặc LevelFailedUI. Hãy kiểm tra lại cấu trúc Hierarchy xem chúng có đang nằm làm CON của EndGameUI chưa!");
+            return;
         }
-        
+
+        levelCompleted.Setup(uIManager);
+        levelFailed.Setup(uIManager);
+    }
+    
+    public void ShowLevelCompletedPanel()
+    {
+
+        levelFailed.Hide();
+
+        ShowDimImage();
+
+        levelCompleted.Show();
         
     }
+    
     public void ShowLevelFailedPanel()
     {
         AudioManager.Instance.PlayLVLLoseAudio();
+        ShowDimImage();
+        levelCompleted.Hide();
+        levelFailed.Show();
+    }
+    private void ShowDimImage()
+    {
         this.gameObject.SetActive(true);
-        levelCompletedPanel.SetActive(false);
-        levelFailedPanel.SetActive(true);
+        this.transform.localScale = Vector3.zero;
+        this.transform.DOKill();
+        this.transform.DOScale(1, 0.5f).SetEase(Ease.OutBack);
     }
     public void Hide()
     {
