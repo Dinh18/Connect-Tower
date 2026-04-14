@@ -17,10 +17,10 @@ public class SlotController : MonoBehaviour
     public GameObject blockPrefab;
     public Transform stackAnchor;
     public Transform arcPeak;
-    [SerializeField] private int amountOfBlocks = 2;
+    // [SerializeField] private int amountOfBlocks = 2;
     [Header("Movement Settings")]
     [SerializeField] private float height = 0.7f;
-    [SerializeField] private float moveSpeed = 10f;
+    // [SerializeField] private float moveSpeed = 10f;
     [SerializeField] private float moveDuration = 0.5f;
     [SerializeField] private float selectDuration = 0.1f;
     public bool isFinished = false;
@@ -42,8 +42,10 @@ public class SlotController : MonoBehaviour
     [SerializeField] private GameObject iceVFX;
     private float baseIceRodLocalY;
     private int row;
+    private int blocksToMove;
     [SerializeField] private float delayBetweenBlocks = 0.1f;
     public static event Action<int> OnSlotCompleted;
+    public static event Action<bool> OnMoveFisnished;
     public void Setup(SlotType slotType, int row, BlockTopic blockTopic = null)
     {
         this.row = row;
@@ -95,6 +97,7 @@ public class SlotController : MonoBehaviour
                 || !block.isRevealed) break;
             block.ChangeState(BlockController.BlockState.Selected);
             Vector3 targetPosition = new Vector3(stackAnchor.position.x, stackAnchor.position.y + (blocks.Count - i) * Constants.BLOCK_HEIGHT, stackAnchor.position.z);
+            block.DOKill();
             block.transform.DOMove(targetPosition, selectDuration).SetEase(Ease.OutQuad);
             i++;
         }
@@ -124,7 +127,18 @@ public class SlotController : MonoBehaviour
         {
             if(blocks.Count > 0)
             {
-                if(otherSlot.blocks.Peek().GetTopicID() != this.blocks.Peek().GetTopicID()) return false;
+                if(otherSlot.blocks.Peek().GetTopicID() != this.blocks.Peek().GetTopicID())
+                {
+                    foreach(BlockController block in otherSlot.blocks)
+                    {
+                        if(block.GetCurrState() == BlockController.BlockState.Selected)
+                        {
+                            block.PlayErrorShake();
+                        }
+                    }
+                    return false;
+                } 
+                
             }
         }
             // Loại block di chuyển
@@ -146,7 +160,7 @@ public class SlotController : MonoBehaviour
                 || !block.isRevealed) break;
             blockCount++;
         }
-        int blocksToMove = Math.Min(4 - blocks.Count, blockCount);
+        blocksToMove = Math.Min(4 - blocks.Count, blockCount);
         // Vị trí bắt đầu của block đầu tiên được di chuyển
         float startY = (blocks.Count == 0) ? stackAnchor.position.y : blocks.Peek().transform.position.y + height;
 
@@ -218,7 +232,7 @@ public class SlotController : MonoBehaviour
         BlockStartMoving();
         Vector3[] pathArr = path.ToArray();
 
-        block.transform.DOKill(true);
+        block.transform.DOKill();
 
         block.transform.DOPath(pathArr, duration, PathType.CatmullRom)
             .SetDelay(delay)
@@ -288,16 +302,27 @@ public class SlotController : MonoBehaviour
                     i++;
                 }
                 AudioManager.Instance.PlayPopMovedAudio(i);
+                StartCoroutine(HapticManager.Instance.PlayVibrateBlockFall(i, 0.2f));
             } 
             else
             {
                 AudioManager.Instance.PlayBlockFailAudio();
+                HapticManager.Instance.PlayVibrateHeavy();
+                // b.PlayErrorShake();
+                int i = 0;
+                foreach(BlockController block in blocks)
+                {
+                    if(i >= blocksToMove) break;
+                    block.PlayErrorShake();
+                    i++;
+                }
                 if(!isSameType) b.PlayDifVFX();
             }
             movingBlocksCount = 0;
 
             if(slotType == SlotType.Ice)
             {
+                
                 // float startLocalY = (blocks.Count * Constants.BLOCK_HEIGHT) + Constants.BLOCK_HEIGHT;
                 // iceRod.transform.DOMove(new Vector3(iceRod.transform.position.x,blocks.Count * Constants.BLOCK_HEIGHT + Constants.BLOCK_HEIGHT, iceRod.transform.position.z), 0.5f);
                 iceRod.transform.DOMove(new Vector3(iceRod.transform.position.x,
@@ -315,9 +340,12 @@ public class SlotController : MonoBehaviour
                 }
 
 
-            float delay = (isSameType) ? 0.5f : 0f;
+        //     float delay = 0.5f;
 
-            StartCoroutine(WaitAndFinishMoving(delay, otherSlot));
+        //    StartCoroutine(WaitAndFinishMoving(delay, otherSlot));
+
+            isMoving = false;
+            OnMoveFisnished?.Invoke(isMoving);
             
             if(blocks.Count == 4) CheckSlotComplete();
         } 
@@ -326,8 +354,7 @@ public class SlotController : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
         isMoving = false;
-
-        
+        OnMoveFisnished?.Invoke(isMoving);
     }
     public void Reveal()
     {

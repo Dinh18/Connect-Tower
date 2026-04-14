@@ -10,15 +10,22 @@ public class BackgroundButton : MonoBehaviour
     private Vector3 originPosBackground;
     private Vector3 originPosIcon;
 
-    void Awake()
+    // void Awake()
+    // {
+    //     // Init();
+    //     Debug.Log("originPosBackground" + originPosBackground.y);
+    // }
+
+    public void Init()
     {
         originPosBackground = background.anchoredPosition;
         originPosIcon = icon.anchoredPosition;
-        Debug.Log("originPosBackground" + originPosBackground.y);
+        // Debug.Log("gv gvh ");
     }
 
     public void Select()
     {
+        // Init();
         background.gameObject.SetActive(true);
         text.SetActive(true);
 

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Reflection;
 using DG.Tweening;
+using NUnit.Framework;
 using TMPro;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
@@ -21,10 +22,9 @@ public class InGameUIManager : MonoBehaviour, IMenu
     [Header("Move Count Text Setting")]
     [SerializeField] private Color normalColor = Color.white;
     [SerializeField] private Color warningColor = Color.red;
-    [SerializeField] private float normalFontSize = 50;
-    [SerializeField] private float warningFontSize = 60;
-    [SerializeField] private float flashSpeed = 0.5f;
-    private Coroutine flashCoroutine;
+    [SerializeField] private float flashSpeed = 0.5f; // Thời gian cho 1 nhịp thở
+    [SerializeField] private float scaleMultiplier = 1.2f;
+    private bool isFlashing = false;
     [Header("Button References")]
     [SerializeField] private Button SettingButton;
     [Header("Booster UI References")]
@@ -103,6 +103,11 @@ public class InGameUIManager : MonoBehaviour, IMenu
         {
             levelDifficultImgae.gameObject.SetActive(false);
             levelDifficultLevelText.gameObject.SetActive(false);
+
+            // movesText.color = normalColor;
+            // movesText.transform.localScale = Vector3.one; 
+            StopWarningFlash();
+            Debug.Log("InGame");
         }
 
     }
@@ -112,38 +117,63 @@ public class InGameUIManager : MonoBehaviour, IMenu
         movesText.text = moves.ToString();
         if(moves > 0 && moves <= 5)
         {
-            if(flashCoroutine == null)
-            {
-                flashCoroutine = StartCoroutine(FlashRoutine());
-            }
+            if(!isFlashing) StartWarningFlash();
         }
         else if(moves <= 0 || moves > 5)
         {
-            StopFlashing();
+            StopWarningFlash();
         }   
     }
 
-    private IEnumerator FlashRoutine()
+    public void StartWarningFlash()
     {
-        while(true)
-        {
-            movesText.color = normalColor;
-            yield return new WaitForSeconds(flashSpeed);
+        movesText.DOKill();
+        movesText.transform.DOKill();
 
-            movesText.color = warningColor;
-            yield return new WaitForSeconds(flashSpeed);
-        }
+        movesText.DOColor(warningColor, flashSpeed)
+                 .SetLoops(-1, LoopType.Yoyo) 
+                 .SetEase(Ease.InOutSine);    
+
+        movesText.transform.DOScale(Vector3.one * scaleMultiplier, flashSpeed)
+                           .SetLoops(-1, LoopType.Yoyo)
+                           .SetEase(Ease.InOutSine);
+        isFlashing = true;
     }
 
-    private void StopFlashing()
+    public void StopWarningFlash()
     {
-        if(flashCoroutine != null)
-        {
-            StopCoroutine(flashCoroutine);
-            flashCoroutine = null;
-        }
+        movesText.DOKill();
+        movesText.transform.DOKill();
+
         movesText.color = normalColor;
+        movesText.transform.localScale = Vector3.one; 
+        isFlashing = false;
     }
+
+    // private IEnumerator FlashRoutine()
+    // {
+    //     while(true)
+    //     {
+    //         movesText.color = normalColor;
+    //         movesText.fontSize = normalFontSize;
+    //         yield return new WaitForSeconds(flashSpeed);
+
+    //         movesText.color = warningColor;
+    //         movesText.fontSize = warningFontSize;
+    //         yield return new WaitForSeconds(flashSpeed);
+    //     }
+    // }
+
+    // private void StopFlashing()
+    // {
+    //     if(flashCoroutine != null)
+    //     {
+    //         StopCoroutine(flashCoroutine);
+    //         flashCoroutine = null;
+    //     }
+    //     movesText.color = normalColor;
+    //     movesText.fontSize= normalFontSize;
+    // }
 
     private void UpdateFinishedSlotsSlider(int finishedSlots, int numSlots)
     {
@@ -160,5 +190,6 @@ public class InGameUIManager : MonoBehaviour, IMenu
     {
         coinsText.text = coins.ToString();
     }
+
 
 }

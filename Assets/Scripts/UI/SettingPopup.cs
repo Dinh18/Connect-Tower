@@ -1,4 +1,5 @@
 
+using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,15 +8,18 @@ public class SettingPopup : MonoBehaviour, IMenu
     private UIManager uIManager;
     [SerializeField] private Button closeButton;
     [SerializeField] private Button backHomeButton;
+    [SerializeField] private GameObject soundInActive;
+    [SerializeField] private GameObject hapticInActive;
+    [SerializeField] private Button soundButton;
+    [SerializeField] private Button hapticButton;
     // void OnEnable()
     // {
-    //     backHomeButton.onClick.AddListener(uIManager.OnClickBackHome);
-    //     closeButton.onClick.AddListener(uIManager.CloseSetting);
+    //     soundButton.onClick.AddListener(OnClickSoundButton);
     // }
     // void OnDisable()
     // {
-    //     backHomeButton.onClick.RemoveListener(uIManager.OnClickBackHome);
-    //     closeButton.onClick.RemoveListener(uIManager.CloseSetting);
+    //     soundButton.onClick.RemoveListener(OnClickSoundButton);
+        
     // }
     public void Hide()
     {
@@ -26,6 +30,9 @@ public class SettingPopup : MonoBehaviour, IMenu
     public void Setup(UIManager uIManager)
     {
         this.uIManager = uIManager;
+
+        soundButton.onClick.AddListener(OnClickSoundButton);
+        hapticButton.onClick.AddListener(OnClickHapticButton);
 
         if (backHomeButton != null)
         {
@@ -47,6 +54,20 @@ public class SettingPopup : MonoBehaviour, IMenu
             bool inGame = uIManager.isCurrentlyInGame();
             backHomeButton.gameObject.SetActive(inGame);
         }
-        
+
+        if(AudioManager.Instance.IsSoundOn()) soundInActive.SetActive(false); 
+        if(HapticManager.Instance.IsHapticOn()) hapticInActive.gameObject.SetActive(false);
+    }
+
+    private void OnClickSoundButton()
+    {
+        if(AudioManager.Instance.ToggleSound()) soundInActive.SetActive(false);
+        else soundInActive.SetActive(true);
+    }
+
+    private void OnClickHapticButton()
+    {
+        if(HapticManager.Instance.ToggleHaptic()) hapticInActive.gameObject.SetActive(false);
+        else hapticInActive.gameObject.SetActive(true);
     }
 }

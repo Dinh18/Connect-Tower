@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System;
 
 
 #if UNITY_EDITOR
@@ -218,8 +217,8 @@ public class MakeLevel : MonoBehaviour
         }
         // Save the LevelDataSO to a file or asset
         string assetPath = $"Assets/Resources/Levels/Level_{Level}.asset";
-        AssetDatabase.CreateAsset(newLevelData, assetPath);
-        AssetDatabase.Refresh();
+        // AssetDatabase.CreateAsset(newLevelData, assetPath);
+        // AssetDatabase.Refresh();
     }
 }
 

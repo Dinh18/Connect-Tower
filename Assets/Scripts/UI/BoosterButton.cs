@@ -82,9 +82,10 @@ public class BoosterButton : MonoBehaviour
             Debug.Log("Booster này chưa mở khóa, không cho bấm!");
             return;
         }
+        // if(GameManager.Instance.GetCurrState() == GameManager.GameState.Pause) return;
         int id = (int)booster.GetBoosterType();
         if(id != ((int)booster.GetBoosterType())) return;
-        if(DataManager.Instance.IsFirstTimeUserBooster(id))
+        if(DataManager.Instance.IsFirstTimeUserBooster(id) && TutorialManager.Instance.currentTutorial == TutorialManager.TutorialType.BoosterUI)
         {
             TutorialManager.Instance.EndBoosterTutorial(id);
         }

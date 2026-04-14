@@ -49,6 +49,8 @@ public class InputManager : MonoBehaviour
                             }
                         }
 
+                        HapticManager.Instance.PlayVibrateMedium();
+
                         if(!selected && !slot.isFinished && slot.blocks.Count > 0)
                         {
                             if (slot.SelectToMove())
@@ -71,7 +73,7 @@ public class InputManager : MonoBehaviour
                             {
                                 selectedSlot = null;
                                 selected = false;
-                                gameManager.Move();
+                                // gameManager.Move();
                             }
                         }
                     }

@@ -30,6 +30,7 @@ public class AddMoveEffect : MonoBehaviour, IBoosterEffect
 
             moveCountText.transform.DOKill();
             moveCountText.transform.DOPunchScale(new Vector3(0.5f,0.5f,0.5f), 0.3f, 5, 4);
+            HapticManager.Instance.PlayVibrateMedium();
             ExcuteBooster();
             
         });

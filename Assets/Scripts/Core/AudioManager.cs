@@ -21,13 +21,16 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip PopMoved_Audio_4;
     [SerializeField] private AudioClip slotFinishedAudio;
     [SerializeField] private AudioClip shuffleAudio;
+    private bool isSoundOn;
     void Awake()
     {
         Instance = this;
+        LoadAudioSetting();
     }
     public void PlaySFX(AudioClip audioClip)
     {
         if(audioClip == null) return;
+        audioSource.volume = isSoundOn ? 1 : 0;
         audioSource.PlayOneShot(audioClip);
     }
 
@@ -62,6 +65,23 @@ public class AudioManager : MonoBehaviour
                 break;
             
         }
+    }
+    private void LoadAudioSetting()
+    {
+        isSoundOn = PlayerPrefs.GetInt("SoundState", 1) == 1;
+    }
+
+    public bool ToggleSound()
+    {
+        isSoundOn = !isSoundOn;
+        PlayerPrefs.SetInt("SoundState", isSoundOn ? 1 : 0);
+        PlayerPrefs.Save();
+        return isSoundOn;
+    }
+
+    public bool IsSoundOn()
+    {
+        return isSoundOn;
     }
 
 }

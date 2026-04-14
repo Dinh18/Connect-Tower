@@ -58,7 +58,7 @@ MonoBehaviour:
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 74f9d22de1d401247a9bda634d6463d0, type: 2}
       indexSprite: 0
-  - slotType: 0
+  - slotType: 2
     questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0

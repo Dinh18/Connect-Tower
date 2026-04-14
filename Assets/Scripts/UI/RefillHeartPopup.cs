@@ -45,6 +45,11 @@ public class RefillHeartPopup : MonoBehaviour, IMenu
     }
     private void OnClickRefillHeart()
     {
+        if(DataManager.Instance.playerData.heart >= 5)
+        {
+            OnclickClose();
+            return;
+        }
         if(DataManager.Instance.playerData.totalCoins > 900)
         {
             DataManager.Instance.AddHeart(5 - DataManager.Instance.playerData.heart,"");

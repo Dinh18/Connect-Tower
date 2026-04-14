@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,6 +13,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private EndGameUI endGameUI;
     [SerializeField] private SettingPopup setting;
     [SerializeField] private ShopPanel shop;
+    [SerializeField] private LoadingImage loadingImage;
     private Stack<IMenu> popupStack = new Stack<IMenu>();
     // [SerializeField] private ShopPanel shopPanel;
     public Button settingButton;
@@ -26,6 +29,7 @@ public class UIManager : MonoBehaviour
         shop.Setup(this);
         ingame.Setup(this);
         endGameUI.Setup(this);
+        loadingImage.Setup(this);
 
     }
 
@@ -43,6 +47,10 @@ public class UIManager : MonoBehaviour
                     int coinWin = LevelLoader.Instance.GetCurrentLevelReward();
                     mainMenu.AddCoin(coinWin);
                 }
+                if(gameManager.GetPrevState() == GameManager.GameState.None)
+                {
+                    StartCoroutine(ShowLoadingImage(1f));
+                }
                
                 break;
             case GameManager.GameState.Win:
@@ -56,6 +64,7 @@ public class UIManager : MonoBehaviour
                 {
                     ClearPopupStack();
                     ingame.Show();
+                    StartCoroutine(ShowLoadingImage(1f));
                 }
                 break;
             case GameManager.GameState.Pause:
@@ -76,7 +85,7 @@ public class UIManager : MonoBehaviour
 
         // if(isCurrentlyInGame() && TutorialManager.Instance.IsTutorialActive()) return;
 
-        PushPopupToFront(setting);
+        PushPopupToFront(setting, setting.transform);
 
         if(gameManager.GetCurrState() == GameManager.GameState.Playing)
         {
@@ -95,7 +104,7 @@ public class UIManager : MonoBehaviour
 
     public void OpenShop(bool inMainMenu = false)
     {
-        PushPopupToFront(shop);
+        PushPopupToFront(shop, shop.transform);
         if(inMainMenu)
         {
             shop.HideCloseButton();
@@ -129,7 +138,7 @@ public class UIManager : MonoBehaviour
         //     claimButton.gameObject.SetActive(false);
         // }
         addBoosterUI.SetConfig(caller,header, coins, type, isFirstTime);
-        PushPopupToFront(addBoosterUI);
+        PushPopupToFront(addBoosterUI, addBoosterUI.transform);
         if(gameManager.GetCurrState() == GameManager.GameState.Playing)
         {
             gameManager.ChangeState(GameManager.GameState.Pause);
@@ -159,7 +168,16 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void PushPopupToFront(IMenu popup)
+    public IEnumerator ShowLoadingImage(float time)
+    {
+        PushPopupToFront(loadingImage, loadingImage.transform, false);
+
+        yield return new WaitForSeconds(time);
+
+        PopPopup();
+    }
+
+    public void PushPopupToFront(IMenu popup, Transform goPopup, bool playAnim = true)
     {
         if(popupStack.Count > 0 && popupStack.Peek() == popup) return;
         if(popupStack.Count > 0)
@@ -170,6 +188,13 @@ public class UIManager : MonoBehaviour
 
         popup.Show();
         popupStack.Push(popup);
+        if(playAnim)
+        {
+            goPopup.localScale = Vector3.zero;
+            goPopup.DOScale(Vector3.one, 0.3f)
+                   .SetEase(Ease.OutBack)
+                   .SetUpdate(true);
+        }
     }
 
     public void PopPopup()

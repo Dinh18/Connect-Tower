@@ -9,7 +9,7 @@ public class LevelEditor : Editor
     // Setting block
     int typeBlock = 0; // 0: Normal, 1: Hide
     // Setting slot
-    int typeSlot = 0; // 0: Normal, 1: Hide, 2: Ice
+    // int typeSlot = 0; // 0: Normal, 1: Hide, 2: Ice
     public override void OnInspectorGUI()
     {
 

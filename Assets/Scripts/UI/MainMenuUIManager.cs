@@ -14,7 +14,7 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
     [SerializeField] private Button shopButton;
     [Header("Coins Text Setting")]
     [SerializeField] private Text coinText;
-    [SerializeField] private float countDuration = 1.5f;
+    // [SerializeField] private float countDuration = 1.5f;
     [Header("Header Setting")]
     [SerializeField] private Text heartCountText;
     [SerializeField] private Image heartIcon;
@@ -75,15 +75,21 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
 
         levelUIManager.Show();
 
-        OnClickHome();
+        shopBackGround.Init();
+        homeBackGround.Init();
+
+        // Debug.Log()
+
     }
 
 
     private void OnClickHome()
     {
+        // yield return new WaitForEndOfFrame();
         homeBackGround.Select();
         uIManager.CloseShop();   
         shopBackGround.UnSelect();
+        Debug.Log("Ngu");
     }
     public void OnClickShop()
     {
@@ -149,6 +155,7 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
 
         // Chơi âm thanh ăn tiền (sẽ kêu "Ting ting ting" theo từng đồng rất đã tai)
         AudioManager.Instance.PlayCoinCollectAudio();
+        HapticManager.Instance.PlayVibrateMedium();
 
 
         Debug.Log("oldCoins: " + oldCoins);
@@ -176,7 +183,7 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         if(enableAddHeartButton)
         {
             refillHeartPopup.ConfigMainMenu(this);
-            uIManager.PushPopupToFront(refillHeartPopup);
+            uIManager.PushPopupToFront(refillHeartPopup, refillHeartPopup.transform);
         }
     }
 
@@ -192,5 +199,6 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         oldCoins = DataManager.Instance.playerData.totalCoins;
         coinText.text = oldCoins.ToString();
         levelUIManager.Show();
+        OnClickHome();
     }
 }

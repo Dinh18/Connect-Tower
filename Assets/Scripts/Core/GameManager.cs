@@ -6,6 +6,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
     public enum GameState
     {
+        None,
         MainMenu,
         Playing,
         Pause,
@@ -15,7 +16,7 @@ public class GameManager : MonoBehaviour
     private int moves;
     private int maxMoves;
     private GameState currState;
-    private GameState prevState;
+    private GameState prevState = GameState.None;
     [SerializeField] private UIManager uIManager;
     [SerializeField] private LevelLoader levelLoader;
     [SerializeField] private SlotsManager slotsManager;
@@ -25,15 +26,19 @@ public class GameManager : MonoBehaviour
     public static event Action<int> OnChangeMoves;
     void Awake()
     {
-        Instance = this;  
+        Instance = this; 
     }
 
     void Start()
     {
+        Application.targetFrameRate = 60;
         cameraController.Setup();
         levelLoader.Setup(this, slotsManager, blocksManager);
         uIManager.Setup(this);
+        // prevState = GameState.None;
+        currState = GameState.None;
         ChangeState(GameState.MainMenu);
+        SlotController.OnMoveFisnished+=Move;
     }
 
     public SlotsManager GetSlotsManager()
@@ -52,15 +57,18 @@ public class GameManager : MonoBehaviour
         OnChangeMoves?.Invoke(moves);
         cameraController.FitCamera(slotsManager.row1, slotsManager.row2);
     }
-    public void Move()
+    public void Move(bool isMoving)
     {
-        moves--;
-        OnChangeMoves?.Invoke(moves);
-        if(moves <= 0)
+        if(!isMoving)
         {
-            ChangeState(GameState.Lose);
-            // DataManager.Instance.UseHeart();
-            heartManager.UseHeart();
+            moves--;
+            OnChangeMoves?.Invoke(moves);
+            if(moves <= 0)
+            {
+                ChangeState(GameState.Lose);
+                // DataManager.Instance.UseHeart();
+                heartManager.UseHeart();
+            }
         }
     }
     public void AddMove(int moves)

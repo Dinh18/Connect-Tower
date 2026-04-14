@@ -50,11 +50,11 @@ MonoBehaviour:
   outLine: {fileID: 6934627574830095750}
   itemImageBlock: {fileID: 3503173180674403309}
   hideImage: {fileID: 21300000, guid: 63b224eada2b50a4dba95e54c5c2536a, type: 3}
-  animator: {fileID: 4905085872387768350}
   hideVFX: {fileID: 4223607011628714307}
   iceVFX: {fileID: 7185840541871333690}
   difVFX: {fileID: 2026712302641517980}
   iceImage: {fileID: 6810414711911370955}
+  visual: {fileID: 132072173484951299}
   isRevealed: 0
 --- !u!1 &2780556142653426451
 GameObject:
@@ -488,7 +488,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 132072173484951299}
-  - component: {fileID: 4905085872387768350}
   m_Layer: 0
   m_Name: Visual
   m_TagString: Untagged
@@ -515,28 +514,6 @@ Transform:
   - {fileID: 2202798481832870921}
   m_Father: {fileID: 5073027069383820790}
   m_LocalEulerAnglesHint: {x: 0, y: -0, z: -0}
---- !u!95 &4905085872387768350
-Animator:
-  serializedVersion: 7
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6850438374503408777}
-  m_Enabled: 1
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: dcf8ce23f1300fa4baae215d8ca38b12, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_StabilizeFeet: 0
-  m_AnimatePhysics: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorStateOnDisable: 0
-  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &6934627574830095750
 GameObject:
   m_ObjectHideFlags: 0
@@ -5847,6 +5824,22 @@ PrefabInstance:
     - target: {fileID: 4421597768233220, guid: f17aa08bf0192264f82ae865a0c1e816, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 198095539346751721, guid: f17aa08bf0192264f82ae865a0c1e816, type: 3}
+      propertyPath: moveWithTransform
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 198356235549269709, guid: f17aa08bf0192264f82ae865a0c1e816, type: 3}
+      propertyPath: moveWithTransform
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 198441454399751727, guid: f17aa08bf0192264f82ae865a0c1e816, type: 3}
+      propertyPath: moveWithTransform
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 198977541578906628, guid: f17aa08bf0192264f82ae865a0c1e816, type: 3}
+      propertyPath: moveWithTransform
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
