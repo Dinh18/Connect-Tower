@@ -15,6 +15,7 @@ public class MakeLevel : MonoBehaviour
     [HideInInspector] public int row1;
     [HideInInspector] public int row2;
     [HideInInspector] public int totalTopics;
+    
     // [HideInInspector] public Dictionary<int, int> amountBlockOfTopic = new Dictionary<int, int>();
     public List<BlockTopic> topics;
     [HideInInspector]public List<int> amountBlockOfTopic;
@@ -27,6 +28,8 @@ public class MakeLevel : MonoBehaviour
     public GameObject blockPrefab;
     // Editor Only
     public int indexTopicSelected = 0;
+
+    private List<SlotController> slotControllers = new List<SlotController>();
 
     // [ContextMenu("Generate Slots In Scene ")]
     public void SettingSlots()
@@ -53,6 +56,8 @@ public class MakeLevel : MonoBehaviour
     {
         if (slotPrefab == null) return;
 
+        slotControllers = new List<SlotController>();
+
         for (int i = transform.childCount - 1; i >= 0; i--)
         {
             DestroyImmediate(transform.GetChild(i).gameObject);
@@ -70,6 +75,7 @@ public class MakeLevel : MonoBehaviour
             newSlot.transform.localPosition = new Vector3(startX_Row1 + (i * Constants.SLOT_WIDTH), 0, 0);
             // setup.slotController = newSlot.GetComponent<SlotController>();
             newSlot.GetComponent<SlotController>().Setup(slots[j].slotType, 0,slots[j].questionTopic ? slots[j].questionTopic : null);
+            slotControllers.Add(newSlot.GetComponent<SlotController>());
             stackHolders.Add(newSlot.gameObject.GetComponentInChildren<StackHolder>().transform);
             j++;
         }
@@ -83,6 +89,7 @@ public class MakeLevel : MonoBehaviour
             newSlot.transform.localPosition = new Vector3(startX_Row2 + (i * Constants.SLOT_WIDTH), Constants.SLOT_HEIGHT, 0);
 
             newSlot.GetComponent<SlotController>().Setup(slots[j].slotType, 1,slots[j].questionTopic ? slots[j].questionTopic : null);
+            slotControllers.Add(newSlot.GetComponent<SlotController>());
             stackHolders.Add(newSlot.gameObject.GetComponentInChildren<StackHolder>().transform);
             j++;
         }
@@ -100,18 +107,22 @@ public class MakeLevel : MonoBehaviour
         for (int i = 0; i < slots.Count; i++)
         {
             SlotSetupData setup = slots[i];
-            for (int j = setup.blocks.Count - 1; j >= 0; j--)
+            for (int j = setup.blocks.Count-1; j >= 0; j--)
             {
                 BlockSetupData chosenTopic = setup.blocks[j];
                 if (chosenTopic == null) continue;
 
-                GameObject newBlock = Instantiate(blockPrefab, stackHolders[i].position + new Vector3(0, Constants.BLOCK_HEIGHT * (setup.blocks.Count - 1-j), 0), Quaternion.identity);
+                GameObject newBlock = Instantiate(blockPrefab, blockHolder);
 
-                newBlock.transform.SetParent(blockHolder);
+                // newBlock.transform.SetParent(blockHolder);
+
+                BlocksManager blocksManager = blockHolder.GetComponent<BlocksManager>();
                 
-                // newBlock.GetComponent<BlockController>().Setup(chosenTopic.blockTopic.blockColor, chosenTopic.blockTopic.topicID, chosenTopic.typeBlock, chosenTopic.blockTopic.blocksSprite[0], slots[i]);
+                newBlock.GetComponent<BlockController>().Setup(blocksManager,chosenTopic.blockTopic.blockColor, chosenTopic.blockTopic, chosenTopic.typeBlock, chosenTopic.blockTopic.blocksSprite[chosenTopic.indexSprite], slotControllers[i]);
 
-                // newBlock.transform.localPosition = new Vector3(0, i * Constants.BLOCK_HEIGHT, 0);
+
+
+                newBlock.transform.position = slotControllers[i].stackAnchor.position + new Vector3(0, Constants.BLOCK_HEIGHT, 0) * (setup.blocks.Count - 1 - j);
             }
         }
 

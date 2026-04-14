@@ -9,4 +9,5 @@ public interface IBooster
     public void Excute();
     public void AddBooster(int amount); 
     public int GetNumsBooster();
+    public int GetUnlockLevel();
 }

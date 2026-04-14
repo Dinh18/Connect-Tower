@@ -14,15 +14,14 @@ public class CameraController : MonoBehaviour
     {
         if(mainCamera.aspect < 0.6)
         {
-            paddingWidth = 1f;
-            paddingHeight = 0.5f;
+            paddingWidth = 2f;
+            paddingHeight = 1f;
         }
         else
         {
-            paddingWidth = 4;
-            paddingHeight = 3;
+            paddingWidth = 1;
+            paddingHeight = 5f;
         }
-        // Chốt chặn an toàn: Nhỡ chưa gọi Setup mà đã gọi FitCamera thì tự động lấy Camera
         if (mainCamera == null) Setup();
 
         int maxColumn = Mathf.Max(row1, row2);

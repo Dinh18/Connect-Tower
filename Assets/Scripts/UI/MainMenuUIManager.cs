@@ -192,6 +192,5 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         oldCoins = DataManager.Instance.playerData.totalCoins;
         coinText.text = oldCoins.ToString();
         levelUIManager.Show();
-        // coinText.text = DataManager.Instance.playerData.totalCoins.ToString();
     }
 }

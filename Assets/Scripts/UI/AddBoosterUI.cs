@@ -11,6 +11,7 @@ public class AddBoosterUI : MonoBehaviour, IMenu
     [SerializeField] private Text coinsText;
     [SerializeField] private Image boosterIconImage;
     [SerializeField] private Button addButton;
+    [SerializeField] private Button claimButton;
     [SerializeField] private Button closeButton;
     [SerializeField] private Sprite addMoveIcon;
     [SerializeField] private Sprite shuffleIcon;
@@ -43,13 +44,27 @@ public class AddBoosterUI : MonoBehaviour, IMenu
         // GameManager.Instance.ChangeState(GameManager.GameState.Pause);
     }
 
-    public void SetConfig(BoosterButton boosterButton ,string header, string coins, Constants.BoosterType boosterType)
+    public void SetConfig(BoosterButton boosterButton ,string header, string coins, Constants.BoosterType boosterType, bool isFirstTime)
     {
+        if(isFirstTime)
+        {
+            claimButton.gameObject.SetActive(true);
+            addButton.gameObject.SetActive(false);
+            closeButton.gameObject.SetActive(false);
+        }
+        else
+        {
+            claimButton.gameObject.SetActive(false);
+            addButton.gameObject.SetActive(true);
+            closeButton.gameObject.SetActive(true);
+        }
         this.boosterButton = boosterButton;
         headerText.text = header;
         coinsText.text = coins;
         addButton.onClick.RemoveAllListeners();
         addButton.onClick.AddListener(boosterButton.OnClickAddBoosterButton);
+        claimButton.onClick.RemoveAllListeners();
+        claimButton.onClick.AddListener(OnClickClaim);
         if(boosterType == Constants.BoosterType.AddMove)
         {
             boosterIconImage.sprite = addMoveIcon;
@@ -104,5 +119,30 @@ public class AddBoosterUI : MonoBehaviour, IMenu
             });
             yield return new WaitForSeconds(0.1f);
         }
+    }
+
+    public void SetupButton(BoosterButton boosterButton)
+    {
+        this.boosterButton = boosterButton;
+    }
+
+    public void OnClickClaim()
+    {
+        string instruction;
+        if(boosterButton.GetBooster().GetBoosterType() == Constants.BoosterType.AddMove)
+        {
+            instruction = "Use the Extra Move Booster to get extra moves!";
+        }
+        else if(boosterButton.GetBooster().GetBoosterType() == Constants.BoosterType.Shuffle)
+        {
+            instruction = "Use it to shuffle the board!";
+        }
+        else
+        {
+            instruction = "Use it to reveal a correct placement";
+        }
+        // StartCoroutine(AddBoosterEffect(boosterButton.gameObject.GetComponent<RectTransform>()));
+        TutorialManager.Instance.StartUseBoosterTutorial(boosterButton.gameObject, instruction);
+        uIManager.CloseAddBooster();
     }
 }

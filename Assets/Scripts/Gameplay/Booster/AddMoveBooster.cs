@@ -7,6 +7,7 @@ public class AddMoveBooster : MonoBehaviour ,IBooster
     private string boosterName = "Extra Moves";
     private Constants.BoosterType boosterType = Constants.BoosterType.AddMove;
     private int price = 900;
+    private int unlockLevel = 1;
     public Constants.BoosterType GetBoosterType() => boosterType;
     public void AddBooster(int amount)
     {
@@ -39,5 +40,10 @@ public class AddMoveBooster : MonoBehaviour ,IBooster
     public string GetName()
     {
         return boosterName;
+    }
+
+    public int GetUnlockLevel()
+    {
+        return unlockLevel;
     }
 }

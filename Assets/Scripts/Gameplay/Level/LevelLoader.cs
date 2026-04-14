@@ -36,6 +36,11 @@ public class LevelLoader : MonoBehaviour
 
     public int GetDifficultLevel(int lvl) => levelDatas[lvl].difficult;
 
+    public SlotController GetSlotByIndex(int index)
+    {
+        return slots[index];
+    }
+
     public void Setup(GameManager gameManager, SlotsManager slotsManager, BlocksManager blocksManager)
     {
         this.gameManager = gameManager;
@@ -73,6 +78,14 @@ public class LevelLoader : MonoBehaviour
         {
             slot.SetupIceSlot();
         }
+
+        if(DataManager.Instance.playerData.currentLevel == 0)
+        {
+            TutorialManager.Instance.SetupFirstTimeTutorial();
+            TutorialManager.Instance.StartFirstTimeTutorial();
+        }
+
+        // else if(Da)
     }
 
     public int GetCurrentLevelReward()

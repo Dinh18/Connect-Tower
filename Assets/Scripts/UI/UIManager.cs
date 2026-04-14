@@ -74,6 +74,8 @@ public class UIManager : MonoBehaviour
         // bool isIngame =(gameManager.GetCurrState() == GameManager.GameState.Playing || 
         //              gameManager.GetCurrState() == GameManager.GameState.Pause);
 
+        // if(isCurrentlyInGame() && TutorialManager.Instance.IsTutorialActive()) return;
+
         PushPopupToFront(setting);
 
         if(gameManager.GetCurrState() == GameManager.GameState.Playing)
@@ -114,9 +116,19 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void OpenAddBooster(AddBoosterUI addBoosterUI, BoosterButton caller, string header, string coins, Constants.BoosterType type)
+    public void OpenAddBooster(AddBoosterUI addBoosterUI, BoosterButton caller, string header, string coins, Constants.BoosterType type, bool isFirstTime)
     {
-        addBoosterUI.SetConfig(caller,header, coins, type);
+        // if(isFirstTime)
+        // {
+        //     buyButton.gameObject.SetActive(false);
+        //     claimButton.gameObject.SetActive(true);
+        // }
+        // else
+        // {
+        //     buyButton.gameObject.SetActive(true);
+        //     claimButton.gameObject.SetActive(false);
+        // }
+        addBoosterUI.SetConfig(caller,header, coins, type, isFirstTime);
         PushPopupToFront(addBoosterUI);
         if(gameManager.GetCurrState() == GameManager.GameState.Playing)
         {

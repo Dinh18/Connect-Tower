@@ -29,13 +29,13 @@ public class LevelCompletedUI : MonoBehaviour, IMenu
 
     public void Show()
     {
+        this.gameObject.SetActive(true);
         StartCoroutine(ShowCoroutine());
     }
 
     private IEnumerator ShowCoroutine()
     {
         AudioManager.Instance.PlayLVLWinAudio();
-        this.gameObject.SetActive(true);
 
         foreach(Transform child in header)
         {

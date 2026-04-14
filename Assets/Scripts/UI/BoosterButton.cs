@@ -10,6 +10,8 @@ public class BoosterButton : MonoBehaviour
     [SerializeField] Text countText;
     [SerializeField] GameObject addImage;
     [SerializeField] AddBoosterUI addBoosterUI;
+    [SerializeField] GameObject lockElements;
+    [SerializeField] GameObject unlockElements;
     void OnEnable()
     {
         boosterButton.onClick.AddListener(OnButtonClicked);
@@ -42,7 +44,20 @@ public class BoosterButton : MonoBehaviour
     public void Show()
     {
         int id = (int)booster.GetBoosterType();
+        if(id != ((int)booster.GetBoosterType())) return;
+        bool isUnlocked = DataManager.Instance.IsUnLockedBooster(id);
+        
+        lockElements.SetActive(!isUnlocked);
+        unlockElements.SetActive(isUnlocked);
+
+        if(DataManager.Instance.playerData.currentLevel == DataManager.Instance.GetUnclockedLevel(id) && DataManager.Instance.IsFirstTimeUserBooster(id))
+        {
+            addBoosterUI.SetupButton(this);
+            OpenAddBoosterPopup(true);
+        }
+
         UpdateCountText(id, DataManager.Instance.GetAmountOfBoosterByID(id));
+        
     }
 
     public void UpdateCountText(int id, int amount)
@@ -61,14 +76,25 @@ public class BoosterButton : MonoBehaviour
 
     public void OnButtonClicked()
     {
+        if (!DataManager.Instance.IsUnLockedBooster((int)booster.GetBoosterType()))
+        {
+            
+            Debug.Log("Booster này chưa mở khóa, không cho bấm!");
+            return;
+        }
+        int id = (int)booster.GetBoosterType();
+        if(id != ((int)booster.GetBoosterType())) return;
+        if(DataManager.Instance.IsFirstTimeUserBooster(id))
+        {
+            TutorialManager.Instance.EndBoosterTutorial(id);
+        }
         if(booster.GetNumsBooster() <= 0)
         {
-            string header = booster.GetName();
-            string coin = booster.GetPrice().ToString();
-            // addBoosterUI.SetConfig(this,header, coin, booster.GetBoosterType());
-            // uIManager.PushPopupToFront(addBoosterUI);
-            uIManager.OpenAddBooster(addBoosterUI, this, header, coin, booster.GetBoosterType());
-            return;
+            // string header = booster.GetName();
+            // string coin = booster.GetPrice().ToString();
+            // uIManager.OpenAddBooster(addBoosterUI, this, header, coin, booster.GetBoosterType());
+            // return;
+            OpenAddBoosterPopup(false);
         }
 
         if(GameManager.Instance.GetCurrState() == GameManager.GameState.Pause) return;
@@ -79,6 +105,15 @@ public class BoosterButton : MonoBehaviour
 
         boosterButton.interactable = true;
     }
+
+    private void OpenAddBoosterPopup(bool isFirstTime)
+    {
+        string header = booster.GetName();
+        string coin = booster.GetPrice().ToString();
+        uIManager.OpenAddBooster(addBoosterUI, this, header, coin, booster.GetBoosterType(), isFirstTime);
+        return;
+    }
+
 
     public void OnClickAddBoosterButton()
     {

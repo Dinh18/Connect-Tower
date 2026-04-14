@@ -5,6 +5,7 @@ public class ShuffleBooster : MonoBehaviour, IBooster
     private BoosterManager boosterManager;
     private string boosterName = "Shuffle";
     private int price = 800;
+    private int unlockLevel = 3;
     private Constants.BoosterType boosterType = Constants.BoosterType.Shuffle;
     public void AddBooster(int amount)
     {
@@ -41,5 +42,10 @@ public class ShuffleBooster : MonoBehaviour, IBooster
     public Constants.BoosterType GetBoosterType()
     {
         return boosterType;
+    }
+
+    public int GetUnlockLevel()
+    {
+        return unlockLevel;
     }
 }

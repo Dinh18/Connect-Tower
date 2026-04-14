@@ -159,7 +159,85 @@ public class DataManager : MonoBehaviour
                 AddCoins(120);
                 break;
         }
+        if(playerData.currentLevel == playerData.boosters[(int) Constants.BoosterType.AddMove].unlockedLevel)
+        {
+            UnlockBooster((int) Constants.BoosterType.AddMove);
+        }
+        if(playerData.currentLevel == playerData.boosters[(int) Constants.BoosterType.Shuffle].unlockedLevel)
+        {
+            UnlockBooster((int) Constants.BoosterType.Shuffle);
+        }
+        if(playerData.currentLevel == playerData.boosters[(int) Constants.BoosterType.Hint].unlockedLevel)
+        {
+            UnlockBooster((int) Constants.BoosterType.Hint);
+        }
         SaveGame();
         OnChangeLevel?.Invoke(playerData.currentLevel);
+    }
+
+    public void UnlockBooster(int id)
+    {
+        for(int i = 0; i < playerData.boosters.Count; i++)
+        {
+            if(playerData.boosters[i].id == id)
+            {
+                playerData.boosters[i].isUnlocked = true;
+                return;
+            }
+        }
+        Debug.Log("Khong tim thay booster");
+    }
+
+    public bool IsUnLockedBooster(int id)
+    {
+        for(int i = 0; i < playerData.boosters.Count; i++)
+        {
+            if(playerData.boosters[i].id == id)
+            {
+                // playerData.boosters[i].isUnlocked = true;
+                return playerData.boosters[i].isUnlocked;
+            }
+        }
+        Debug.Log("Khong tim thay booster");
+        return false;
+    }
+
+    public bool IsFirstTimeUserBooster(int id)
+    {
+        for(int i = 0; i < playerData.boosters.Count; i++)
+        {
+            if(playerData.boosters[i].id == id)
+            {
+                // playerData.boosters[i].isUnlocked = true;
+                return playerData.boosters[i].isFirstTime;
+            }
+        }
+        Debug.Log("Khong tim thay booster");
+        return false;
+    }
+
+    public void UsedBooster(int id)
+    {
+        for(int i = 0; i < playerData.boosters.Count; i++)
+        {
+            if(playerData.boosters[i].id == id)
+            {
+                playerData.boosters[i].isFirstTime = false;
+                return;
+            }
+        }
+        Debug.Log("Khong tim thay booster");
+    }
+
+    public int GetUnclockedLevel(int id)
+    {
+           for(int i = 0; i < playerData.boosters.Count; i++)
+        {
+            if(playerData.boosters[i].id == id)
+            {
+                return playerData.boosters[i].unlockedLevel;
+            }
+        }
+        return 0;
     }
 }

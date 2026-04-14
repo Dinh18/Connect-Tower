@@ -6,6 +6,7 @@ public class HintBooster : MonoBehaviour, IBooster
     private Constants.BoosterType boosterType = Constants.BoosterType.Hint;
     private string boosterName = "Hint";
     private int price = 900;
+    private int unlockLevel = 2;
     public Constants.BoosterType GetBoosterType() => boosterType;
 
     public void AddBooster(int amount)
@@ -43,5 +44,10 @@ public class HintBooster : MonoBehaviour, IBooster
     public string GetName()
     {
         return boosterName;
+    }
+
+    public int GetUnlockLevel()
+    {
+        return unlockLevel;
     }
 }
