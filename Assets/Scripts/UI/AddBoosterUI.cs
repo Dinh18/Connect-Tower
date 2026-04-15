@@ -116,6 +116,7 @@ public class AddBoosterUI : MonoBehaviour, IMenu
             {
                 icon.gameObject.SetActive(false);
                 icon.anchoredPosition = originPos;
+                AudioManager.Instance.PlayAddBoosterAudio();
             });
             yield return new WaitForSeconds(0.1f);
         }
@@ -144,5 +145,10 @@ public class AddBoosterUI : MonoBehaviour, IMenu
         // StartCoroutine(AddBoosterEffect(boosterButton.gameObject.GetComponent<RectTransform>()));
         TutorialManager.Instance.StartUseBoosterTutorial(boosterButton.gameObject, instruction);
         uIManager.CloseAddBooster();
+    }
+
+    public GameObject GetGameObject()
+    {
+        return this.gameObject;
     }
 }

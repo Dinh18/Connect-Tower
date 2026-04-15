@@ -76,7 +76,7 @@ public static class Constants
     public const string SUPERHARD_NEXT_LVL = "Sprite/SUPERHARD_LVL_NEXT_STAGE";
     public const string NORMAL_CURRENT_LVL = "Sprite/NORMAL_LVL_STAGE_CURRENT";
     public const string HARD_CURRENT_LVL = "Sprite/HARD_LVL_STAGE_CURRENT";
-    public const string SUPERHARD_CURRENT_LVL = "Sprite/HARD_LVL_STAGE_CURRENT";
+    public const string SUPERHARD_CURRENT_LVL = "Sprite/SUPERHARD_LVL_STAGE_CURRENT";
     public const string LEVEL_PREFAB = "Prefabs/LevelPrefab";
     public const string HARD_LVL_SKULL = "Sprite/HARD_LVL_SKULL";
     public const string SUPERHARD_LVL_SKULL = "Sprite/SUPERHARD_LVL_SKULL";
@@ -85,4 +85,8 @@ public static class Constants
     // Heart Icon
     public const string ADD_HEART_ICON = "Sprite/LIVES_ICON_0";
     public const string HEART_ICON = "Sprite/LIVE_ICON";
+    // Progress bar
+    public const string NORMAL_PROGRESS = "Sprite/PROGRESS_BAR_SLIDER";
+    public const string HARD_PROGRESS = "Sprite/PROGRESS_BAR_HARD_SLIDER";
+    public const string SUPER_HARD_PROGRESS = "Sprite/PROGRESS_BAR_SUPERHARD_SLIDER";
 }

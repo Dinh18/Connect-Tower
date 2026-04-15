@@ -96,8 +96,11 @@ Assets/Scripts/
    StackHolder.cs
    TopicHeaderSlot.cs
   Tutorials/
+   FirstTimePlayHiddenBlock.cs
    FirstTimePlayTutorial.cs
    FirstTimeUseBooster.cs
+   TutorialDimBackground.cs
+   TutorialTask.cs
  UI/
   AddBoosterUI.cs
   AddMoveEffect.cs
@@ -119,12 +122,15 @@ Assets/Scripts/
   LoadingImage.cs
   MainMenuUIManager.cs
   PlayButton.cs
+  PopupAnimation.cs
   RefillHeartPopup.cs
   SafeAreaFitter.cs
   SettingPopup.cs
   ShopButton.cs
   ShopPanel.cs
   ShuffleEffect.cs
+  TextProOnACurve.cs
+  TextProOnAnArch.cs
   UIManager.cs
  Utilities/Constants.cs
 Temp/obj/Assembly-CSharp/.NETStandard,Version=v2.1.AssemblyAttributes.cs

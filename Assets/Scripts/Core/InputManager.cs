@@ -17,6 +17,11 @@ public class InputManager : MonoBehaviour
     {
         SelectSlot();
     }
+    public void Setup()
+    {
+        selectedSlot = null;
+        selected = false;
+    }
     public void SelectSlot()
     {
         if(GameManager.Instance.GetCurrState() != GameManager.GameState.Playing) return;
@@ -40,7 +45,8 @@ public class InputManager : MonoBehaviour
                             if (TutorialManager.Instance.currentTutorial == TutorialManager.TutorialType.GridPlay)
                             {
                                 // Đang dạy xếp gạch -> Nộp bài để sếp tổng chấm
-                                if (!TutorialManager.Instance.ProcessTutorialClick(slot)) return;
+                                if(!TutorialManager.Instance.ProcessTutorialClick(slot)) return;
+                                // if(!TutorialManager.Instance.ProcessHiddenBlockTutorialClick(slot)) return;
                             }
                             else
                             {

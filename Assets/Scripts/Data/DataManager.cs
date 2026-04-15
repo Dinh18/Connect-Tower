@@ -86,6 +86,7 @@ public class DataManager : MonoBehaviour
             {
                 playerData.boosters[i].count--;
                 SaveGame();
+                Debug.Log("Use Booster");
                 OnChangeCountBooster?.Invoke(id, playerData.boosters[i].count);
                 return;
             }
@@ -101,6 +102,7 @@ public class DataManager : MonoBehaviour
                 playerData.boosters[i].count += amount;
                 UseCoins(price);
                 SaveGame();
+                Debug.Log("Add Booster");
                 OnChangeCountBooster?.Invoke(id, playerData.boosters[i].count);
                 return;
             }
@@ -111,12 +113,14 @@ public class DataManager : MonoBehaviour
     {
         playerData.totalCoins += amount;
         SaveGame();
+        Debug.Log("Add Coins");
         OnChangeCoins?.Invoke(playerData.totalCoins);
     }
     public void UseCoins(int amount)
     {
         playerData.totalCoins -= amount;
         SaveGame();
+        Debug.Log("USe Coins");
         OnChangeCoins?.Invoke(playerData.totalCoins);
     }
     public void UseHeart(string nextHeartTime)
@@ -234,6 +238,39 @@ public class DataManager : MonoBehaviour
             if(playerData.boosters[i].id == id)
             {
                 return playerData.boosters[i].unlockedLevel;
+            }
+        }
+        return 0;
+    }
+    public void PlayedMechanic(int id)
+    {
+        foreach(var mechanic in playerData.mechanics)
+        {
+            if(mechanic.id == id)
+            {
+                mechanic.isFirstTimePlay = false;
+            }
+        }
+    }
+    public bool IsFirstTimePlayMechanic(int id)
+    {
+        foreach(var mechanic in playerData.mechanics)
+        {
+            if(mechanic.id == id && playerData.currentLevel == mechanic.levelUnclock && mechanic.isFirstTimePlay)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public int GetLevelUnlockMechanic(int id)
+    {
+        foreach(var mechanic in playerData.mechanics)
+        {
+            if(mechanic.id == id)
+            {
+                return mechanic.levelUnclock;
             }
         }
         return 0;

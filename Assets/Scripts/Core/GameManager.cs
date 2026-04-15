@@ -11,7 +11,8 @@ public class GameManager : MonoBehaviour
         Playing,
         Pause,
         Win,
-        Lose
+        Lose,
+        Resume
     }
     private int moves;
     private int maxMoves;
@@ -23,6 +24,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private BlocksManager blocksManager;
     [SerializeField] private HeartManager heartManager;
     [SerializeField] private CameraController cameraController;
+    [SerializeField] private InputManager inputManager;
     public static event Action<int> OnChangeMoves;
     void Awake()
     {
@@ -67,9 +69,13 @@ public class GameManager : MonoBehaviour
             {
                 ChangeState(GameState.Lose);
                 // DataManager.Instance.UseHeart();
-                heartManager.UseHeart();
+                // heartManager.UseHeart();
             }
         }
+    }
+    public void UseHeart()
+    {
+        heartManager.UseHeart();
     }
     public void AddMove(int moves)
     {
@@ -89,6 +95,7 @@ public class GameManager : MonoBehaviour
             if(prevState != GameState.Pause)
             {
                 levelLoader.LoadLevel();
+                inputManager.Setup();
             }
         }
 

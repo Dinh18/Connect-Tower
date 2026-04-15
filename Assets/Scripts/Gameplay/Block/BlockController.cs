@@ -66,6 +66,7 @@ public class BlockController : MonoBehaviour
         hideVFX.SetActive(false);
         difVFX.Stop();
         ResetOutLint();
+        ChangeState(BlockState.None);
         if(slot.slotType == SlotController.SlotType.Ice)
         {
             ShowIceImage();
@@ -75,6 +76,7 @@ public class BlockController : MonoBehaviour
             ChangeMaterialOutLine(Constants.MATERIAL_COLOR_HIDE_PATH);
 
             itemImageBlock.AddImage(hideImage);
+            // if(DataManager.Instance.IsFirstTimePlayMechanic(0)) TutorialManager.Instance.StartMechanicTutorial(0);
             isRevealed = false;
         }
         else
@@ -99,6 +101,7 @@ public class BlockController : MonoBehaviour
         
         hideVFX.SetActive(true);
         isRevealed = true;
+        AudioManager.Instance.PlayHideBlockAudio();
     }
 
     public void ChangeMaterialOutLine(string materialPath)

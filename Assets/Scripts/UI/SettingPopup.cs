@@ -12,6 +12,7 @@ public class SettingPopup : MonoBehaviour, IMenu
     [SerializeField] private GameObject hapticInActive;
     [SerializeField] private Button soundButton;
     [SerializeField] private Button hapticButton;
+    // private PopupAnimation popupAnimation;
     // void OnEnable()
     // {
     //     soundButton.onClick.AddListener(OnClickSoundButton);
@@ -23,6 +24,7 @@ public class SettingPopup : MonoBehaviour, IMenu
     // }
     public void Hide()
     {
+        // popupAnimation.CloseAnimation(0.3f);
         this.gameObject.SetActive(false);
     }
 
@@ -43,6 +45,7 @@ public class SettingPopup : MonoBehaviour, IMenu
         {
             closeButton.onClick.AddListener(uIManager.CloseSetting);
         }
+        // popupAnimation = this.gameObject.AddComponent<PopupAnimation>();
     }
 
     public void Show()
@@ -69,5 +72,10 @@ public class SettingPopup : MonoBehaviour, IMenu
     {
         if(HapticManager.Instance.ToggleHaptic()) hapticInActive.gameObject.SetActive(false);
         else hapticInActive.gameObject.SetActive(true);
+    }
+
+    public GameObject GetGameObject()
+    {
+        return this.gameObject;
     }
 }

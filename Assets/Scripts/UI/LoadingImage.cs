@@ -18,4 +18,8 @@ public class LoadingImage : MonoBehaviour, IMenu
         this.gameObject.SetActive(true);
     }
 
+    public GameObject GetGameObject()
+    {
+        return this.gameObject;
+    }
 }

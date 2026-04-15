@@ -32,6 +32,8 @@ public class RefillHeartPopup : MonoBehaviour, IMenu
     public void Setup(UIManager uIManager)
     {
         this.uIManager = uIManager;
+        
+        
     }
 
     public void Show()
@@ -71,9 +73,17 @@ public class RefillHeartPopup : MonoBehaviour, IMenu
         {
             this.mainMenuUIManager = mainMenuUIManager; 
         }
+
+        // refillButton.onClick.RemoveAllListeners();
+        // refillButton.onClick.AddListener(OnClickRefillHeart);
     }
     private void UpdateHeardCountText(int amount)
     {
         heardCountText.text = amount.ToString();
+    }
+
+    public GameObject GetGameObject()
+    {
+        return this.gameObject;
     }
 }

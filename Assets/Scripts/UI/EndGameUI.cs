@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using DG.Tweening;
 using UnityEngine;
@@ -7,6 +8,8 @@ public class EndGameUI : MonoBehaviour
     [Header("Panel Refrences")]
     private LevelCompletedUI levelCompleted;
     private LevelFailedUI levelFailed;
+    public static event Action<bool> OnLoadLevel;
+    private UIManager uIManager;
 
     void Awake()
     {
@@ -34,6 +37,7 @@ public class EndGameUI : MonoBehaviour
 
         levelCompleted.Setup(uIManager);
         levelFailed.Setup(uIManager);
+        this.uIManager = uIManager;
     }
     
     public void ShowLevelCompletedPanel()
@@ -44,7 +48,6 @@ public class EndGameUI : MonoBehaviour
         ShowDimImage();
 
         levelCompleted.Show();
-        
     }
     
     public void ShowLevelFailedPanel()

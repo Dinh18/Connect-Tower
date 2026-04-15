@@ -33,6 +33,11 @@ public class BoosterButton : MonoBehaviour
 
     }
 
+    public AddBoosterUI GetAddBooster()
+    {
+        return addBoosterUI;
+    }
+
     public IBooster GetBooster() => booster;
 
     public void Setup(UIManager uIManager)

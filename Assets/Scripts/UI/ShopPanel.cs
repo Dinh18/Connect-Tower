@@ -39,6 +39,9 @@ public class ShopPanel : MonoBehaviour, IMenu
         closeButton.gameObject.SetActive(false);
         
     }
-    
 
+    public GameObject GetGameObject()
+    {
+        return this.gameObject;
+    }
 }

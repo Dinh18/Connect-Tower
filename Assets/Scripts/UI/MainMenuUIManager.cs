@@ -54,6 +54,7 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
     {
         this.uIManager = uIManager;
         refillHeartPopup.Setup(uIManager);
+        refillHeartPopup.ConfigMainMenu(this);
 
         oldCoins = DataManager.Instance.playerData.totalCoins;
         coinText.text = DataManager.Instance.playerData.totalCoins.ToString();
@@ -89,7 +90,7 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         homeBackGround.Select();
         uIManager.CloseShop();   
         shopBackGround.UnSelect();
-        Debug.Log("Ngu");
+        // Debug.Log("Ngu");
     }
     public void OnClickShop()
     {
@@ -99,7 +100,19 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
     }
     private void OnClickPlay()
     {
-        GameManager.Instance.ChangeState(GameManager.GameState.Playing);
+        if(DataManager.Instance.playerData.heart > 0)
+        {
+            GameManager.Instance.ChangeState(GameManager.GameState.Playing);
+        }
+        else
+        {
+            OpenRefillHeart();
+        }
+    }
+
+    public void OpenRefillHeart()
+    {
+        uIManager.PushPopupToFront(refillHeartPopup, refillHeartPopup.GetComponent<RectTransform>());
     }
 
     public void AddCoin(int winAmount)
@@ -183,7 +196,7 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         if(enableAddHeartButton)
         {
             refillHeartPopup.ConfigMainMenu(this);
-            uIManager.PushPopupToFront(refillHeartPopup, refillHeartPopup.transform);
+            OpenRefillHeart();
         }
     }
 
@@ -200,5 +213,10 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         coinText.text = oldCoins.ToString();
         levelUIManager.Show();
         OnClickHome();
+    }
+
+    public GameObject GetGameObject()
+    {
+        return this.gameObject;
     }
 }

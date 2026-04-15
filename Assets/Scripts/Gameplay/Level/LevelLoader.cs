@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Data.Common;
 using UnityEngine;
 /*
 - số lượng slot hàng 1, hàng 2
@@ -85,7 +86,16 @@ public class LevelLoader : MonoBehaviour
             TutorialManager.Instance.StartFirstTimeTutorial();
         }
 
-        // else if(Da)
+        foreach(var mechanic in DataManager.Instance.playerData.mechanics)
+        {
+            if(DataManager.Instance.IsFirstTimePlayMechanic(mechanic.id))
+            {
+                TutorialManager.Instance.StartMechanicTutorial(mechanic.id);
+            }
+        }
+
+
+
     }
 
     public int GetCurrentLevelReward()

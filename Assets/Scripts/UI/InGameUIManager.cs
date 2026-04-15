@@ -18,7 +18,13 @@ public class InGameUIManager : MonoBehaviour, IMenu
     [SerializeField] private Slider finishedSlotsSlider;
     [SerializeField] private Text progressText;
     [SerializeField] private Image levelDifficultImgae;
+    [SerializeField] private Image levelDifficultProgressImage;
     [SerializeField] private Text levelDifficultLevelText;
+    private Sprite hardLevelSprite;
+    private Sprite superLevelSprite;
+    private Sprite normalLevelProgressSprite;
+    private Sprite hardLevelProgressSprite;
+    private Sprite superLevelProgressSprite;
     [Header("Move Count Text Setting")]
     [SerializeField] private Color normalColor = Color.white;
     [SerializeField] private Color warningColor = Color.red;
@@ -30,6 +36,38 @@ public class InGameUIManager : MonoBehaviour, IMenu
     [Header("Booster UI References")]
     private BoosterButton[] boosterButtons;
     private UIManager uIManager;
+    private Sprite GetLevelSprite(LevelLoader.GameDifficult gameDifficult)
+    {
+        if(gameDifficult == LevelLoader.GameDifficult.Hard)
+        {
+            if(hardLevelSprite == null) hardLevelSprite = Resources.Load<Sprite>(Constants.HARD_TEXT_UI);
+            return hardLevelSprite;
+        }
+        else if(gameDifficult == LevelLoader.GameDifficult.VeryHard)
+        {
+            if(superLevelSprite == null) superLevelSprite = Resources.Load<Sprite>(Constants.SUPERHARD_TEXT_UI);
+            return superLevelSprite;
+        }
+        else return null;
+    } 
+    private Sprite GetLevelProgressSprite(LevelLoader.GameDifficult gameDifficult)
+    {
+        if(gameDifficult == LevelLoader.GameDifficult.Easy)
+        {
+            if(normalLevelProgressSprite == null) normalLevelProgressSprite = Resources.Load<Sprite>(Constants.NORMAL_PROGRESS);
+            return normalLevelProgressSprite;
+        }
+        else if(gameDifficult == LevelLoader.GameDifficult.Hard)
+        {
+            if(hardLevelProgressSprite == null) hardLevelProgressSprite = Resources.Load<Sprite>(Constants.HARD_PROGRESS);
+            return hardLevelProgressSprite;
+        }
+        else
+        {
+            if(superLevelProgressSprite == null) superLevelProgressSprite = Resources.Load<Sprite>(Constants.SUPER_HARD_PROGRESS);
+            return superLevelProgressSprite;
+        }
+    }
     void OnEnable()
     {
         GameManager.OnChangeMoves+=UpdateMovesText;
@@ -83,17 +121,28 @@ public class InGameUIManager : MonoBehaviour, IMenu
         UpdateFinishedSlotsSlider(0, LevelLoader.Instance.GetNumsTopic());
         UpdateProgressText(0, LevelLoader.Instance.GetNumsTopic());
         
-        if(LevelLoader.Instance.gameDifficult == LevelLoader.GameDifficult.Hard)
+        SetupProgressBar(LevelLoader.Instance.gameDifficult);
+        
+        StopWarningFlash();
+        Debug.Log("InGame");
+
+    }
+
+    private void SetupProgressBar(LevelLoader.GameDifficult gameDifficult)
+    {
+        if(gameDifficult == LevelLoader.GameDifficult.Hard)
         {
-            levelDifficultImgae.sprite = Resources.Load<Sprite>(Constants.HARD_TEXT_UI);
+            levelDifficultImgae.sprite = GetLevelSprite(gameDifficult);
+            levelDifficultProgressImage.sprite = GetLevelProgressSprite(gameDifficult);
             levelDifficultLevelText.text = "Hard";
 
             levelDifficultImgae.gameObject.SetActive(true);
             levelDifficultLevelText.gameObject.SetActive(true);
         }
-        else if(LevelLoader.Instance.gameDifficult == LevelLoader.GameDifficult.VeryHard)
+        else if(gameDifficult == LevelLoader.GameDifficult.VeryHard)
         {
-            levelDifficultImgae.sprite = Resources.Load<Sprite>(Constants.SUPERHARD_TEXT_UI);
+            levelDifficultImgae.sprite = GetLevelSprite(gameDifficult);
+            levelDifficultProgressImage.sprite = GetLevelProgressSprite(gameDifficult);
             levelDifficultLevelText.text = "Super Hard";
 
             levelDifficultImgae.gameObject.SetActive(true);
@@ -101,15 +150,10 @@ public class InGameUIManager : MonoBehaviour, IMenu
         }
         else
         {
+            levelDifficultProgressImage.sprite = GetLevelProgressSprite(gameDifficult);
             levelDifficultImgae.gameObject.SetActive(false);
             levelDifficultLevelText.gameObject.SetActive(false);
-
-            // movesText.color = normalColor;
-            // movesText.transform.localScale = Vector3.one; 
-            StopWarningFlash();
-            Debug.Log("InGame");
         }
-
     }
 
     public void UpdateMovesText(int moves)
@@ -150,30 +194,6 @@ public class InGameUIManager : MonoBehaviour, IMenu
         isFlashing = false;
     }
 
-    // private IEnumerator FlashRoutine()
-    // {
-    //     while(true)
-    //     {
-    //         movesText.color = normalColor;
-    //         movesText.fontSize = normalFontSize;
-    //         yield return new WaitForSeconds(flashSpeed);
-
-    //         movesText.color = warningColor;
-    //         movesText.fontSize = warningFontSize;
-    //         yield return new WaitForSeconds(flashSpeed);
-    //     }
-    // }
-
-    // private void StopFlashing()
-    // {
-    //     if(flashCoroutine != null)
-    //     {
-    //         StopCoroutine(flashCoroutine);
-    //         flashCoroutine = null;
-    //     }
-    //     movesText.color = normalColor;
-    //     movesText.fontSize= normalFontSize;
-    // }
 
     private void UpdateFinishedSlotsSlider(int finishedSlots, int numSlots)
     {
@@ -191,5 +211,8 @@ public class InGameUIManager : MonoBehaviour, IMenu
         coinsText.text = coins.ToString();
     }
 
-
+    public GameObject GetGameObject()
+    {
+        return this.gameObject;
+    }
 }

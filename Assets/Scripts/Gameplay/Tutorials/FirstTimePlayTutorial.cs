@@ -2,16 +2,7 @@ using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
-public class TutorialTask
-{
-    public SlotController slot;
-    public string instruction;
-    public TutorialTask(SlotController slot, string instruction)
-    {
-        this.slot = slot;
-        this.instruction = instruction;
-    }
-}
+
 public class FirstTimePlayTutorial : MonoBehaviour
 {
     public List<TutorialTask> sequence;

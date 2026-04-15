@@ -131,10 +131,10 @@ public class SlotController : MonoBehaviour
                 {
                     foreach(BlockController block in otherSlot.blocks)
                     {
-                        if(block.GetCurrState() == BlockController.BlockState.Selected)
-                        {
-                            block.PlayErrorShake();
-                        }
+                        // if(block.GetCurrState() == BlockController.BlockState.Selected)
+                        // {
+                        //     block.PlayErrorShake();
+                        // }
                     }
                     return false;
                 } 
@@ -161,6 +161,11 @@ public class SlotController : MonoBehaviour
             blockCount++;
         }
         blocksToMove = Math.Min(4 - blocks.Count, blockCount);
+        if(blocksToMove <= 0)
+        {
+            // UnSelect();
+            return false;
+        }
         // Vị trí bắt đầu của block đầu tiên được di chuyển
         float startY = (blocks.Count == 0) ? stackAnchor.position.y : blocks.Peek().transform.position.y + height;
 

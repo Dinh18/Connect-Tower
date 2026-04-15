@@ -14,6 +14,8 @@ public class UIManager : MonoBehaviour
     [SerializeField] private SettingPopup setting;
     [SerializeField] private ShopPanel shop;
     [SerializeField] private LoadingImage loadingImage;
+    [SerializeField] private RefillHeartPopup refillHeartPopup;
+
     private Stack<IMenu> popupStack = new Stack<IMenu>();
     // [SerializeField] private ShopPanel shopPanel;
     public Button settingButton;
@@ -60,7 +62,7 @@ public class UIManager : MonoBehaviour
                 endGameUI.ShowLevelFailedPanel();
                 break;
             case GameManager.GameState.Playing:
-                if(gameManager.GetPrevState() != GameManager.GameState.Pause)
+                if(gameManager.GetPrevState() != GameManager.GameState.Pause && gameManager.GetPrevState() != GameManager.GameState.Lose)
                 {
                     ClearPopupStack();
                     ingame.Show();
@@ -70,6 +72,8 @@ public class UIManager : MonoBehaviour
             case GameManager.GameState.Pause:
                 // setting.Show();
                 break;
+            case GameManager.GameState.Resume:
+                break;
 
         }
     }
@@ -77,6 +81,40 @@ public class UIManager : MonoBehaviour
     {
         ClearPopupStack();
         gameManager.ChangeState(GameManager.GameState.MainMenu);
+        if(gameManager.GetPrevState() == GameManager.GameState.Lose)
+        {
+            gameManager.UseHeart();
+        }
+    }
+    public void OnClickAddMoveToContinue()
+    {
+        if(DataManager.Instance.playerData.totalCoins >= 900)
+        {
+            endGameUI.Hide();
+            gameManager.AddMove(5);
+            gameManager.ChangeState(GameManager.GameState.Pause);
+            gameManager.ChangeState(GameManager.GameState.Playing);
+            DataManager.Instance.UseCoins(900);
+        }
+        else
+        {
+            OpenShop();
+        }   
+    }
+    public void OnClickTryAgain()
+    {
+        gameManager.UseHeart();
+        Debug.Log("heart " + DataManager.Instance.playerData.heart);
+        if(DataManager.Instance.playerData.heart > 0)
+        {    
+            gameManager.ChangeState(GameManager.GameState.Playing);
+        }
+        else
+        {
+            ClearPopupStack();
+            gameManager.ChangeState(GameManager.GameState.MainMenu);
+            mainMenu.OpenRefillHeart();
+        }
     }
     public void OpenSetting()
     {
@@ -119,10 +157,17 @@ public class UIManager : MonoBehaviour
     public void CloseShop()
     {
         PopPopup();
+        if(gameManager.GetCurrState() == GameManager.GameState.MainMenu) return;
+        if(gameManager.GetPrevState() == GameManager.GameState.Lose)
+        {
+            gameManager.ChangeState(GameManager.GameState.Lose);
+            return;
+        }
         if(popupStack.Count == 0 && gameManager.GetCurrState() == GameManager.GameState.Pause)
         {
             gameManager.ChangeState(GameManager.GameState.Playing);
         }
+        
     }
 
     public void OpenAddBooster(AddBoosterUI addBoosterUI, BoosterButton caller, string header, string coins, Constants.BoosterType type, bool isFirstTime)
@@ -202,6 +247,7 @@ public class UIManager : MonoBehaviour
         if(popupStack.Count > 0)
         {
             IMenu currPopup = popupStack.Pop();
+            // goPopup.DOScale(Vector3.zero, 0.3f);
             currPopup.Hide();
         }
 

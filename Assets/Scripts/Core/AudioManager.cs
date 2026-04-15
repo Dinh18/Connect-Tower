@@ -21,6 +21,8 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip PopMoved_Audio_4;
     [SerializeField] private AudioClip slotFinishedAudio;
     [SerializeField] private AudioClip shuffleAudio;
+    [SerializeField] private AudioClip hideBlockAudio;
+    [SerializeField] private AudioClip addBoosterAudio;
     private bool isSoundOn;
     void Awake()
     {
@@ -47,6 +49,8 @@ public class AudioManager : MonoBehaviour
     public void PlayMoveWooshAudio() => PlaySFX(moveWooshAudio);
     public void PlaySlotFinishedAudio() => PlaySFX(slotFinishedAudio);
     public void PlayShuffleAudio() => PlaySFX(shuffleAudio);
+    public void PlayHideBlockAudio() => PlaySFX(hideBlockAudio);
+    public void PlayAddBoosterAudio() => PlaySFX(addBoosterAudio);
     public void PlayPopMovedAudio(int count)
     {
         switch(count)

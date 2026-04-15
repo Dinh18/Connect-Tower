@@ -19,8 +19,8 @@ MonoBehaviour:
   row1: 4
   row2: 3
   slots:
-  - slotType: 1
-    questionTopic: {fileID: 11400000, guid: 86aa26c66b53e6a40aae465960b1b8b0, type: 2}
+  - slotType: 0
+    questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 6f336c99264b55c4baeac5d504d47d3f, type: 2}
@@ -58,7 +58,7 @@ MonoBehaviour:
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 74f9d22de1d401247a9bda634d6463d0, type: 2}
       indexSprite: 0
-  - slotType: 2
+  - slotType: 0
     questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0

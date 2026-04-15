@@ -46,4 +46,9 @@ public class LevelCompletedUI : MonoBehaviour, IMenu
         } 
         
     }
+
+    public GameObject GetGameObject()
+    {
+        return this.gameObject;
+    }
 }
