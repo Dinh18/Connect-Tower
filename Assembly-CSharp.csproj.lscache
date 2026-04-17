@@ -52,9 +52,6 @@ TemporaryDependencyNodeTargetIdentifier=netstandard2.1
 /warnaserror+:NU1605
 
 [sourceFiles]
-Assets/MOST_HapticFeedback/Scripts/
- HapticsExample.cs
- MOST_HapticFeedback.cs
 Assets/Scripts/Core/
  AudioManager.cs
  CameraController.cs
@@ -115,6 +112,7 @@ Assets/Scripts/
   IBoosterEffect.cs
   IMenu.cs
   InGameUIManager.cs
+  JuicyLoadingText.cs
   LevelCompletedUI.cs
   LevelFailedUI.cs
   LevelUIController.cs
@@ -392,6 +390,9 @@ Library/PackageCache/
  com.coffee.ui-particle@92fb173507ec/Runtime/Coffee.UIParticle.R.dll
  com.unity.ext.nunit@031a54704bff/net40/unity-custom/nunit.framework.dll
 Library/ScriptAssemblies/
+ CandyCoded.HapticFeedback.Android.dll
+ CandyCoded.HapticFeedback.dll
+ CandyCoded.HapticFeedback.iOS.dll
  Coffee.UIParticle.dll
  Unity.2D.Sprite.AIIntegration.Editor.dll
  Unity.2D.Sprite.Editor.dll
@@ -400,11 +401,7 @@ Library/ScriptAssemblies/
  Unity.VisualStudio.Editor.dll
  UnityEditor.UI.dll
  UnityEngine.UI.dll
-Temp/bin/Debug/
- Assembly-CSharp-firstpass.dll
- NaughtyAttributes.Core.dll
- NaughtyAttributes.Editor.dll
- NaughtyAttributes.Test.dll
+Temp/bin/Debug/Assembly-CSharp-firstpass.dll
 
 [analyzerReferences]
 ../Unity/Hub/Editor/6000.2.14f1/Editor/Data/Tools/Unity.SourceGenerators/

@@ -17,6 +17,7 @@ public class AddBoosterUI : MonoBehaviour, IMenu
     [SerializeField] private Sprite shuffleIcon;
     [SerializeField] private Sprite hintIcon;
     [SerializeField] private List<RectTransform> boosterIcon;
+    [SerializeField] private GameObject dimImage;
     private BoosterButton boosterButton;
     private UIManager uIManager;
     // void OnEnable()
@@ -41,6 +42,7 @@ public class AddBoosterUI : MonoBehaviour, IMenu
     public void Show()
     {
         this.gameObject.SetActive(true);
+        dimImage.SetActive(true);
         // GameManager.Instance.ChangeState(GameManager.GameState.Pause);
     }
 
@@ -86,6 +88,7 @@ public class AddBoosterUI : MonoBehaviour, IMenu
     {
         // GameManager.Instance.ChangeState(GameManager.GameState.Playing);
         this.gameObject.SetActive(false);
+        dimImage.SetActive(false);
     }
 
     public void OnClickClose()

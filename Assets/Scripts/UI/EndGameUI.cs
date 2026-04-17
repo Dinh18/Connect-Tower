@@ -8,7 +8,7 @@ public class EndGameUI : MonoBehaviour
     [Header("Panel Refrences")]
     private LevelCompletedUI levelCompleted;
     private LevelFailedUI levelFailed;
-    public static event Action<bool> OnLoadLevel;
+    [SerializeField] private Transform dimImage;
     private UIManager uIManager;
 
     void Awake()
@@ -45,24 +45,29 @@ public class EndGameUI : MonoBehaviour
 
         levelFailed.Hide();
 
-        ShowDimImage();
+        // ShowDimImage();
+        // dimImage.Set
+        this.gameObject.SetActive(true);
 
         levelCompleted.Show();
     }
+
     
     public void ShowLevelFailedPanel()
     {
         AudioManager.Instance.PlayLVLLoseAudio();
-        ShowDimImage();
+        // ShowDimImage();
+        this.gameObject.SetActive(true);
         levelCompleted.Hide();
         levelFailed.Show();
+        
     }
     private void ShowDimImage()
     {
         this.gameObject.SetActive(true);
-        this.transform.localScale = Vector3.zero;
-        this.transform.DOKill();
-        this.transform.DOScale(1, 0.5f).SetEase(Ease.OutBack);
+        dimImage.transform.DOKill();
+        dimImage.transform.localScale = Vector3.zero;
+        dimImage.transform.DOScale(1, 0.5f).SetEase(Ease.OutBack);
     }
     public void Hide()
     {

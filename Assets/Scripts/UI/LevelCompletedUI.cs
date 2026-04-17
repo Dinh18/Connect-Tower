@@ -8,6 +8,7 @@ public class LevelCompletedUI : MonoBehaviour, IMenu
     private UIManager uIManager;
     [SerializeField] private Button continueButton;
     [SerializeField] private Transform header;
+    [SerializeField] private Transform coinImage;
     void OnEnable()
     {
         continueButton.onClick.AddListener(uIManager.OnClickBackHome);
@@ -37,14 +38,20 @@ public class LevelCompletedUI : MonoBehaviour, IMenu
     {
         AudioManager.Instance.PlayLVLWinAudio();
 
+        coinImage.DOKill();
+        coinImage.localScale = Vector3.zero;
+        coinImage.DOScale(1, 0.5f).SetEase(Ease.OutBack);
         foreach(Transform child in header)
         {
             child.DOKill();
             child.localScale = Vector3.zero;
-            child.DOScale(1, 1f).SetEase(Ease.OutBack);
+        }
+
+        foreach(Transform child in header)
+        {
+            child.DOScale(1, 0.5f).SetEase(Ease.OutBack);
             yield return new WaitForSeconds(0.1f);
-        } 
-        
+        }  
     }
 
     public GameObject GetGameObject()

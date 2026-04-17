@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
@@ -125,10 +126,6 @@ public class BlockController : MonoBehaviour
         difVFX.Play();
     }
 
-    private void GetMaterial(string materialPath)
-    {
-        
-    }
 
     public void SetColorOutLine()
     {
@@ -205,17 +202,18 @@ public class BlockController : MonoBehaviour
 
     public void SelectedEffect()
     {
-        // visual.DOLocalRotate(new Vector3(0, 0, 6f), 0.35f)
-        //         .SetLoops(-1, LoopType.Yoyo) 
-        //         .SetEase(Ease.InOutSine);   
-        // visual.DOLocalMoveY(0.08f, 0.35f)
-        //         .SetLoops(-1, LoopType.Yoyo)
-        //         .SetEase(Ease.InOutSine);
-        visual.DOLocalRotate(new Vector3(0, 0, 6f), 0.35f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
-        visual.DOLocalMoveY(0.08f, 0.35f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
+        // HapticManager.Instance.PlayHaptic();
+        visual.DOKill();
+        visual.localPosition = Vector3.zero;
+        visual.localRotation = Quaternion.identity;
+        
+        visual.DOLocalRotate(new Vector3(0, 0, 6f), 0.35f)
+              .SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
+        visual.DOLocalMoveY(0.08f, 0.35f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);  
     }
     public void FallEffect(int index)
     {
+        // HapticManager.Instance.PlayHaptic();
         visual.DOKill(false); 
 
         Vector3 baseLocalPos = Vector3.zero; // Vì visual là con, nên đưa về local zero
@@ -226,10 +224,13 @@ public class BlockController : MonoBehaviour
         seq.Append(visual.DOLocalJump(baseLocalPos, jumpPower, 1, 0.4f));
         seq.Append(visual.DOPunchPosition(new Vector3(0, 0.2f, 0), 0.2f, 1, 0));
     }
-    public void PlayErrorShake()
+    public void PlayErrorShake(Action onCompleteCallBack = null)
     {
+        HapticManager.Instance.PlayHaptic();
         visual.DOKill(false);
         visual.localPosition = Vector3.zero; // Reset về gốc trước khi lắc
-        visual.DOShakePosition(0.3f, new Vector3(0.1f, 0f, 0f), 15);
+        visual.DOShakePosition(0.3f, new Vector3(0.1f, 0f, 0f), 15).OnComplete(() =>{
+            onCompleteCallBack?.Invoke();
+        });
     }
 }

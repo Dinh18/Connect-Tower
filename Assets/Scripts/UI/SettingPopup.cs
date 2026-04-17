@@ -12,6 +12,7 @@ public class SettingPopup : MonoBehaviour, IMenu
     [SerializeField] private GameObject hapticInActive;
     [SerializeField] private Button soundButton;
     [SerializeField] private Button hapticButton;
+    [SerializeField] private GameObject dimImage;
     // private PopupAnimation popupAnimation;
     // void OnEnable()
     // {
@@ -26,6 +27,7 @@ public class SettingPopup : MonoBehaviour, IMenu
     {
         // popupAnimation.CloseAnimation(0.3f);
         this.gameObject.SetActive(false);
+        dimImage.SetActive(false);
     }
 
 
@@ -51,6 +53,7 @@ public class SettingPopup : MonoBehaviour, IMenu
     public void Show()
     {
         this.gameObject.SetActive(true);
+        dimImage.SetActive(true);
 
         if(backHomeButton != null)
         {
@@ -58,8 +61,11 @@ public class SettingPopup : MonoBehaviour, IMenu
             backHomeButton.gameObject.SetActive(inGame);
         }
 
-        if(AudioManager.Instance.IsSoundOn()) soundInActive.SetActive(false); 
-        if(HapticManager.Instance.IsHapticOn()) hapticInActive.gameObject.SetActive(false);
+        if(AudioManager.Instance.IsSoundOn()) soundInActive.SetActive(false);
+        else soundInActive.SetActive(true);
+        if(HapticManager.Instance.IsHapticOn()) hapticInActive.SetActive(false);
+        else hapticInActive.SetActive(true);
+
     }
 
     private void OnClickSoundButton()

@@ -81,6 +81,10 @@ public class SlotController : MonoBehaviour
             {
                 iceRod.transform.position = new Vector3(iceRod.transform.position.x, blocks.Count * Constants.BLOCK_HEIGHT + Constants.BLOCK_HEIGHT + Constants.SLOT_HEIGHT * row, iceRod.transform.position.z);
             }
+            else
+            {
+                iceRod.transform.localPosition = new Vector3(0,3.82f,0); 
+            }
         }
     }
 
@@ -91,6 +95,7 @@ public class SlotController : MonoBehaviour
         || !isRevealed || slotType == SlotType.Ice) return false;
         int topicID = blocks.Peek().GetComponent<BlockController>().GetTopicID();
         int i = 0;
+
         foreach(BlockController block in blocks)
         {
             if(block.GetTopicID() != topicID 
@@ -101,6 +106,8 @@ public class SlotController : MonoBehaviour
             block.transform.DOMove(targetPosition, selectDuration).SetEase(Ease.OutQuad);
             i++;
         }
+        AudioManager.Instance.PlaySelectSlotAudio();
+
         return true;
     }
 
@@ -129,12 +136,13 @@ public class SlotController : MonoBehaviour
             {
                 if(otherSlot.blocks.Peek().GetTopicID() != this.blocks.Peek().GetTopicID())
                 {
+                    AudioManager.Instance.PlayMoveFailAudio();
                     foreach(BlockController block in otherSlot.blocks)
                     {
-                        // if(block.GetCurrState() == BlockController.BlockState.Selected)
-                        // {
-                        //     block.PlayErrorShake();
-                        // }
+                        if(block.GetCurrState() == BlockController.BlockState.Selected)
+                        {
+                            block.PlayErrorShake(block.SelectedEffect);
+                        }
                     }
                     return false;
                 } 
@@ -164,6 +172,14 @@ public class SlotController : MonoBehaviour
         if(blocksToMove <= 0)
         {
             // UnSelect();
+            AudioManager.Instance.PlayMoveFailAudio();
+            int i = 0;
+            foreach(var block in otherSlot.blocks)
+            {
+                if(i >= blockCount) break;
+                block.PlayErrorShake(block.SelectedEffect);
+                i++;
+            }
             return false;
         }
         // Vị trí bắt đầu của block đầu tiên được di chuyển
@@ -241,7 +257,7 @@ public class SlotController : MonoBehaviour
 
         block.transform.DOPath(pathArr, duration, PathType.CatmullRom)
             .SetDelay(delay)
-            .SetEase(Ease.InOutSine)
+            .SetEase(Ease.InOutQuad)
             .OnComplete(() => 
             {
                 // Gọi hàm này khi DOTween chạy xong
@@ -307,12 +323,10 @@ public class SlotController : MonoBehaviour
                     i++;
                 }
                 AudioManager.Instance.PlayPopMovedAudio(i);
-                StartCoroutine(HapticManager.Instance.PlayVibrateBlockFall(i, 0.2f));
             } 
             else
             {
                 AudioManager.Instance.PlayBlockFailAudio();
-                HapticManager.Instance.PlayVibrateHeavy();
                 // b.PlayErrorShake();
                 int i = 0;
                 foreach(BlockController block in blocks)
@@ -349,10 +363,10 @@ public class SlotController : MonoBehaviour
 
         //    StartCoroutine(WaitAndFinishMoving(delay, otherSlot));
 
-            isMoving = false;
-            OnMoveFisnished?.Invoke(isMoving);
             
             if(blocks.Count == 4) CheckSlotComplete();
+            isMoving = false;
+            OnMoveFisnished?.Invoke(isMoving);
         } 
     }
     private IEnumerator WaitAndFinishMoving(float delay, SlotController otherSlot)

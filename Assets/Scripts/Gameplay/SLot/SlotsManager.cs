@@ -13,7 +13,7 @@ public class SlotsManager : MonoBehaviour
     public int row2;
     private Stack<GameObject> slotPool = new Stack<GameObject>();
     private GameObject slotPrefab;
-
+    private bool levelCompleted;
     public static event Action<int, int> OnChangeFinishedSlots;
     void OnEnable()
     {
@@ -37,7 +37,7 @@ public class SlotsManager : MonoBehaviour
     {
         for(int i = 0; i < numsSlot; i++)
         {
-            GameObject slot = GameObject.Instantiate(slotPrefab, gridRoot);
+            GameObject slot = Instantiate(slotPrefab, gridRoot);
             slot.SetActive(false);
             slotPool.Push(slot);
         }
@@ -108,6 +108,7 @@ public class SlotsManager : MonoBehaviour
             slot.SetActive(true);
             j++;
         }
+        levelCompleted = false;
     }
 
     private void CheckLevelComplete(int topicID)
@@ -129,8 +130,11 @@ public class SlotsManager : MonoBehaviour
             }
         }
         // AudioManager.Instance.PlayLVLWinAudio();
+        levelCompleted = true;
         GameManager.Instance.ChangeState(GameManager.GameState.Win);
         levelLoader.LevelUp();
     }
+
+    public bool GetLevelComleted() => levelCompleted;
 }
 

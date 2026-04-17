@@ -17,6 +17,6 @@ MonoBehaviour:
   topicID: 16
   blocksSprite:
   - {fileID: 21300000, guid: 41c8fc3e058082744b99e3bdd8ec85f4, type: 3}
-  - {fileID: 21300000, guid: 41c8fc3e058082744b99e3bdd8ec85f4, type: 3}
-  - {fileID: 21300000, guid: 41c8fc3e058082744b99e3bdd8ec85f4, type: 3}
-  - {fileID: 21300000, guid: 41c8fc3e058082744b99e3bdd8ec85f4, type: 3}
+  - {fileID: 21300000, guid: 0e1521e95e8a1b248ac15bfd3357880c, type: 3}
+  - {fileID: 21300000, guid: 5282fe85695965a4e927e7bb57af2187, type: 3}
+  - {fileID: 21300000, guid: 5282fe85695965a4e927e7bb57af2187, type: 3}

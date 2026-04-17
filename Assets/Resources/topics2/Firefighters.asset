@@ -18,5 +18,5 @@ MonoBehaviour:
   blocksSprite:
   - {fileID: 21300000, guid: 63e8005ca787a6349bfded22cb226fee, type: 3}
   - {fileID: 21300000, guid: 53358528dad16414c9b5ba7f1881be0a, type: 3}
-  - {fileID: 21300000, guid: 53358528dad16414c9b5ba7f1881be0a, type: 3}
-  - {fileID: 21300000, guid: 53358528dad16414c9b5ba7f1881be0a, type: 3}
+  - {fileID: 21300000, guid: efd3b0ed1db9a7243a7304c009a6d637, type: 3}
+  - {fileID: 21300000, guid: 59f5eb8f60c453d4b96e30e84d5de7c7, type: 3}

@@ -54,9 +54,7 @@ public class InputManager : MonoBehaviour
                                 return; 
                             }
                         }
-
-                        HapticManager.Instance.PlayVibrateMedium();
-
+                        HapticManager.Instance.PlayHaptic();
                         if(!selected && !slot.isFinished && slot.blocks.Count > 0)
                         {
                             if (slot.SelectToMove())

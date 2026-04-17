@@ -37,7 +37,7 @@ public class HintEffext : MonoBehaviour, IBoosterEffect
 
         sequence.OnComplete(() =>
         {
-            ExcuteBooster(); 
+            ExcuteBooster?.Invoke(); 
             sequence.AppendInterval(0.2f);
             sequence.Append(hintIcon.DOAnchorPos(originPos, 0.5f));
             sequence.Join(hintIcon.DOScale(1,0.5f).SetEase(Ease.OutQuad));

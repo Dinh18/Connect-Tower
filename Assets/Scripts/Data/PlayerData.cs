@@ -14,7 +14,8 @@ public class PlayerData
                                                               new BoosterData(1, "Shuffle", 3, 9, false, true),
                                                               new BoosterData(2, "Hint", 3, 13, false, true)};
     public List<MechanicData> mechanics = new List<MechanicData>{new MechanicData(0, "Block Hide", 6, true),
-                                                                 new MechanicData(1, "Slot Hide", 17, true)};                                                   
+                                                                 new MechanicData(1, "Slot Hide", 17, true),
+                                                                 new MechanicData(2, "Ice Slot", 20, true)};                                                   
     public bool isFirstTimePlay = true;
 
 }

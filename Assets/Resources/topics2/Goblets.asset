@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c5ed26078d810f4b848d959c0654f42, type: 3}
   m_Name: Goblets
   m_EditorClassIdentifier: Assembly-CSharp::BlockTopic
-  topicName: Goblets
+  topicName: Bowl
   blockColor: 4
   topicID: 14
   blocksSprite:
-  - {fileID: 21300000, guid: 3fdf71fa83e828d44a2391054584bb5a, type: 3}
-  - {fileID: 21300000, guid: 3fdf71fa83e828d44a2391054584bb5a, type: 3}
-  - {fileID: 21300000, guid: 3fdf71fa83e828d44a2391054584bb5a, type: 3}
-  - {fileID: 21300000, guid: 3fdf71fa83e828d44a2391054584bb5a, type: 3}
+  - {fileID: 21300000, guid: a82e14aa5af88d54dbe769a7f698cb97, type: 3}
+  - {fileID: 21300000, guid: 801f4fc5e2ece6f4ab9e966a97b19a48, type: 3}
+  - {fileID: 21300000, guid: a82e14aa5af88d54dbe769a7f698cb97, type: 3}
+  - {fileID: 21300000, guid: e84fb5c7587b9f849824a110ae7ad186, type: 3}

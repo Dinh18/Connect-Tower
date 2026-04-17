@@ -8,6 +8,7 @@ public class RefillHeartPopup : MonoBehaviour, IMenu
     [SerializeField] private Button watchVideo;
     [SerializeField] private Button refillButton;
     [SerializeField] private Text heardCountText;
+    [SerializeField] private GameObject dimImage;
     // [SerializeField] private Text timeText;
     private MainMenuUIManager mainMenuUIManager;
     void OnEnable()
@@ -27,6 +28,7 @@ public class RefillHeartPopup : MonoBehaviour, IMenu
     public void Hide()
     {
         this.gameObject.SetActive(false);
+        dimImage.SetActive(false);
     }
 
     public void Setup(UIManager uIManager)
@@ -39,6 +41,7 @@ public class RefillHeartPopup : MonoBehaviour, IMenu
     public void Show()
     {
         this.gameObject.SetActive(true);
+        dimImage.SetActive(true);
         UpdateHeardCountText(DataManager.Instance.playerData.heart);
     }
     private void OnclickWatchVideo()
@@ -56,6 +59,7 @@ public class RefillHeartPopup : MonoBehaviour, IMenu
         {
             DataManager.Instance.AddHeart(5 - DataManager.Instance.playerData.heart,"");
             DataManager.Instance.UseCoins(900);
+            mainMenuUIManager.UpdateCoinText();
             OnclickClose();
         }
         else

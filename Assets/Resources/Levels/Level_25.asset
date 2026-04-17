@@ -1,0 +1,132 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25ab7f7f03bb8b7468efbe24131e7b4a, type: 3}
+  m_Name: Level_25
+  m_EditorClassIdentifier: Assembly-CSharp::LevelDataSO
+  level: 25
+  numsTopic: 7
+  difficult: 1
+  moves: 30
+  row1: 4
+  row2: 5
+  slots:
+  - slotType: 0
+    questionTopic: {fileID: 0}
+    blocks:
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 774c5d3c3fc772d41b97f82006fee0ef, type: 2}
+      indexSprite: 0
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 7be9b15994bd2484db3fd395112e1b0e, type: 2}
+      indexSprite: 0
+    - typeBlock: 1
+      blockTopic: {fileID: 11400000, guid: bc02a671a2354a542893853aae07a19d, type: 2}
+      indexSprite: 0
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 9e8ae13ff65bed240bbae74170cf7c77, type: 2}
+      indexSprite: 0
+  - slotType: 0
+    questionTopic: {fileID: 0}
+    blocks:
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: bc02a671a2354a542893853aae07a19d, type: 2}
+      indexSprite: 1
+    - typeBlock: 1
+      blockTopic: {fileID: 11400000, guid: d7fff6102437864439cab0ec024083f3, type: 2}
+      indexSprite: 0
+    - typeBlock: 1
+      blockTopic: {fileID: 11400000, guid: 2735e1b40813a9a4ca306591c0369638, type: 2}
+      indexSprite: 0
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 7be9b15994bd2484db3fd395112e1b0e, type: 2}
+      indexSprite: 1
+  - slotType: 2
+    questionTopic: {fileID: 0}
+    blocks: []
+  - slotType: 0
+    questionTopic: {fileID: 0}
+    blocks:
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 56e0bfa4818982747bdff14c74d8ca96, type: 2}
+      indexSprite: 0
+  - slotType: 0
+    questionTopic: {fileID: 0}
+    blocks:
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 7be9b15994bd2484db3fd395112e1b0e, type: 2}
+      indexSprite: 2
+    - typeBlock: 1
+      blockTopic: {fileID: 11400000, guid: 2735e1b40813a9a4ca306591c0369638, type: 2}
+      indexSprite: 1
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 774c5d3c3fc772d41b97f82006fee0ef, type: 2}
+      indexSprite: 1
+  - slotType: 0
+    questionTopic: {fileID: 0}
+    blocks:
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: bc02a671a2354a542893853aae07a19d, type: 2}
+      indexSprite: 2
+    - typeBlock: 1
+      blockTopic: {fileID: 11400000, guid: d7fff6102437864439cab0ec024083f3, type: 2}
+      indexSprite: 1
+    - typeBlock: 1
+      blockTopic: {fileID: 11400000, guid: 9e8ae13ff65bed240bbae74170cf7c77, type: 2}
+      indexSprite: 1
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 7be9b15994bd2484db3fd395112e1b0e, type: 2}
+      indexSprite: 3
+  - slotType: 0
+    questionTopic: {fileID: 0}
+    blocks:
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 9e8ae13ff65bed240bbae74170cf7c77, type: 2}
+      indexSprite: 2
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: d7fff6102437864439cab0ec024083f3, type: 2}
+      indexSprite: 2
+    - typeBlock: 1
+      blockTopic: {fileID: 11400000, guid: 774c5d3c3fc772d41b97f82006fee0ef, type: 2}
+      indexSprite: 2
+    - typeBlock: 1
+      blockTopic: {fileID: 11400000, guid: 56e0bfa4818982747bdff14c74d8ca96, type: 2}
+      indexSprite: 1
+  - slotType: 0
+    questionTopic: {fileID: 0}
+    blocks:
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 2735e1b40813a9a4ca306591c0369638, type: 2}
+      indexSprite: 2
+    - typeBlock: 1
+      blockTopic: {fileID: 11400000, guid: 774c5d3c3fc772d41b97f82006fee0ef, type: 2}
+      indexSprite: 3
+    - typeBlock: 1
+      blockTopic: {fileID: 11400000, guid: d7fff6102437864439cab0ec024083f3, type: 2}
+      indexSprite: 3
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 56e0bfa4818982747bdff14c74d8ca96, type: 2}
+      indexSprite: 2
+  - slotType: 0
+    questionTopic: {fileID: 0}
+    blocks:
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 9e8ae13ff65bed240bbae74170cf7c77, type: 2}
+      indexSprite: 3
+    - typeBlock: 1
+      blockTopic: {fileID: 11400000, guid: 2735e1b40813a9a4ca306591c0369638, type: 2}
+      indexSprite: 3
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 56e0bfa4818982747bdff14c74d8ca96, type: 2}
+      indexSprite: 3
+    - typeBlock: 1
+      blockTopic: {fileID: 11400000, guid: bc02a671a2354a542893853aae07a19d, type: 2}
+      indexSprite: 3

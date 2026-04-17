@@ -24,7 +24,7 @@ public class ShuffleEffect : MonoBehaviour, IBoosterEffect
         // sequence.AppendInterval(0.1f);
         sequence.JoinCallback(() =>
         {
-            ExcuteBooster(); 
+            ExcuteBooster?.Invoke();
         });
         sequence.Append(shuffleIcon.DORotate(new Vector3(0,0,360),0.5f, RotateMode.FastBeyond360).SetEase(Ease.OutBack)); 
         sequence.OnComplete(() =>

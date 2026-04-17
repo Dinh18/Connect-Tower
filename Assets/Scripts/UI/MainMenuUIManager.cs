@@ -115,6 +115,11 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         uIManager.PushPopupToFront(refillHeartPopup, refillHeartPopup.GetComponent<RectTransform>());
     }
 
+    public void UpdateCoinText()
+    {
+        coinText.text = DataManager.Instance.playerData.totalCoins.ToString();
+    }
+
     public void AddCoin(int winAmount)
     {
         // 1. Lấy tổng tiền cuối cùng (Đã trừ tiền mua Booster, đã cộng tiền Win)
@@ -168,7 +173,6 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
 
         // Chơi âm thanh ăn tiền (sẽ kêu "Ting ting ting" theo từng đồng rất đã tai)
         AudioManager.Instance.PlayCoinCollectAudio();
-        HapticManager.Instance.PlayVibrateMedium();
 
 
         Debug.Log("oldCoins: " + oldCoins);

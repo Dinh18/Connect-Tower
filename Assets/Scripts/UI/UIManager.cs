@@ -51,12 +51,13 @@ public class UIManager : MonoBehaviour
                 }
                 if(gameManager.GetPrevState() == GameManager.GameState.None)
                 {
-                    StartCoroutine(ShowLoadingImage(1f));
+                    StartCoroutine(ShowLoadingImage(3f));
                 }
                
                 break;
             case GameManager.GameState.Win:
                 endGameUI.ShowLevelCompletedPanel();
+                // StartCoroutine(DelayShowLevelCompletedPanel());
                 break;
             case GameManager.GameState.Lose:
                 endGameUI.ShowLevelFailedPanel();
@@ -77,10 +78,22 @@ public class UIManager : MonoBehaviour
 
         }
     }
+    public IEnumerator DelayShowLevelCompletedPanel()
+    {
+        yield return new WaitForSeconds(0.5f);
+        endGameUI.ShowLevelCompletedPanel();
+    }
     public void OnClickBackHome()
     {
         ClearPopupStack();
         gameManager.ChangeState(GameManager.GameState.MainMenu);
+        if(gameManager.GetPrevState() == GameManager.GameState.Pause)
+        {
+            if(gameManager.GetMaxMoves() > gameManager.GetMoves())
+            {
+                gameManager.UseHeart();
+            }
+        }
         if(gameManager.GetPrevState() == GameManager.GameState.Lose)
         {
             gameManager.UseHeart();
@@ -121,7 +134,7 @@ public class UIManager : MonoBehaviour
         // bool isIngame =(gameManager.GetCurrState() == GameManager.GameState.Playing || 
         //              gameManager.GetCurrState() == GameManager.GameState.Pause);
 
-        // if(isCurrentlyInGame() && TutorialManager.Instance.IsTutorialActive()) return;
+        if(isCurrentlyInGame() && TutorialManager.Instance.IsTutorialActive()) return;
 
         PushPopupToFront(setting, setting.transform);
 
@@ -142,6 +155,7 @@ public class UIManager : MonoBehaviour
 
     public void OpenShop(bool inMainMenu = false)
     {
+        if(isCurrentlyInGame() && TutorialManager.Instance.IsTutorialActive()) return;
         PushPopupToFront(shop, shop.transform);
         if(inMainMenu)
         {
@@ -225,6 +239,7 @@ public class UIManager : MonoBehaviour
     public void PushPopupToFront(IMenu popup, Transform goPopup, bool playAnim = true)
     {
         if(popupStack.Count > 0 && popupStack.Peek() == popup) return;
+        // if(TutorialManager.Instance.IsTutorialActive()) return;
         if(popupStack.Count > 0)
         {
             IMenu topPopup = popupStack.Peek();

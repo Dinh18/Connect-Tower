@@ -65,7 +65,7 @@ public class GameManager : MonoBehaviour
         {
             moves--;
             OnChangeMoves?.Invoke(moves);
-            if(moves <= 0)
+            if(moves <= 0 && !slotsManager.GetLevelComleted())
             {
                 ChangeState(GameState.Lose);
                 // DataManager.Instance.UseHeart();

@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using NaughtyAttributes;
 
 
 
@@ -23,7 +22,7 @@ public class SlotSetupData
 {
     // public List<BlockTopic> blocks= new List<BlockTopic>();
     public SlotController.SlotType slotType = SlotController.SlotType.Normal;
-    [ShowIf("slotType", SlotController.SlotType.Hide)]
+    // [ShowIf("slotType", SlotController.SlotType.Hide)]
     public BlockTopic questionTopic;
     public List<BlockSetupData> blocks= new List<BlockSetupData>();
 
