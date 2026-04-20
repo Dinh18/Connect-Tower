@@ -2,6 +2,8 @@ using System.IO;
 using UnityEngine;
 using UnityEditor;
 using System;
+using System.Security.Cryptography;
+using System.Text;
 
 public class DataManager : MonoBehaviour
 {
@@ -33,34 +35,97 @@ public class DataManager : MonoBehaviour
         
     }
 
+    // 16-byte key and IV cho AES. Bạn có thể thay đổi chuỗi này để tăng tính bảo mật.
+    private readonly byte[] encryptionKey = Encoding.UTF8.GetBytes("ThaleGame1234567");
+    private readonly byte[] encryptionIV = Encoding.UTF8.GetBytes("ThaleTower765432");
+
     public void SaveGame()
     {
-        // chuyen palyer data thanh chuoi json
-        // true de co dinh dang de doc hon
         string jsonString = JsonUtility.ToJson(playerData, true);
-        // Ghi chuoi json vao file
-        File.WriteAllText(saveFilePath, jsonString);
-        Debug.Log("<color=green>Đã lưu game thành công tại: </color>" + saveFilePath);
+        
+        try
+        {
+            string encryptedData = EncryptString(jsonString);
+            File.WriteAllText(saveFilePath, encryptedData);
+            Debug.Log("<color=green>Đã mã hóa và lưu game tại: </color>" + saveFilePath);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Lỗi khi lưu game: " + e.Message);
+            // Fallback lưu không mã hóa nếu có lỗi phát sinh
+            File.WriteAllText(saveFilePath, jsonString);
+        }
     }
 
     public void LoadGame()
     {
         if(File.Exists(saveFilePath))
         {
-            // Doc chuoi json tu file
-            string jsonString = File.ReadAllText(saveFilePath);
-            // Chuyen chuoi json thanh doi tuong player data
-            playerData = JsonUtility.FromJson<PlayerData>(jsonString);
-
-            Debug.Log("<color=green>Đã tải game thành công từ: </color>" + saveFilePath);
+            string fileContent = File.ReadAllText(saveFilePath);
+            try
+            {
+                string decryptedJson = DecryptString(fileContent);
+                playerData = JsonUtility.FromJson<PlayerData>(decryptedJson);
+                Debug.Log("<color=green>Đã giải mã và tải game từ: </color>" + saveFilePath);
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning("Không thể giải mã dữ liệu (Có thể là file cũ chưa mã hóa). Thử đọc json thuần túy... Lỗi: " + e.Message);
+                try 
+                {
+                    // Fallback cho file cũ chưa mã hóa
+                    playerData = JsonUtility.FromJson<PlayerData>(fileContent);
+                    Debug.Log("<color=green>Đã tải game (không mã hóa) từ: </color>" + saveFilePath);
+                }
+                catch
+                {
+                    Debug.LogError("File save bị hỏng hoàn toàn. Reset data.");
+                    playerData = new PlayerData();
+                    SaveGame();
+                }
+            }
         }
         else
         {
-            playerData = new PlayerData(); // Khoi tao du lieu mac dinh neu khong co file luu
-
+            playerData = new PlayerData();
             Debug.LogWarning("<color=red>Không tìm thấy file lưu game tại: </color>" + saveFilePath);
-
             SaveGame();
+        }
+    }
+
+    private string EncryptString(string plainText)
+    {
+        using (Aes aesAlg = Aes.Create())
+        {
+            aesAlg.Key = encryptionKey;
+            aesAlg.IV = encryptionIV;
+            ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
+            using (MemoryStream msEncrypt = new MemoryStream())
+            {
+                using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
+                using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
+                {
+                    swEncrypt.Write(plainText);
+                }
+                return Convert.ToBase64String(msEncrypt.ToArray());
+            }
+        }
+    }
+
+    private string DecryptString(string cipherText)
+    {
+        byte[] cipherBytes = Convert.FromBase64String(cipherText);
+        using (Aes aesAlg = Aes.Create())
+        {
+            aesAlg.Key = encryptionKey;
+            aesAlg.IV = encryptionIV;
+            ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
+            using (MemoryStream msDecrypt = new MemoryStream(cipherBytes))
+            using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+            using (StreamReader srDecrypt = new StreamReader(csDecrypt))
+            {
+                return srDecrypt.ReadToEnd();
+            }
         }
     }
 
@@ -149,16 +214,21 @@ public class DataManager : MonoBehaviour
         {
             playerData.currentLevel++;
         }
+        GameConfigSO config = Resources.Load<GameConfigSO>("GameConfig");
+        int rewardE = config != null ? config.coinRewardEasy : 40;
+        int rewardH = config != null ? config.coinRewardHard : 80;
+        int rewardVH = config != null ? config.coinRewardSuperHard : 120;
+
         switch(gameDifficult)
         {
             case LevelLoader.GameDifficult.Easy:
-                AddCoins(40);
+                AddCoins(rewardE);
                 break;
             case LevelLoader.GameDifficult.Hard:
-                AddCoins(80);
+                AddCoins(rewardH);
                 break;
             case LevelLoader.GameDifficult.VeryHard:
-                AddCoins(120);
+                AddCoins(rewardVH);
                 break;
         }
         if(playerData.currentLevel == playerData.boosters[(int) Constants.BoosterType.AddMove].unlockedLevel)

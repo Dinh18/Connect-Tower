@@ -52,9 +52,11 @@ TemporaryDependencyNodeTargetIdentifier=netstandard2.1
 /warnaserror+:NU1605
 
 [sourceFiles]
-Assets/Scripts/Editor/
+Assets/Editor/
+ AIUnityBridge.cs
  LevelEditor.cs
  LevelGridBuilder.cs
+ MakeLevel_2.cs
 Temp/obj/Assembly-CSharp-Editor/.NETStandard,Version=v2.1.AssemblyAttributes.cs
 
 [metadataReferences]

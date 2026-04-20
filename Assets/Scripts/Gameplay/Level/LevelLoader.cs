@@ -100,9 +100,16 @@ public class LevelLoader : MonoBehaviour
 
     public int GetCurrentLevelReward()
     {
-        if (gameDifficult == GameDifficult.Easy) return 40;
-        if (gameDifficult == GameDifficult.Hard) return 80;
-        return 120;
+        GameConfigSO config = Resources.Load<GameConfigSO>("GameConfig");
+        if (config == null) 
+        {
+            Debug.LogWarning("Không tìm thấy GameConfig trong thư mục Resources!");
+            return 40; // Default fallback
+        }
+
+        if (gameDifficult == GameDifficult.Easy) return config.coinRewardEasy;
+        if (gameDifficult == GameDifficult.Hard) return config.coinRewardHard;
+        return config.coinRewardSuperHard;
     }
 
     

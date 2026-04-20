@@ -19,7 +19,7 @@ public class TutorialManager : MonoBehaviour
     // [SerializeField] private HiddenBlockTutorial hiddenBlockTutorial;
     // [SerializeField] private FirstTimeUseBooster firstTimeUseBooster;
     private GameObject currentElevatedTarget;
-    public TutorialType currentTutorial = TutorialType.None;
+    public TutorialType currentTutorial {get; private set;} = TutorialType.None;
     public int mechanic;
     void Awake()
     {

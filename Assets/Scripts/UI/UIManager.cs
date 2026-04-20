@@ -99,13 +99,20 @@ public class UIManager : MonoBehaviour
     }
     public void OnClickAddMoveToContinue()
     {
-        if(DataManager.Instance.playerData.totalCoins >= 900)
+        int addMoveCost = 900;
+        GameConfigSO config = Resources.Load<GameConfigSO>("GameConfig");
+        if (config != null)
+        {
+            addMoveCost = config.addMoveCost;
+        }
+
+        if(DataManager.Instance.playerData.totalCoins >= addMoveCost)
         {
             endGameUI.Hide();
             gameManager.AddMove(5);
             gameManager.ChangeState(GameManager.GameState.Pause);
             gameManager.ChangeState(GameManager.GameState.Playing);
-            DataManager.Instance.UseCoins(900);
+            DataManager.Instance.UseCoins(addMoveCost);
         }
         else
         {

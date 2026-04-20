@@ -13,7 +13,7 @@ public class SlotController : MonoBehaviour
         Hide,
         Ice
     }
-    public Stack<BlockController> blocks;
+    public Stack<BlockController> blocks{get; private set;}
     public GameObject blockPrefab;
     public Transform stackAnchor;
     public Transform arcPeak;

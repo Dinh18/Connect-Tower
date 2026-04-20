@@ -56,6 +56,7 @@ Assets/Scripts/Core/
  AudioManager.cs
  CameraController.cs
  GameManager.cs
+ GamePlayController.cs
  HapticManager.cs
  HeartManager.cs
  InputManager.cs
@@ -63,6 +64,7 @@ Assets/Scripts/Core/
 Assets/Scripts/Data/
  BlockTopic.cs
  DataManager.cs
+ GameConfigSO.cs
  LevelDataSO.cs
  MakeLevel.cs
  PlayerData.cs
@@ -130,7 +132,9 @@ Assets/Scripts/
   TextProOnACurve.cs
   TextProOnAnArch.cs
   UIManager.cs
- Utilities/Constants.cs
+ Utilities/
+  Constants.cs
+  LevelEditorUtils.cs
 Temp/obj/Assembly-CSharp/.NETStandard,Version=v2.1.AssemblyAttributes.cs
 
 [metadataReferences]

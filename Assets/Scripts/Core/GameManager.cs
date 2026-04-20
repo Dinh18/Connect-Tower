@@ -29,11 +29,11 @@ public class GameManager : MonoBehaviour
     void Awake()
     {
         Instance = this; 
+        Application.targetFrameRate = 60;
     }
 
     void Start()
     {
-        Application.targetFrameRate = 60;
         cameraController.Setup();
         levelLoader.Setup(this, slotsManager, blocksManager);
         uIManager.Setup(this);
@@ -46,6 +46,11 @@ public class GameManager : MonoBehaviour
     public SlotsManager GetSlotsManager()
     {
         return slotsManager;
+    }
+
+    private void OnDestroy()
+    {
+        SlotController.OnMoveFisnished -= Move;
     }
 
     public GameState GetCurrState() => currState;
