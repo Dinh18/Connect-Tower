@@ -18,8 +18,6 @@ public class UIManager : MonoBehaviour
 
     private Stack<IMenu> popupStack = new Stack<IMenu>();
     // [SerializeField] private ShopPanel shopPanel;
-    public Button settingButton;
-    public Button continueButton;
     private GameManager gameManager;
     
     public void Setup(GameManager gameManager)
