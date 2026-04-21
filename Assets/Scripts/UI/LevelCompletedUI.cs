@@ -5,27 +5,24 @@ using UnityEngine.UI;
 
 public class LevelCompletedUI : MonoBehaviour, IMenu
 {
-    private UIManager uIManager;
+    // private UIManager uIManager; // Loại bỏ phụ thuộc
     [SerializeField] private Button continueButton;
     [SerializeField] private Transform header;
     [SerializeField] private Transform coinImage;
+
     void OnEnable()
     {
-        continueButton.onClick.AddListener(uIManager.OnClickBackHome);
-    }
-    void OnDisable()
-    {
-        continueButton.onClick.RemoveListener(uIManager.OnClickBackHome);
+        continueButton.onClick.AddListener(() => GameEventBus.OnRequestBackHome?.Invoke());
     }
 
-    public void Hide()
+    void OnDisable()
     {
-        this.gameObject.SetActive(false);
+        continueButton.onClick.RemoveAllListeners();
     }
 
     public void Setup(UIManager uIManager)
     {
-        this.uIManager = uIManager;
+        // Vẫn giữ để tương thích nhưng không dùng đến
     }
 
     public void Show()
@@ -37,7 +34,6 @@ public class LevelCompletedUI : MonoBehaviour, IMenu
     private IEnumerator ShowCoroutine()
     {
         AudioManager.Instance.PlayLVLWinAudio();
-
         coinImage.DOKill();
         coinImage.localScale = Vector3.zero;
         coinImage.DOScale(1, 0.5f).SetEase(Ease.OutBack);
@@ -54,8 +50,6 @@ public class LevelCompletedUI : MonoBehaviour, IMenu
         }  
     }
 
-    public GameObject GetGameObject()
-    {
-        return this.gameObject;
-    }
+    public void Hide() => this.gameObject.SetActive(false);
+    public GameObject GetGameObject() => this.gameObject;
 }

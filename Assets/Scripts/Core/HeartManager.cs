@@ -9,6 +9,10 @@ public class HeartManager : MonoBehaviour
     [SerializeField] private Text timerTextAddHeardPopup;
     private DateTime nextHeartTime;
     private DateTime lastHeartTime;
+    void Awake()
+    {
+        CoreServices.Register<HeartManager>(this);
+    }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {

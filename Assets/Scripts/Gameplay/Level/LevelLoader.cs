@@ -15,10 +15,10 @@ public class LevelLoader : MonoBehaviour
         Hard = 1,
         VeryHard = 2
     }
-    public static LevelLoader Instance;
-    [SerializeField] private SlotsManager slotsManager;
-    [SerializeField] private BlocksManager blocksManager;
-    [SerializeField] private GameManager gameManager;
+    // public static LevelLoader Instance;
+    private SlotsManager slotsManager;
+    private BlocksManager blocksManager;
+    private GameManager gameManager;
     // private int coinWin;
     private LevelDataSO[] levelDatas;
     // [SerializeField] DataLevel dataTest;
@@ -30,7 +30,7 @@ public class LevelLoader : MonoBehaviour
 
     void Awake()
     {
-        Instance = this;
+        CoreServices.Register<LevelLoader>(this);
     }
 
     public int GetNumsLevel() => levelDatas.Length;
@@ -42,13 +42,12 @@ public class LevelLoader : MonoBehaviour
         return slots[index];
     }
 
-    public void Setup(GameManager gameManager, SlotsManager slotsManager, BlocksManager blocksManager)
+    void Start()
     {
-        this.gameManager = gameManager;
-        this.slotsManager = slotsManager;
-        this.blocksManager = blocksManager;
+        this.gameManager = CoreServices.Get<GameManager>();
+        this.slotsManager = CoreServices.Get<SlotsManager>();
+        this.blocksManager = CoreServices.Get<BlocksManager>();
         levelDatas = Resources.LoadAll<LevelDataSO>(Constants.LEVELS_PATH);
-        slotsManager.Setup(this);
         blocksManager.PoolBlock(40);
         slotsManager.PoolSlot(10);
     }
@@ -93,9 +92,6 @@ public class LevelLoader : MonoBehaviour
                 TutorialManager.Instance.StartMechanicTutorial(mechanic.id);
             }
         }
-
-
-
     }
 
     public int GetCurrentLevelReward()

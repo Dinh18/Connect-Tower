@@ -10,6 +10,7 @@ public class HapticManager : MonoBehaviour
     {
         Instance = this;
         LoadHapticSetting();
+        CoreServices.Register<HapticManager>(this);
     }
 
     public void PlayHaptic()

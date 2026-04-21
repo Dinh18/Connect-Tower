@@ -6,50 +6,42 @@ public class BoosterButton : MonoBehaviour
     private Button boosterButton;
     private IBooster booster;
     private IBoosterEffect boosterEffect;
-    private UIManager uIManager;
+    // private UIManager uIManager; // Đã loại bỏ
     [SerializeField] Text countText;
     [SerializeField] GameObject addImage;
     [SerializeField] AddBoosterUI addBoosterUI;
     [SerializeField] GameObject lockElements;
     [SerializeField] GameObject unlockElements;
+
     void OnEnable()
     {
         boosterButton.onClick.AddListener(OnButtonClicked);
-        DataManager.OnChangeCountBooster+=UpdateCountText;
+        DataManager.OnChangeCountBooster += UpdateCountText;
     }
+
     void OnDisable()
     {
         boosterButton.onClick.RemoveListener(OnButtonClicked);
-        DataManager.OnChangeCountBooster-=UpdateCountText;
-
+        DataManager.OnChangeCountBooster -= UpdateCountText;
     }
+
     void Awake()
     {
         boosterButton = GetComponent<Button>();
-
         booster = GetComponentInChildren<IBooster>();
-
         boosterEffect = GetComponentInChildren<IBoosterEffect>();
-
-    }
-
-    public AddBoosterUI GetAddBooster()
-    {
-        return addBoosterUI;
     }
 
     public IBooster GetBooster() => booster;
 
     public void Setup(UIManager uIManager)
     {
-        this.uIManager = uIManager;
         addBoosterUI.Setup(uIManager);
     }
 
     public void Show()
     {
         int id = (int)booster.GetBoosterType();
-        if(id != ((int)booster.GetBoosterType())) return;
         bool isUnlocked = DataManager.Instance.IsUnLockedBooster(id);
         
         lockElements.SetActive(!isUnlocked);
@@ -62,7 +54,6 @@ public class BoosterButton : MonoBehaviour
         }
 
         UpdateCountText(id, DataManager.Instance.GetAmountOfBoosterByID(id));
-        
     }
 
     public void UpdateCountText(int id, int amount)
@@ -81,34 +72,24 @@ public class BoosterButton : MonoBehaviour
 
     public void OnButtonClicked()
     {
-        if (!DataManager.Instance.IsUnLockedBooster((int)booster.GetBoosterType()))
-        {
-            
-            Debug.Log("Booster này chưa mở khóa, không cho bấm!");
-            return;
-        }
-        // if(GameManager.Instance.GetCurrState() == GameManager.GameState.Pause) return;
+        if (!DataManager.Instance.IsUnLockedBooster((int)booster.GetBoosterType())) return;
+
         int id = (int)booster.GetBoosterType();
-        if(id != ((int)booster.GetBoosterType())) return;
         if(DataManager.Instance.IsFirstTimeUserBooster(id) && TutorialManager.Instance.currentTutorial == TutorialManager.TutorialType.BoosterUI)
         {
             TutorialManager.Instance.EndBoosterTutorial(id);
         }
+
         if(booster.GetNumsBooster() <= 0)
         {
-            // string header = booster.GetName();
-            // string coin = booster.GetPrice().ToString();
-            // uIManager.OpenAddBooster(addBoosterUI, this, header, coin, booster.GetBoosterType());
-            // return;
             OpenAddBoosterPopup(false);
+            return;
         }
 
-        if(GameManager.Instance.GetCurrState() == GameManager.GameState.Pause) return;
+        if(CoreServices.Get<GameManager>().GetCurrState() == GameManager.GameState.Pause) return;
 
         boosterButton.interactable = false;
-
         if(boosterEffect != null) boosterEffect.PlayEffect(booster.Excute);
-
         boosterButton.interactable = true;
     }
 
@@ -116,14 +97,14 @@ public class BoosterButton : MonoBehaviour
     {
         string header = booster.GetName();
         string coin = booster.GetPrice().ToString();
-        uIManager.OpenAddBooster(addBoosterUI, this, header, coin, booster.GetBoosterType(), isFirstTime);
-        return;
+        // Bắn tín hiệu qua EventBus
+        GameEventBus.OnRequestAddBooster?.Invoke(addBoosterUI, this, header, coin, booster.GetBoosterType(), isFirstTime);
     }
-
 
     public void OnClickAddBoosterButton()
     {
-        uIManager.OnClickAddBooster(this);
+        // Bắn tín hiệu qua EventBus
+        GameEventBus.OnClickAddBooster?.Invoke(this);
     }
 
     public void PlayAddEffect()

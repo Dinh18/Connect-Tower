@@ -34,18 +34,31 @@ public class BlockController : MonoBehaviour
     private BlocksManager blocksManager;
     private Sprite itemImage;
     private BlockState currState = BlockState.None;
+    
     [Header("Block Setting")]
     [SerializeField] private ColorBlock colorBlock;
     [SerializeField] private GameObject outLine;
     [SerializeField] private ItemImageBlock itemImageBlock;
     [SerializeField] private Sprite hideImage;
-    // [SerializeField] private Animator animator;
     [SerializeField] private GameObject hideVFX;
     [SerializeField] private GameObject iceVFX;
     [SerializeField] private ParticleSystem difVFX;
     [SerializeField] private GameObject iceImage;
     [SerializeField] private Transform visual;
+    
     public bool isRevealed;
+    
+    // Caching MeshRenderer để tránh tốn CPU gọi GetComponent liên tục
+    private MeshRenderer outLineRenderer;
+
+    void Awake()
+    {
+        if(outLine != null)
+        {
+            outLineRenderer = outLine.GetComponent<MeshRenderer>();
+        }
+    }
+
     public int GetTopicID() => topic.topicID;
     public string GetTopicName() => topic.name;
 
@@ -68,16 +81,16 @@ public class BlockController : MonoBehaviour
         difVFX.Stop();
         ResetOutLint();
         ChangeState(BlockState.None);
+        
         if(slot.slotType == SlotController.SlotType.Ice)
         {
             ShowIceImage();
         }
+        
         if(type == BlockType.Hide)
         {
             ChangeMaterialOutLine(Constants.MATERIAL_COLOR_HIDE_PATH);
-
             itemImageBlock.AddImage(hideImage);
-            // if(DataManager.Instance.IsFirstTimePlayMechanic(0)) TutorialManager.Instance.StartMechanicTutorial(0);
             isRevealed = false;
         }
         else
@@ -86,6 +99,7 @@ public class BlockController : MonoBehaviour
             isRevealed = true;
         }
     }
+    
     public void Finished(SlotController slot)
     {
         SetColorOutLine();
@@ -107,8 +121,11 @@ public class BlockController : MonoBehaviour
 
     public void ChangeMaterialOutLine(string materialPath)
     {
-        Material materialObj = Resources.Load<Material>(materialPath);
-            outLine.GetComponent<MeshRenderer>().material = materialObj;
+        // Sử dụng Cache của BlocksManager thay vì Resources.Load trực tiếp
+        if (outLineRenderer != null && blocksManager != null)
+        {
+            outLineRenderer.material = blocksManager.GetMaterial(materialPath);
+        }
     }
 
     public void ShowIceImage()
@@ -126,66 +143,48 @@ public class BlockController : MonoBehaviour
         difVFX.Play();
     }
 
-
     public void SetColorOutLine()
     {
         Material materialObj;
         switch (colorBlock)
         {
-            case ColorBlock.Color_1:
-                materialObj = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_1_PATH);
-                break;
-            case ColorBlock.Color_2:
-                materialObj = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_2_PATH);
-                break;
-            case ColorBlock.Color_3:
-                materialObj = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_3_PATH);
-                break;
-            case ColorBlock.Color_4:
-                materialObj = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_4_PATH);
-                break;
-            case ColorBlock.Color_5:
-                materialObj = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_5_PATH);
-                break;
-            case ColorBlock.Color_6:
-                materialObj = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_6_PATH);;
-                break;
-            case ColorBlock.Color_7:
-                materialObj = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_7_PATH);
-                break;
-            case ColorBlock.Color_8:
-                materialObj = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_8_PATH);
-                break;
-            case ColorBlock.Color_9:
-                materialObj = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_9_PATH);
-                break;
-            default:
-                materialObj = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_W_PATH);
-                break; 
+            case ColorBlock.Color_1: materialObj = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_1_PATH); break;
+            case ColorBlock.Color_2: materialObj = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_2_PATH); break;
+            case ColorBlock.Color_3: materialObj = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_3_PATH); break;
+            case ColorBlock.Color_4: materialObj = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_4_PATH); break;
+            case ColorBlock.Color_5: materialObj = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_5_PATH); break;
+            case ColorBlock.Color_6: materialObj = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_6_PATH); break;
+            case ColorBlock.Color_7: materialObj = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_7_PATH); break;
+            case ColorBlock.Color_8: materialObj = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_8_PATH); break;
+            case ColorBlock.Color_9: materialObj = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_9_PATH); break;
+            default: materialObj = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_W_PATH); break; 
         }
         
-        outLine.GetComponent<MeshRenderer>().material = materialObj;
+        if (outLineRenderer != null)
+        {
+            outLineRenderer.material = materialObj;
+        }
     }
+    
     private void ResetOutLint()
     {
-        outLine.GetComponent<MeshRenderer>().material = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_W_PATH);
+        if (outLineRenderer != null && blocksManager != null)
+        {
+            outLineRenderer.material = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_W_PATH);
+        }
     }
 
 
     public void ChangeState(BlockState blockState)
     {
-        // transform.DOKill(true);
         switch (blockState)
         {
             case BlockState.Selected:
-                // animator.Play("SelectedAnim", -1, 0f);
                 SelectedEffect();
                 break;
             case BlockState.Collde:
-                // animator.Play("ColliderWithSameType",-1,0f);;
                 break;
             case BlockState.None:
-            // animator.Play("None", -1, 0f);
                 visual.DOKill(true);
                 visual.localPosition = Vector3.zero;
                 visual.localRotation = Quaternion.identity;
@@ -202,7 +201,6 @@ public class BlockController : MonoBehaviour
 
     public void SelectedEffect()
     {
-        // HapticManager.Instance.PlayHaptic();
         visual.DOKill();
         visual.localPosition = Vector3.zero;
         visual.localRotation = Quaternion.identity;
@@ -211,24 +209,24 @@ public class BlockController : MonoBehaviour
               .SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
         visual.DOLocalMoveY(0.08f, 0.35f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);  
     }
+    
     public void FallEffect(int index)
     {
-        // HapticManager.Instance.PlayHaptic();
         visual.DOKill(false); 
 
-        Vector3 baseLocalPos = Vector3.zero; // Vì visual là con, nên đưa về local zero
+        Vector3 baseLocalPos = Vector3.zero;
         float jumpPower = Mathf.Max(0.1f, 0.5f - (index * 0.15f)); 
 
         Sequence seq = DOTween.Sequence();
-        // Dùng DOLocalJump để an toàn hơn khi cha đang di chuyển
         seq.Append(visual.DOLocalJump(baseLocalPos, jumpPower, 1, 0.4f));
         seq.Append(visual.DOPunchPosition(new Vector3(0, 0.2f, 0), 0.2f, 1, 0));
     }
+    
     public void PlayErrorShake(Action onCompleteCallBack = null)
     {
         HapticManager.Instance.PlayHaptic();
         visual.DOKill(false);
-        visual.localPosition = Vector3.zero; // Reset về gốc trước khi lắc
+        visual.localPosition = Vector3.zero;
         visual.DOShakePosition(0.3f, new Vector3(0.1f, 0f, 0f), 15).OnComplete(() =>{
             onCompleteCallBack?.Invoke();
         });

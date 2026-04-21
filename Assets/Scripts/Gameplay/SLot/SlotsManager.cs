@@ -15,6 +15,15 @@ public class SlotsManager : MonoBehaviour
     private GameObject slotPrefab;
     private bool levelCompleted;
     public static event Action<int, int> OnChangeFinishedSlots;
+    void Awake()
+    {
+        slotPrefab = Resources.Load<GameObject>(Constants.SLOT_PREFAB_PATH);
+        CoreServices.Register<SlotsManager>(this);
+    }
+    void Start()
+    {
+        this.levelLoader = CoreServices.Get<LevelLoader>(); 
+    }
     void OnEnable()
     {
         SlotController.OnSlotCompleted += CheckLevelComplete;
@@ -24,15 +33,9 @@ public class SlotsManager : MonoBehaviour
         SlotController.OnSlotCompleted -= CheckLevelComplete;
     }
 
-    void Awake()
-    {
-        slotPrefab = Resources.Load<GameObject>(Constants.SLOT_PREFAB_PATH);
-    }
+    
 
-    public void Setup(LevelLoader levelLoader)
-    {
-        this.levelLoader = levelLoader;   
-    }
+
     public void PoolSlot(int numsSlot)
     {
         for(int i = 0; i < numsSlot; i++)
@@ -129,9 +132,8 @@ public class SlotsManager : MonoBehaviour
                 return;
             }
         }
-        // AudioManager.Instance.PlayLVLWinAudio();
         levelCompleted = true;
-        GameManager.Instance.ChangeState(GameManager.GameState.Win);
+        CoreServices.Get<GameManager>().ChangeState(GameManager.GameState.Win);
         levelLoader.LevelUp();
     }
 

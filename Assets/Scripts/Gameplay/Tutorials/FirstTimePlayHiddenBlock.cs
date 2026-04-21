@@ -5,10 +5,14 @@ public class HiddenBlockTutorial : MonoBehaviour
 {
     public List<TutorialTask> sequence;
     private int currStep;
+    private LevelLoader levelLoader;
     void Awake()
     {
         sequence = new List<TutorialTask>();
-        
+    }
+    void Start()
+    {
+        levelLoader = CoreServices.Get<LevelLoader>();
     }
 
     void UpdateTutorialVisual()
@@ -22,9 +26,9 @@ public class HiddenBlockTutorial : MonoBehaviour
 
     public void Setup()
     {
-        sequence.Add(new TutorialTask(LevelLoader.Instance.GetSlotByIndex(1), "To move the block, please tap it!"));
-        sequence.Add(new TutorialTask(LevelLoader.Instance.GetSlotByIndex(2), "Move the block by tapping an empty space!"));
-        sequence.Add(new TutorialTask(LevelLoader.Instance.GetSlotByIndex(1), "Block revealed!"));
+        sequence.Add(new TutorialTask(levelLoader.GetSlotByIndex(1), "To move the block, please tap it!"));
+        sequence.Add(new TutorialTask(levelLoader.GetSlotByIndex(2), "Move the block by tapping an empty space!"));
+        sequence.Add(new TutorialTask(levelLoader.GetSlotByIndex(1), "Block revealed!"));
     }
     public void StartHiddenTutorial()
     {

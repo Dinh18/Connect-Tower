@@ -19,31 +19,17 @@ public class AddBoosterUI : MonoBehaviour, IMenu
     [SerializeField] private List<RectTransform> boosterIcon;
     [SerializeField] private GameObject dimImage;
     private BoosterButton boosterButton;
-    private UIManager uIManager;
-    // void OnEnable()
-    // {
-    //     addButton.onClick.AddListener(boosterButton.OnClickAddBoosterButton);
-    //     closeButton.onClick.AddListener(OnClickClose);
-    // }
-
-    // void OnDisable()
-    // {
-    //     addButton.onClick.RemoveListener(boosterButton.OnClickAddBoosterButton);  
-    //     closeButton.onClick.RemoveListener(OnClickClose);   
-    // }
 
     public void Setup(UIManager uIManager)
     {
-        this.uIManager = uIManager;
         closeButton.onClick.RemoveAllListeners();
-        closeButton.onClick.AddListener(uIManager.CloseAddBooster);
+        closeButton.onClick.AddListener(OnClickClose);
     }
 
     public void Show()
     {
         this.gameObject.SetActive(true);
         dimImage.SetActive(true);
-        // GameManager.Instance.ChangeState(GameManager.GameState.Pause);
     }
 
     public void SetConfig(BoosterButton boosterButton ,string header, string coins, Constants.BoosterType boosterType, bool isFirstTime)
@@ -63,10 +49,13 @@ public class AddBoosterUI : MonoBehaviour, IMenu
         this.boosterButton = boosterButton;
         headerText.text = header;
         coinsText.text = coins;
+        
         addButton.onClick.RemoveAllListeners();
         addButton.onClick.AddListener(boosterButton.OnClickAddBoosterButton);
+        
         claimButton.onClick.RemoveAllListeners();
         claimButton.onClick.AddListener(OnClickClaim);
+        
         if(boosterType == Constants.BoosterType.AddMove)
         {
             boosterIconImage.sprite = addMoveIcon;
@@ -86,14 +75,13 @@ public class AddBoosterUI : MonoBehaviour, IMenu
 
     public void Hide()
     {
-        // GameManager.Instance.ChangeState(GameManager.GameState.Playing);
         this.gameObject.SetActive(false);
         dimImage.SetActive(false);
     }
 
     public void OnClickClose()
     {
-        uIManager.PopPopup();
+        GameEventBus.OnRequestClosePopup?.Invoke();
     }
 
     public IEnumerator AddBoosterEffect(RectTransform rectTransform)
@@ -104,17 +92,12 @@ public class AddBoosterUI : MonoBehaviour, IMenu
             icon.DOKill();
             icon.gameObject.SetActive(true);
             if(boosterButton.GetBooster().GetBoosterType() == Constants.BoosterType.AddMove)
-            {
                 icon.GetComponent<Image>().sprite = addMoveIcon;
-            }
             else if(boosterButton.GetBooster().GetBoosterType() == Constants.BoosterType.Shuffle)
-            {
                 icon.GetComponent<Image>().sprite = shuffleIcon;
-            }
             else
-            {
                 icon.GetComponent<Image>().sprite = hintIcon;
-            }
+
             icon.DOMove(rectTransform.position, 0.7f).SetEase(Ease.OutQuad).OnComplete(() =>
             {
                 icon.gameObject.SetActive(false);
@@ -133,25 +116,17 @@ public class AddBoosterUI : MonoBehaviour, IMenu
     public void OnClickClaim()
     {
         string instruction;
-        if(boosterButton.GetBooster().GetBoosterType() == Constants.BoosterType.AddMove)
-        {
+        var type = boosterButton.GetBooster().GetBoosterType();
+        if(type == Constants.BoosterType.AddMove)
             instruction = "Use the Extra Move Booster to get extra moves!";
-        }
-        else if(boosterButton.GetBooster().GetBoosterType() == Constants.BoosterType.Shuffle)
-        {
+        else if(type == Constants.BoosterType.Shuffle)
             instruction = "Use it to shuffle the board!";
-        }
         else
-        {
             instruction = "Use it to reveal a correct placement";
-        }
-        // StartCoroutine(AddBoosterEffect(boosterButton.gameObject.GetComponent<RectTransform>()));
+
         TutorialManager.Instance.StartUseBoosterTutorial(boosterButton.gameObject, instruction);
-        uIManager.CloseAddBooster();
+        OnClickClose();
     }
 
-    public GameObject GetGameObject()
-    {
-        return this.gameObject;
-    }
+    public GameObject GetGameObject() => this.gameObject;
 }

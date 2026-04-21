@@ -16,24 +16,31 @@ public class LevelUIController : MonoBehaviour
     private Sprite hardSkullSprite;
     private Sprite superSkullSprite;
     private LevelUIManager levelUIManager;
+    private LevelLoader levelLoader;
+    void Start()
+    {
+        levelLoader = CoreServices.Get<LevelLoader>();
+    }
     public void SetUp(LevelUIManager levelUIManager)
     {
         this.levelUIManager = levelUIManager;
     }
     public void ShowLevel(int levelOffset)
     {
+        if (levelLoader == null) levelLoader = CoreServices.Get<LevelLoader>();
+        
         int level = DataManager.Instance.playerData.currentLevel + levelOffset;
         LevelLoader.GameDifficult gameDifficult;
         levelText.text = (level + 1).ToString();
 
-        if(level >= LevelLoader.Instance.GetNumsLevel())
+        if(level >= levelLoader.GetNumsLevel())
         {
             this.gameObject.SetActive(false);
             return;
         }
 
         this.gameObject.SetActive(true);
-        gameDifficult = (LevelLoader.GameDifficult)LevelLoader.Instance.GetDifficultLevel(level);
+        gameDifficult = (LevelLoader.GameDifficult)levelLoader.GetDifficultLevel(level);
         
 
         if(levelOffset == 0)

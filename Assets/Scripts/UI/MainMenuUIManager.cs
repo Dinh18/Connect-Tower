@@ -32,6 +32,17 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
     [SerializeField] private GameObject homeButtonBackground;
     [SerializeField] private GameObject shopButtonBackground;
 
+    void Awake()
+    {
+        shopBackGround = shopButton.GetComponent<BackgroundButton>();
+        homeBackGround = homeButton.GetComponent<BackgroundButton>();
+    }
+
+    void Start()
+    {
+        this.uIManager = CoreServices.Get<UIManager>();
+    }
+
     void OnEnable()
     {
         homeButton.onClick.AddListener(OnClickHome);
@@ -52,7 +63,7 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
 
     public void Setup(UIManager uIManager)
     {
-        this.uIManager = uIManager;
+        
         refillHeartPopup.Setup(uIManager);
         refillHeartPopup.ConfigMainMenu(this);
 
@@ -71,26 +82,24 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         if(DataManager.Instance.playerData.heart < 5) enableAddHeartButton = true;
         else enableAddHeartButton = false;
 
-        shopBackGround = shopButton.GetComponent<BackgroundButton>();
-        homeBackGround = homeButton.GetComponent<BackgroundButton>();
+        if (shopBackGround == null) shopBackGround = shopButton.GetComponent<BackgroundButton>();
+        if (homeBackGround == null) homeBackGround = homeButton.GetComponent<BackgroundButton>();
+        
+        // shopBackGround.Init();
+        // homeBackGround.Init();
 
         levelUIManager.Show();
 
-        shopBackGround.Init();
-        homeBackGround.Init();
-
-        // Debug.Log()
 
     }
 
 
     private void OnClickHome()
     {
-        // yield return new WaitForEndOfFrame();
+        if(uIManager == null) this.uIManager = CoreServices.Get<UIManager>();
         homeBackGround.Select();
         uIManager.CloseShop();   
         shopBackGround.UnSelect();
-        // Debug.Log("Ngu");
     }
     public void OnClickShop()
     {
@@ -102,7 +111,7 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
     {
         if(DataManager.Instance.playerData.heart > 0)
         {
-            GameManager.Instance.ChangeState(GameManager.GameState.Playing);
+            CoreServices.Get<GameManager>().ChangeState(GameManager.GameState.Playing);
         }
         else
         {

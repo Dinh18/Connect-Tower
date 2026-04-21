@@ -7,17 +7,21 @@ public class FirstTimePlayTutorial : MonoBehaviour
 {
     public List<TutorialTask> sequence;
     private int currStep;
+    private LevelLoader levelLoader;
     void Awake()
     {
         sequence = new List<TutorialTask>();
-        
+    }
+    void Start()
+    {
+        levelLoader = CoreServices.Get<LevelLoader>();
     }
     public void Setup()
     {
-        sequence.Add(new TutorialTask(LevelLoader.Instance.GetSlotByIndex(1), "To move the block, please tap it!"));
-        sequence.Add(new TutorialTask(LevelLoader.Instance.GetSlotByIndex(2), "Move the block by tapping an empty space!"));
-        sequence.Add(new TutorialTask(LevelLoader.Instance.GetSlotByIndex(1), "Stacked blocks of the same category move together!"));
-        sequence.Add(new TutorialTask(LevelLoader.Instance.GetSlotByIndex(0), "Stacked blocks of the same category move together!"));
+        sequence.Add(new TutorialTask(levelLoader.GetSlotByIndex(1), "To move the block, please tap it!"));
+        sequence.Add(new TutorialTask(levelLoader.GetSlotByIndex(2), "Move the block by tapping an empty space!"));
+        sequence.Add(new TutorialTask(levelLoader.GetSlotByIndex(1), "Stacked blocks of the same category move together!"));
+        sequence.Add(new TutorialTask(levelLoader.GetSlotByIndex(0), "Stacked blocks of the same category move together!"));
     }
     public void StartFirstTimeTutorial()
     {

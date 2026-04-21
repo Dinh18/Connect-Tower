@@ -1,4 +1,5 @@
 using DG.Tweening;
+using NUnit.Framework;
 using UnityEngine;
 
 public class BackgroundButton : MonoBehaviour
@@ -9,12 +10,9 @@ public class BackgroundButton : MonoBehaviour
     
     private Vector3 originPosBackground;
     private Vector3 originPosIcon;
+    private bool isInit = false;
 
-    // void Awake()
-    // {
-    //     // Init();
-    //     Debug.Log("originPosBackground" + originPosBackground.y);
-    // }
+ 
 
     public void Init()
     {
@@ -25,7 +23,11 @@ public class BackgroundButton : MonoBehaviour
 
     public void Select()
     {
-        // Init();
+        if(!isInit)
+        {
+            Init();
+            isInit = true;
+        } 
         background.gameObject.SetActive(true);
         text.SetActive(true);
 
@@ -46,6 +48,12 @@ public class BackgroundButton : MonoBehaviour
 
     public void UnSelect()
     {
+        if (!isInit)
+        {
+            
+            Init();
+            isInit = true;
+        } 
         // 💡 BÍ QUYẾT AN TOÀN: Luôn Kill trước khi giấu đi
         background.DOKill();
         icon.DOKill();

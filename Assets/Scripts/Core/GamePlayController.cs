@@ -23,7 +23,7 @@ public class GamePlayController : MonoBehaviour
 
     private void HandleSlotClicked(SlotController slot)
     {
-        if(GameManager.Instance.GetCurrState() != GameManager.GameState.Playing) return;
+        if(CoreServices.Get<GameManager>().GetCurrState() != GameManager.GameState.Playing) return;
         if(TutorialManager.Instance.currentTutorial != TutorialManager.TutorialType.None)
         {
             if(TutorialManager.Instance.currentTutorial == TutorialManager.TutorialType.GridPlay)
@@ -49,7 +49,7 @@ public class GamePlayController : MonoBehaviour
                 ResetSelection();
             }
         }
-        else if(!hasSelected && slot == selectedSlot)
+        else if(hasSelected && slot == selectedSlot)
         {
             if(slot.UnSelect())
             {

@@ -4,6 +4,7 @@ using UnityEditor;
 using System;
 using System.Security.Cryptography;
 using System.Text;
+using System.Collections.Generic;
 
 public class DataManager : MonoBehaviour
 {
@@ -28,6 +29,7 @@ public class DataManager : MonoBehaviour
 
         saveFilePath = Path.Combine(Application.persistentDataPath, "saveData.json");
         LoadGame();
+        CoreServices.Register<DataManager>(this);
     }
 
     void Start()
@@ -139,62 +141,80 @@ public class DataManager : MonoBehaviour
             Debug.Log("<color=green>Đã xóa dữ liệu game tại: </color>" + saveFilePath);
         }
     }
+
+    // Tự động lưu game khi người chơi tắt App hoặc thu nhỏ màn hình (Rất quan trọng để tối ưu I/O)
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        if (pauseStatus) SaveGame();
+    }
+
+    private void OnApplicationQuit()
+    {
+        SaveGame();
+    }
+
+    // --- HELPER METHODS (DRY Principle) ---
+    public BoosterData GetBooster(int id)
+    {
+        return playerData.boosters.Find(b => b.id == id);
+    }
+
+    public MechanicData GetMechanic(int id)
+    {
+        return playerData.mechanics.Find(m => m.id == id);
+    }
+    // -------------------------------------
+
     public int GetAmountOfBoosterByID(int id)
     {
-        return playerData.boosters[id].count;
+        var b = GetBooster(id);
+        return b != null ? b.count : 0;
     }
+
     public void UseBooster(int id)
     {
-        for(int i = 0; i < playerData.boosters.Count; i++)
+        var b = GetBooster(id);
+        if (b != null)
         {
-            if(playerData.boosters[i].id == id)
-            {
-                playerData.boosters[i].count--;
-                SaveGame();
-                Debug.Log("Use Booster");
-                OnChangeCountBooster?.Invoke(id, playerData.boosters[i].count);
-                return;
-            }
+            b.count--;
+            // Đã xóa SaveGame() ở đây để tối ưu I/O. File sẽ tự save khi OnApplicationPause.
+            Debug.Log("Use Booster");
+            OnChangeCountBooster?.Invoke(id, b.count);
         }
     }
 
     public void AddBooster(int id, int amount, int price)
     {
-        for(int i = 0; i < playerData.boosters.Count; i++)
+        var b = GetBooster(id);
+        if (b != null)
         {
-            if(playerData.boosters[i].id == id)
-            {
-                playerData.boosters[i].count += amount;
-                UseCoins(price);
-                SaveGame();
-                Debug.Log("Add Booster");
-                OnChangeCountBooster?.Invoke(id, playerData.boosters[i].count);
-                return;
-            }
+            b.count += amount;
+            UseCoins(price);
+            Debug.Log("Add Booster");
+            OnChangeCountBooster?.Invoke(id, b.count);
         }
-        
     }
+
     public void AddCoins(int amount)
     {
         playerData.totalCoins += amount;
-        SaveGame();
         Debug.Log("Add Coins");
         OnChangeCoins?.Invoke(playerData.totalCoins);
     }
+
     public void UseCoins(int amount)
     {
         playerData.totalCoins -= amount;
-        SaveGame();
         Debug.Log("USe Coins");
         OnChangeCoins?.Invoke(playerData.totalCoins);
     }
+
     public void UseHeart(string nextHeartTime)
     {
         if(playerData.heart > 0)
         {
             playerData.heart--;
             playerData.nextHeartTime = nextHeartTime;
-            SaveGame();
             OnChangeHeart?.Invoke(playerData.heart);
         }
     }
@@ -203,10 +223,8 @@ public class DataManager : MonoBehaviour
     {
         playerData.heart = Math.Min(playerData.heart+=amount, 5);
         playerData.nextHeartTime = nextHeartTime;
-        SaveGame();
         OnChangeHeart?.Invoke(playerData.heart);
     }
-
 
     public void LevelUp(LevelLoader.GameDifficult gameDifficult, int maxLevel)
     {
@@ -214,6 +232,7 @@ public class DataManager : MonoBehaviour
         {
             playerData.currentLevel++;
         }
+        
         GameConfigSO config = Resources.Load<GameConfigSO>("GameConfig");
         int rewardE = config != null ? config.coinRewardEasy : 40;
         int rewardH = config != null ? config.coinRewardHard : 80;
@@ -231,118 +250,77 @@ public class DataManager : MonoBehaviour
                 AddCoins(rewardVH);
                 break;
         }
-        if(playerData.currentLevel == playerData.boosters[(int) Constants.BoosterType.AddMove].unlockedLevel)
-        {
-            UnlockBooster((int) Constants.BoosterType.AddMove);
-        }
-        if(playerData.currentLevel == playerData.boosters[(int) Constants.BoosterType.Shuffle].unlockedLevel)
-        {
-            UnlockBooster((int) Constants.BoosterType.Shuffle);
-        }
-        if(playerData.currentLevel == playerData.boosters[(int) Constants.BoosterType.Hint].unlockedLevel)
-        {
-            UnlockBooster((int) Constants.BoosterType.Hint);
-        }
-        SaveGame();
+
+        // Fix lỗi Index bằng cách gọi GetBooster(ID)
+        var addMove = GetBooster((int)Constants.BoosterType.AddMove);
+        if(addMove != null && playerData.currentLevel == addMove.unlockedLevel)
+            UnlockBooster(addMove.id);
+
+        var shuffle = GetBooster((int)Constants.BoosterType.Shuffle);
+        if(shuffle != null && playerData.currentLevel == shuffle.unlockedLevel)
+            UnlockBooster(shuffle.id);
+
+        var hint = GetBooster((int)Constants.BoosterType.Hint);
+        if(hint != null && playerData.currentLevel == hint.unlockedLevel)
+            UnlockBooster(hint.id);
+
+        SaveGame(); // Vẫn giữ SaveGame ở đây vì qua Level là một cột mốc quan trọng (Checkpoint)
         OnChangeLevel?.Invoke(playerData.currentLevel);
     }
 
     public void UnlockBooster(int id)
     {
-        for(int i = 0; i < playerData.boosters.Count; i++)
-        {
-            if(playerData.boosters[i].id == id)
-            {
-                playerData.boosters[i].isUnlocked = true;
-                return;
-            }
-        }
-        Debug.Log("Khong tim thay booster");
+        var b = GetBooster(id);
+        if (b != null) b.isUnlocked = true;
+        else Debug.Log("Khong tim thay booster");
     }
 
     public bool IsUnLockedBooster(int id)
     {
-        for(int i = 0; i < playerData.boosters.Count; i++)
-        {
-            if(playerData.boosters[i].id == id)
-            {
-                // playerData.boosters[i].isUnlocked = true;
-                return playerData.boosters[i].isUnlocked;
-            }
-        }
+        var b = GetBooster(id);
+        if (b != null) return b.isUnlocked;
+        
         Debug.Log("Khong tim thay booster");
         return false;
     }
 
     public bool IsFirstTimeUserBooster(int id)
     {
-        for(int i = 0; i < playerData.boosters.Count; i++)
-        {
-            if(playerData.boosters[i].id == id)
-            {
-                // playerData.boosters[i].isUnlocked = true;
-                return playerData.boosters[i].isFirstTime;
-            }
-        }
+        var b = GetBooster(id);
+        if (b != null) return b.isFirstTime;
+
         Debug.Log("Khong tim thay booster");
         return false;
     }
 
     public void UsedBooster(int id)
     {
-        for(int i = 0; i < playerData.boosters.Count; i++)
-        {
-            if(playerData.boosters[i].id == id)
-            {
-                playerData.boosters[i].isFirstTime = false;
-                return;
-            }
-        }
-        Debug.Log("Khong tim thay booster");
+        var b = GetBooster(id);
+        if (b != null) b.isFirstTime = false;
+        else Debug.Log("Khong tim thay booster");
     }
 
     public int GetUnclockedLevel(int id)
     {
-           for(int i = 0; i < playerData.boosters.Count; i++)
-        {
-            if(playerData.boosters[i].id == id)
-            {
-                return playerData.boosters[i].unlockedLevel;
-            }
-        }
-        return 0;
+        var b = GetBooster(id);
+        return b != null ? b.unlockedLevel : 0;
     }
+
     public void PlayedMechanic(int id)
     {
-        foreach(var mechanic in playerData.mechanics)
-        {
-            if(mechanic.id == id)
-            {
-                mechanic.isFirstTimePlay = false;
-            }
-        }
+        var m = GetMechanic(id);
+        if (m != null) m.isFirstTimePlay = false;
     }
+
     public bool IsFirstTimePlayMechanic(int id)
     {
-        foreach(var mechanic in playerData.mechanics)
-        {
-            if(mechanic.id == id && playerData.currentLevel == mechanic.levelUnclock && mechanic.isFirstTimePlay)
-            {
-                return true;
-            }
-        }
-        return false;
+        var m = GetMechanic(id);
+        return m != null && playerData.currentLevel == m.levelUnclock && m.isFirstTimePlay;
     }
 
     public int GetLevelUnlockMechanic(int id)
     {
-        foreach(var mechanic in playerData.mechanics)
-        {
-            if(mechanic.id == id)
-            {
-                return mechanic.levelUnclock;
-            }
-        }
-        return 0;
+        var m = GetMechanic(id);
+        return m != null ? m.levelUnclock : 0;
     }
 }

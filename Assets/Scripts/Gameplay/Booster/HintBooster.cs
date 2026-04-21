@@ -7,6 +7,15 @@ public class HintBooster : MonoBehaviour, IBooster
     private string boosterName = "Hint";
     private int price = 900;
     private int unlockLevel = 2;
+    
+    void Start()
+    {
+        if (BoosterManager.Instance != null)
+        {
+            BoosterManager.Instance.RegisterBooster(this);
+        }
+    }
+
     public Constants.BoosterType GetBoosterType() => boosterType;
 
     public void AddBooster(int amount)

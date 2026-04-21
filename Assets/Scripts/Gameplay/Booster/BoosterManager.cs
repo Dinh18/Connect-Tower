@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
+using System.Linq;
 
 public class BoosterManager : MonoBehaviour
 {
@@ -9,23 +10,26 @@ public class BoosterManager : MonoBehaviour
     [SerializeField] private Camera mainCamera;
     [SerializeField] private SlotsManager slotsManager;
     [SerializeField] private BlocksManager blocksManager;
-    // [SerializeField] private Transform gridRoot;
-    [SerializeField] private AddMoveBooster addMove;
-    [SerializeField] private HintBooster hint;
-    [SerializeField] private ShuffleBooster suffle;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    
+    // Biến Singleton để các Booster tự tìm đến
+    public static BoosterManager Instance { get; private set; }
+
+    private List<IBooster> activeBoosters = new List<IBooster>();
+    private Dictionary<int, List<BlockController>> visitedBlock = new Dictionary<int, List<BlockController>>();
+
+    void Awake()
     {
-        addMove.Setup(this);
-        hint.Setup(this);
-        suffle.Setup(this);
-        visitedBlock = new Dictionary<int, List<BlockController>>();
+        Instance = this;
     }
 
-    // Update is called once per frame
-    void Update()
+    // Cơ chế Self-Registration (Tự điểm danh) - Không tốn 1 chút hiệu năng quét Scene nào!
+    public void RegisterBooster(IBooster booster)
     {
-        
+        if (!activeBoosters.Contains(booster))
+        {
+            booster.Setup(this);
+            activeBoosters.Add(booster);
+        }
     }
 
     public IEnumerator ShuffleBlock()
@@ -37,19 +41,14 @@ public class BoosterManager : MonoBehaviour
         {
             if(slot.isFinished || !slot.isRevealed || slot.slotType == SlotController.SlotType.Ice) continue;
             
-            slot.MoveToShuffle(slotsManager.gameObject.transform,diffcultBLocks,sameBlocks);
+            slot.MoveToShuffle(slotsManager.gameObject.transform, diffcultBLocks, sameBlocks);
         }
 
         yield return new WaitForSeconds(1f);
-        
 
         List<SlotController> randomSlots = new List<SlotController>(slotsManager.GetAllSlots());
-
         ShuffleList(randomSlots);
-
         ShuffleList(diffcultBLocks);
-
-        // List<BlockController> easyBlocks = new List<BlockController>();
 
         foreach(var kvp in sameBlocks) 
         {
@@ -57,7 +56,6 @@ public class BoosterManager : MonoBehaviour
         }
 
         int index = 0;
-
         while(index < diffcultBLocks.Count)
         {
             for(int i = 0; i < randomSlots.Count; i++)
@@ -67,13 +65,12 @@ public class BoosterManager : MonoBehaviour
                 if(randomSlots[i].blocks.Count >= 4 || !randomSlots[i].isRevealed || randomSlots[i].slotType == SlotController.SlotType.Ice) continue;
 
                 BlockController block = diffcultBLocks[index];
-
                 randomSlots[i].MoveToSlot(block);
-
                 index++;
             }
         }
     }   
+
     private void ShuffleList<T>(List<T> list)
     {
         for (int i = list.Count - 1; i > 0; i--)
@@ -84,16 +81,14 @@ public class BoosterManager : MonoBehaviour
             list[randomIndex] = temp;
         }
     }
-    // Hint Booster
-    private Dictionary<int, List<BlockController>> visitedBlock = new Dictionary<int, List<BlockController>>();
+
     [Header("Hint References")]
     [SerializeField] private GameObject hintImage1;
     [SerializeField] private GameObject hintImage2;
+
     public bool SearchedBlocks()
     {
-        // Setup dữ liệu để bắt đầu tìm kiếm.
         Dictionary<int, List<BlockController>> blocksByTopicID = new Dictionary<int, List<BlockController>>();
-
         List<SlotController> randomSlot = new List<SlotController>();
 
         foreach(SlotController slot in slotsManager.GetAllSlots())
@@ -124,7 +119,7 @@ public class BoosterManager : MonoBehaviour
                 }
             }
         }
-        // Tìm kiếm các cặp block giống nhau.
+
         foreach((int topicID, List<BlockController> blocks) in blocksByTopicID)
         {
             if(blocks.Count < 2) continue;
@@ -145,21 +140,20 @@ public class BoosterManager : MonoBehaviour
             }
             return true;
         }
-        // Tìm block đơn lẻ mà topic của nó đã được tìm kiếm trước đó khi không có cặp block nào
+
         foreach((int topicID, List<BlockController> blocks) in blocksByTopicID)
         {
             if(visitedBlock.ContainsKey(topicID))
             {
                 visitedBlock[topicID].Add(blocks[0]);
-                
-                StartCoroutine(HintCoroutine(0.5f,hintImage1, hintImage2, blocks[0]));
+                StartCoroutine(HintCoroutine(0.5f, hintImage1, hintImage2, blocks[0]));
                 return true;
             }
         }
 
         return false;
-        
     }
+
     public IEnumerator HintCoroutine(float time, GameObject hintImage1, GameObject hintImage2, BlockController block1, BlockController block2 = null)
     {
         hintImage1.transform.position = mainCamera.WorldToScreenPoint(block1.transform.position);

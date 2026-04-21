@@ -8,21 +8,17 @@ public class InputManager : MonoBehaviour
     // private bool selected = false;
     // private SlotController selectedSlot;
     public static event Action<SlotController> OnSlotClicked;
-    private Camera mainCamera;
+
 
     void Awake()
     {
-        mainCamera = Camera.main;
+        CoreServices.Register<InputManager>(this);
     }
 
     // Update is called once per frame
     void Update()
     {
         DetectInput();
-    }
-    public void Setup()
-    {
-        
     }
     public void DetectInput()
     {

@@ -24,10 +24,8 @@ public class TutorialManager : MonoBehaviour
     void Awake()
     {
         Instance = this;
-
         tutorialCanvas.SetActive(false);
-
-        
+        CoreServices.Register<TutorialManager>(this);
     }
 
     public void SetupFirstTimeTutorial()

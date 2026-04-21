@@ -30,6 +30,7 @@ public class AudioManager : MonoBehaviour
     {
         Instance = this;
         LoadAudioSetting();
+        CoreServices.Register<AudioManager>(this);
     }
     public void PlaySFX(AudioClip audioClip)
     {

@@ -1,10 +1,6 @@
 using System.Collections;
-using System.Reflection;
 using DG.Tweening;
-using NUnit.Framework;
-using TMPro;
 using UnityEngine;
-using UnityEngine.PlayerLoop;
 using UnityEngine.UI;
 
 public class InGameUIManager : MonoBehaviour, IMenu
@@ -20,22 +16,27 @@ public class InGameUIManager : MonoBehaviour, IMenu
     [SerializeField] private Image levelDifficultImgae;
     [SerializeField] private Image levelDifficultProgressImage;
     [SerializeField] private Text levelDifficultLevelText;
+    
     private Sprite hardLevelSprite;
     private Sprite superLevelSprite;
     private Sprite normalLevelProgressSprite;
     private Sprite hardLevelProgressSprite;
     private Sprite superLevelProgressSprite;
+
     [Header("Move Count Text Setting")]
     [SerializeField] private Color normalColor = Color.white;
     [SerializeField] private Color warningColor = Color.red;
-    [SerializeField] private float flashSpeed = 0.5f; // Thời gian cho 1 nhịp thở
+    [SerializeField] private float flashSpeed = 0.5f; 
     [SerializeField] private float scaleMultiplier = 1.2f;
     private bool isFlashing = false;
+
     [Header("Button References")]
     [SerializeField] private Button SettingButton;
-    [Header("Booster UI References")]
+
     private BoosterButton[] boosterButtons;
-    private UIManager uIManager;
+    private GameManager gameManager;
+    private LevelLoader levelLoader;
+
     private Sprite GetLevelSprite(LevelLoader.GameDifficult gameDifficult)
     {
         if(gameDifficult == LevelLoader.GameDifficult.Hard)
@@ -48,8 +49,9 @@ public class InGameUIManager : MonoBehaviour, IMenu
             if(superLevelSprite == null) superLevelSprite = Resources.Load<Sprite>(Constants.SUPERHARD_TEXT_UI);
             return superLevelSprite;
         }
-        else return null;
+        return null;
     } 
+
     private Sprite GetLevelProgressSprite(LevelLoader.GameDifficult gameDifficult)
     {
         if(gameDifficult == LevelLoader.GameDifficult.Easy)
@@ -68,64 +70,61 @@ public class InGameUIManager : MonoBehaviour, IMenu
             return superLevelProgressSprite;
         }
     }
+
     void OnEnable()
     {
-        GameManager.OnChangeMoves+=UpdateMovesText;
-        SlotsManager.OnChangeFinishedSlots+=UpdateProgressText;
-        SlotsManager.OnChangeFinishedSlots+=UpdateFinishedSlotsSlider;
-        DataManager.OnChangeCoins+=UpDateCoinText;
+        GameManager.OnChangeMoves += UpdateMovesText;
+        SlotsManager.OnChangeFinishedSlots += UpdateProgressText;
+        SlotsManager.OnChangeFinishedSlots += UpdateFinishedSlotsSlider;
+        DataManager.OnChangeCoins += UpDateCoinText;
+        
+        SettingButton.onClick.RemoveAllListeners();
+        SettingButton.onClick.AddListener(() => GameEventBus.OnRequestUI?.Invoke(GameEventBus.UIType.Settings));
+
+        coinsButton.onClick.RemoveAllListeners();
+        coinsButton.onClick.AddListener(() => GameEventBus.OnRequestUI?.Invoke(GameEventBus.UIType.Shop));
     }
+
     void OnDisable()
     {
-        GameManager.OnChangeMoves-=UpdateMovesText;
-        SlotsManager.OnChangeFinishedSlots-=UpdateProgressText;
-        SlotsManager.OnChangeFinishedSlots-=UpdateFinishedSlotsSlider;
-        DataManager.OnChangeCoins-=UpDateCoinText;
-        // DataManager.OnChangeCountBooster-=UpdateBoosterCountText;
-
-    }
-    public void Hide()
-    {
-        this.gameObject.SetActive(false);
+        GameManager.OnChangeMoves -= UpdateMovesText;
+        SlotsManager.OnChangeFinishedSlots -= UpdateProgressText;
+        SlotsManager.OnChangeFinishedSlots -= UpdateFinishedSlotsSlider;
+        DataManager.OnChangeCoins -= UpDateCoinText;
     }
 
     public void Setup(UIManager uIManager)
     {
-        this.uIManager = uIManager;
+        levelLoader = CoreServices.Get<LevelLoader>();
+        gameManager = CoreServices.Get<GameManager>();
 
-        SettingButton.onClick.RemoveAllListeners();
-        SettingButton.onClick.AddListener(uIManager.OpenSetting);
-
-        coinsButton.onClick.RemoveAllListeners();
-        coinsButton.onClick.AddListener(() => uIManager.OpenShop(false));
-
-        boosterButtons = FindObjectsByType<BoosterButton>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        boosterButtons = GetComponentsInChildren<BoosterButton>(true);
         foreach(var booster in boosterButtons)
         {
             booster.Setup(uIManager);
         }
-
     }
+
     public void Show()
     {
         this.gameObject.SetActive(true);
+        if (gameManager == null) gameManager = CoreServices.Get<GameManager>();
+        if (levelLoader == null) levelLoader = CoreServices.Get<LevelLoader>();
+
         coinsText.text = DataManager.Instance.playerData.totalCoins.ToString();
         levelText.text = "Level " + (DataManager.Instance.playerData.currentLevel + 1).ToString();
         movesText.color = normalColor;
-        movesText.text = GameManager.Instance.GetMaxMoves().ToString();
+        movesText.text = gameManager.GetMaxMoves().ToString();
+        
         foreach(var booster in boosterButtons)
         {
             booster.Show();
         }
 
-        UpdateFinishedSlotsSlider(0, LevelLoader.Instance.GetNumsTopic());
-        UpdateProgressText(0, LevelLoader.Instance.GetNumsTopic());
-        
-        SetupProgressBar(LevelLoader.Instance.gameDifficult);
-        
+        UpdateFinishedSlotsSlider(0, levelLoader.GetNumsTopic());
+        UpdateProgressText(0, levelLoader.GetNumsTopic());
+        SetupProgressBar(levelLoader.gameDifficult);
         StopWarningFlash();
-        Debug.Log("InGame");
-
     }
 
     private void SetupProgressBar(LevelLoader.GameDifficult gameDifficult)
@@ -135,7 +134,6 @@ public class InGameUIManager : MonoBehaviour, IMenu
             levelDifficultImgae.sprite = GetLevelSprite(gameDifficult);
             levelDifficultProgressImage.sprite = GetLevelProgressSprite(gameDifficult);
             levelDifficultLevelText.text = "Hard";
-
             levelDifficultImgae.gameObject.SetActive(true);
             levelDifficultLevelText.gameObject.SetActive(true);
         }
@@ -144,7 +142,6 @@ public class InGameUIManager : MonoBehaviour, IMenu
             levelDifficultImgae.sprite = GetLevelSprite(gameDifficult);
             levelDifficultProgressImage.sprite = GetLevelProgressSprite(gameDifficult);
             levelDifficultLevelText.text = "Super Hard";
-
             levelDifficultImgae.gameObject.SetActive(true);
             levelDifficultLevelText.gameObject.SetActive(true);
         }
@@ -163,7 +160,7 @@ public class InGameUIManager : MonoBehaviour, IMenu
         {
             if(!isFlashing) StartWarningFlash();
         }
-        else if(moves <= 0 || moves > 5)
+        else
         {
             StopWarningFlash();
         }   
@@ -173,14 +170,8 @@ public class InGameUIManager : MonoBehaviour, IMenu
     {
         movesText.DOKill();
         movesText.transform.DOKill();
-
-        movesText.DOColor(warningColor, flashSpeed)
-                 .SetLoops(-1, LoopType.Yoyo) 
-                 .SetEase(Ease.InOutSine);    
-
-        movesText.transform.DOScale(Vector3.one * scaleMultiplier, flashSpeed)
-                           .SetLoops(-1, LoopType.Yoyo)
-                           .SetEase(Ease.InOutSine);
+        movesText.DOColor(warningColor, flashSpeed).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);    
+        movesText.transform.DOScale(Vector3.one * scaleMultiplier, flashSpeed).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
         isFlashing = true;
     }
 
@@ -188,31 +179,24 @@ public class InGameUIManager : MonoBehaviour, IMenu
     {
         movesText.DOKill();
         movesText.transform.DOKill();
-
         movesText.color = normalColor;
         movesText.transform.localScale = Vector3.one; 
         isFlashing = false;
     }
 
-
     private void UpdateFinishedSlotsSlider(int finishedSlots, int numSlots)
     {
         float value = (float) finishedSlots / numSlots;
-        finishedSlotsSlider.DOValue(value, 0.5f)
-                .SetEase(Ease.OutCubic);
+        finishedSlotsSlider.DOValue(value, 0.5f).SetEase(Ease.OutCubic);
     }
+
     private void UpdateProgressText(int finishedSlots, int numSlots)
     {
         progressText.text = finishedSlots.ToString() + "/" + numSlots.ToString();
     }
 
-    private void UpDateCoinText(int coins)
-    {
-        coinsText.text = coins.ToString();
-    }
+    private void UpDateCoinText(int coins) => coinsText.text = coins.ToString();
 
-    public GameObject GetGameObject()
-    {
-        return this.gameObject;
-    }
+    public void Hide() => this.gameObject.SetActive(false);
+    public GameObject GetGameObject() => this.gameObject;
 }
