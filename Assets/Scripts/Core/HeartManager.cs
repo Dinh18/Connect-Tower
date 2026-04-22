@@ -9,6 +9,7 @@ public class HeartManager : MonoBehaviour
     [SerializeField] private Text timerTextAddHeardPopup;
     private DateTime nextHeartTime;
     private DateTime lastHeartTime;
+    private DataManager dataManager;
     void Awake()
     {
         CoreServices.Register<HeartManager>(this);
@@ -16,13 +17,14 @@ public class HeartManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        dataManager = CoreServices.Get<DataManager>();
         LoadHeart();
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(DataManager.Instance.playerData.heart < 5)
+        if(dataManager.GetHearts() < 5)
         {
             UpdateTimer();
         }
@@ -43,7 +45,7 @@ public class HeartManager : MonoBehaviour
         if(secondsLeft <= 0)
         {
             nextHeartTime = nextHeartTime.AddSeconds(restoreDuration);
-            DataManager.Instance.AddHeart(1, nextHeartTime.ToString());
+            dataManager.AddHeart(1, nextHeartTime.ToString());
         }
         else
         {
@@ -56,20 +58,20 @@ public class HeartManager : MonoBehaviour
 
     public void UseHeart()
     {
-        if (DataManager.Instance.playerData.heart > 0)
+        if (dataManager.GetHearts() > 0)
         {
-            if (DataManager.Instance.playerData.heart == 5)
+            if (dataManager.GetHearts() == 5)
             {
                 nextHeartTime = DateTime.Now.AddSeconds(restoreDuration);
             }
             
-            DataManager.Instance.UseHeart(nextHeartTime.ToString());
+            dataManager.UseHeart(nextHeartTime.ToString());
         }
     }
 
     private void LoadHeart()
     {
-        string nextTimeStr = DataManager.Instance.playerData.nextHeartTime;
+        string nextTimeStr = dataManager.GetNextHeartTime();
         if (!string.IsNullOrEmpty(nextTimeStr))
         {
             nextHeartTime = DateTime.Parse(nextTimeStr);
@@ -79,7 +81,7 @@ public class HeartManager : MonoBehaviour
             if (secondsOffline > 0)
             {
                 int energyToAdd = 1 + (int)(secondsOffline / restoreDuration);
-                DataManager.Instance.AddHeart(energyToAdd, nextHeartTime.ToString());
+                dataManager.AddHeart(energyToAdd, nextHeartTime.ToString());
                 
                 // Tính lại mốc thời gian lẻ còn dư
                 double remainderSeconds = secondsOffline % restoreDuration;

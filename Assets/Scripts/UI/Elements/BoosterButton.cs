@@ -1,3 +1,4 @@
+using Unity.Android.Gradle.Manifest;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,6 +7,7 @@ public class BoosterButton : MonoBehaviour
     private Button boosterButton;
     private IBooster booster;
     private IBoosterEffect boosterEffect;
+    private DataManager dataManager;
     // private UIManager uIManager; // Đã loại bỏ
     [SerializeField] Text countText;
     [SerializeField] GameObject addImage;
@@ -31,29 +33,31 @@ public class BoosterButton : MonoBehaviour
         booster = GetComponentInChildren<IBooster>();
         boosterEffect = GetComponentInChildren<IBoosterEffect>();
     }
+        
 
     public IBooster GetBooster() => booster;
 
     public void Setup(UIManager uIManager)
     {
         addBoosterUI.Setup(uIManager);
+        dataManager = CoreServices.Get<DataManager>(); 
     }
 
     public void Show()
     {
         int id = (int)booster.GetBoosterType();
-        bool isUnlocked = DataManager.Instance.IsUnLockedBooster(id);
+        bool isUnlocked = dataManager.IsUnLockedBooster(id);
         
         lockElements.SetActive(!isUnlocked);
         unlockElements.SetActive(isUnlocked);
 
-        if(DataManager.Instance.playerData.currentLevel == DataManager.Instance.GetUnclockedLevel(id) && DataManager.Instance.IsFirstTimeUserBooster(id))
+        if(dataManager.GetCurrentLevel() == dataManager.GetUnclockedLevel(id) && dataManager.IsFirstTimeUserBooster(id))
         {
             addBoosterUI.SetupButton(this);
             OpenAddBoosterPopup(true);
         }
 
-        UpdateCountText(id, DataManager.Instance.GetAmountOfBoosterByID(id));
+        UpdateCountText(id, dataManager.GetAmountOfBoosterByID(id));
     }
 
     public void UpdateCountText(int id, int amount)
@@ -72,10 +76,10 @@ public class BoosterButton : MonoBehaviour
 
     public void OnButtonClicked()
     {
-        if (!DataManager.Instance.IsUnLockedBooster((int)booster.GetBoosterType())) return;
+        if (!dataManager.IsUnLockedBooster((int)booster.GetBoosterType())) return;
 
         int id = (int)booster.GetBoosterType();
-        if(DataManager.Instance.IsFirstTimeUserBooster(id) && TutorialManager.Instance.currentTutorial == TutorialManager.TutorialType.BoosterUI)
+        if(dataManager.IsFirstTimeUserBooster(id) && TutorialManager.Instance.currentTutorial == TutorialManager.TutorialType.BoosterUI)
         {
             TutorialManager.Instance.EndBoosterTutorial(id);
         }

@@ -34,5 +34,6 @@ public static class GameEventBus
 
     // --- BOOSTER EVENTS ---
     public static Action<AddBoosterUI, BoosterButton, string, string, Constants.BoosterType, bool> OnRequestAddBooster;
+    public static Action OnRequestCloseShop;
     public static Action<BoosterButton> OnClickAddBooster;
 }

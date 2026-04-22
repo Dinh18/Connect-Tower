@@ -10,6 +10,6 @@ public class FirstTimeUseBooster : MonoBehaviour
     public void EndBoosterTutorial(int id)
     {
         TutorialManager.Instance.EndTutorial();
-        DataManager.Instance.UseBooster(id);
+        CoreServices.Get<DataManager>().UseBooster(id);
     }
 }

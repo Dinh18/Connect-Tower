@@ -13,12 +13,12 @@ public class BlocksManager : MonoBehaviour
     
     void Awake()
     {
-        blockObj = Resources.Load<GameObject>(Constants.BLOCK_TEST_1_PATH);
         CoreServices.Register<BlocksManager>(this);
     }
     
     public void PoolBlock(int numsBlock)
     {
+        if(blockObj == null) blockObj = Resources.Load<GameObject>(Constants.BLOCK_TEST_1_PATH);
         for(int i = 0; i < numsBlock; i++)
         {
             GameObject block = Instantiate(blockObj, this.transform);

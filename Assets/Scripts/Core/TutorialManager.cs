@@ -85,14 +85,14 @@ public class TutorialManager : MonoBehaviour
     public void EndMechanicTutorial()
     {
         EndTutorial();
-        DataManager.Instance.PlayedMechanic(mechanic);
+        CoreServices.Get<DataManager>().PlayedMechanic(mechanic);
     }
 
     public void EndBoosterTutorial(int id)
     {
         EndTutorial();
         // DataManager.Instance.UseBooster(id);
-        DataManager.Instance.UsedBooster(id);
+        CoreServices.Get<DataManager>().UsedBooster(id);
     }
 
     public void StartTutorial(GameObject target, string instruction)

@@ -3,54 +3,39 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    public enum GameState { None, MainMenu, Playing, Pause, Win, Lose, Resume }
     
-    public enum GameState
-    {
-        None,
-        MainMenu,
-        Playing,
-        Pause,
-        Win,
-        Lose,
-        Resume
-    }
-    
-    private int moves;
-    private int maxMoves;
     private GameState currState = GameState.None;
     private GameState prevState = GameState.None;
+    private int moves;
+    private int maxMoves;
+
+    // Dependencies injected via Init
     private CameraController cameraController;
     private SlotsManager slotsManager;
     private HeartManager heartManager;
     private LevelLoader levelLoader;
+
     public static event Action<int> OnChangeMoves;
 
-    void Awake()
+    public void Init(SlotsManager slots, HeartManager heart, CameraController cam, LevelLoader loader)
     {
+        this.slotsManager = slots;
+        this.heartManager = heart;
+        this.cameraController = cam;
+        this.levelLoader = loader;
+
         CoreServices.Register<GameManager>(this);
         Application.targetFrameRate = 60;
     }
 
-    void Start()
+    public void StartGame()
     {
-        slotsManager = CoreServices.Get<SlotsManager>();
-        heartManager = CoreServices.Get<HeartManager>();
-        cameraController = CoreServices.Get<CameraController>();
-        levelLoader = CoreServices.Get<LevelLoader>();
-
         ChangeState(GameState.MainMenu);
     }
 
-    void OnEnable()
-    {
-        SlotController.OnMoveFisnished += Move;
-    }
-
-    void OnDisable()
-    {
-        SlotController.OnMoveFisnished -= Move;
-    }
-
+    void OnEnable() { SlotController.OnMoveFisnished += Move; }
+    void OnDisable() { SlotController.OnMoveFisnished -= Move; }
 
     public GameState GetCurrState() => currState;
     public GameState GetPrevState() => prevState;
@@ -59,12 +44,10 @@ public class GameManager : MonoBehaviour
 
     public void SetupLevel(int maxMoves)
     {
-        moves = maxMoves;
+        this.moves = maxMoves;
         this.maxMoves = maxMoves;
         OnChangeMoves?.Invoke(moves);
         GameEventBus.OnMovesUpdated?.Invoke(moves);
-
-        
         cameraController.FitCamera(slotsManager.row1, slotsManager.row2);
     }
 
@@ -77,17 +60,11 @@ public class GameManager : MonoBehaviour
             GameEventBus.OnMovesUpdated?.Invoke(moves);
             
             if(moves <= 0 && !slotsManager.GetLevelComleted())
-            {
                 ChangeState(GameState.Lose);
-            }
         }
     }
 
-    public void UseHeart()
-    {
-        heartManager.UseHeart();
-    }
-
+    public void UseHeart() => heartManager.UseHeart();
     public void AddMove(int moves)
     {
         this.moves += moves;
@@ -102,18 +79,12 @@ public class GameManager : MonoBehaviour
         prevState = currState;
         currState = newState;
 
-        // Xử lý nội bộ (Nếu muốn gỡ sạch, hãy chuyển đoạn này sang LevelLoader và InputManager để chúng tự nghe EventBus)
         if(currState == GameState.Playing && prevState != GameState.Pause)
         {
             levelLoader.LoadLevel();
-            // inputManager.Setup();
         }
 
-
-
-        // ĐỒNG THỜI bắn tín hiệu EventBus ra toàn bộ thế giới
         GameEventBus.OnGameStateChanged?.Invoke(currState);
-        
         Debug.Log($"[GameManager] State Changed: {prevState} -> {currState}");
     }
 }

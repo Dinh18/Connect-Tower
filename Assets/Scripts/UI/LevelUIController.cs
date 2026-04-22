@@ -29,7 +29,7 @@ public class LevelUIController : MonoBehaviour
     {
         if (levelLoader == null) levelLoader = CoreServices.Get<LevelLoader>();
         
-        int level = DataManager.Instance.playerData.currentLevel + levelOffset;
+        int level = CoreServices.Get<DataManager>().playerData.currentLevel + levelOffset;
         LevelLoader.GameDifficult gameDifficult;
         levelText.text = (level + 1).ToString();
 

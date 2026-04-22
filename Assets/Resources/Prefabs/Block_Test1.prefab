@@ -401,7 +401,6 @@ GameObject:
   m_Component:
   - component: {fileID: 3637411509030855007}
   - component: {fileID: 2654074584671658652}
-  - component: {fileID: 6957811726929169279}
   - component: {fileID: 1995989336647522203}
   m_Layer: 0
   m_Name: Ice_Image
@@ -437,18 +436,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6810414711911370955}
   m_CullTransparentMesh: 1
---- !u!114 &6957811726929169279
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6810414711911370955}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d918d17eeb1c4aa5dcc3c1b949aa8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Empty
 --- !u!114 &1995989336647522203
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -613,8 +600,6 @@ GameObject:
   m_Component:
   - component: {fileID: 3595981077154881593}
   - component: {fileID: 387050790550054524}
-  - component: {fileID: 7271066100976009352}
-  - component: {fileID: 5803395380274202806}
   m_Layer: 0
   m_Name: Canvas
   m_TagString: Untagged
@@ -666,30 +651,6 @@ Canvas:
   m_SortingLayerID: -277240369
   m_SortingOrder: 0
   m_TargetDisplay: 0
---- !u!114 &7271066100976009352
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7157490175839595886}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d918d17eeb1c4aa5dcc3c1b949aa8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Empty
---- !u!114 &5803395380274202806
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7157490175839595886}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea7d918d17eeb1c4aa5dcc3c1b949aa8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Empty
 --- !u!1 &7185840541871333690
 GameObject:
   m_ObjectHideFlags: 0

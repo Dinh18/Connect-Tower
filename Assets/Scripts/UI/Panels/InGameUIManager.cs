@@ -111,8 +111,8 @@ public class InGameUIManager : MonoBehaviour, IMenu
         if (gameManager == null) gameManager = CoreServices.Get<GameManager>();
         if (levelLoader == null) levelLoader = CoreServices.Get<LevelLoader>();
 
-        coinsText.text = DataManager.Instance.playerData.totalCoins.ToString();
-        levelText.text = "Level " + (DataManager.Instance.playerData.currentLevel + 1).ToString();
+        coinsText.text = CoreServices.Get<DataManager>().GetTotalCoins().ToString();
+        levelText.text = "Level " + (CoreServices.Get<DataManager>().GetCurrentLevel() + 1).ToString();
         movesText.color = normalColor;
         movesText.text = gameManager.GetMaxMoves().ToString();
         

@@ -27,7 +27,7 @@ public class ShopPanel : MonoBehaviour, IMenu
     public void Show()
     {
         this.gameObject.SetActive(true);    
-        coinCountText.text = DataManager.Instance.playerData.totalCoins.ToString();
+        coinCountText.text = CoreServices.Get<DataManager>().GetTotalCoins().ToString();
     }
 
     public void ShowCloseButton()

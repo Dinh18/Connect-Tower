@@ -1,6 +1,5 @@
 using System.IO;
 using UnityEngine;
-using UnityEditor;
 using System;
 using System.Security.Cryptography;
 using System.Text;
@@ -8,53 +7,36 @@ using System.Collections.Generic;
 
 public class DataManager : MonoBehaviour
 {
-    public static DataManager Instance;
     public PlayerData playerData;
     private string saveFilePath;
+
     public static event Action<int> OnChangeCoins;
     public static event Action<int> OnChangeLevel;
     public static event Action<int,int> OnChangeCountBooster;
     public static event Action<int> OnChangeHeart;
-    void Awake()
-    {
-        if(Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(this.gameObject);
-            return;
-        }
 
+    public void Init()
+    {
         saveFilePath = Path.Combine(Application.persistentDataPath, "saveData.json");
         LoadGame();
         CoreServices.Register<DataManager>(this);
     }
 
-    void Start()
-    {
-        
-    }
-
-    // 16-byte key and IV cho AES. Bạn có thể thay đổi chuỗi này để tăng tính bảo mật.
+    // --- ENCRYPTION ---
     private readonly byte[] encryptionKey = Encoding.UTF8.GetBytes("ThaleGame1234567");
     private readonly byte[] encryptionIV = Encoding.UTF8.GetBytes("ThaleTower765432");
 
     public void SaveGame()
     {
         string jsonString = JsonUtility.ToJson(playerData, true);
-        
         try
         {
             string encryptedData = EncryptString(jsonString);
             File.WriteAllText(saveFilePath, encryptedData);
-            Debug.Log("<color=green>Đã mã hóa và lưu game tại: </color>" + saveFilePath);
         }
         catch (Exception e)
         {
             Debug.LogError("Lỗi khi lưu game: " + e.Message);
-            // Fallback lưu không mã hóa nếu có lỗi phát sinh
             File.WriteAllText(saveFilePath, jsonString);
         }
     }
@@ -68,30 +50,37 @@ public class DataManager : MonoBehaviour
             {
                 string decryptedJson = DecryptString(fileContent);
                 playerData = JsonUtility.FromJson<PlayerData>(decryptedJson);
-                Debug.Log("<color=green>Đã giải mã và tải game từ: </color>" + saveFilePath);
             }
-            catch (Exception e)
+            catch
             {
-                Debug.LogWarning("Không thể giải mã dữ liệu (Có thể là file cũ chưa mã hóa). Thử đọc json thuần túy... Lỗi: " + e.Message);
-                try 
-                {
-                    // Fallback cho file cũ chưa mã hóa
-                    playerData = JsonUtility.FromJson<PlayerData>(fileContent);
-                    Debug.Log("<color=green>Đã tải game (không mã hóa) từ: </color>" + saveFilePath);
-                }
-                catch
-                {
-                    Debug.LogError("File save bị hỏng hoàn toàn. Reset data.");
-                    playerData = new PlayerData();
-                    SaveGame();
-                }
+                // Fallback for old unencrypted files or corrupted files
+                try { playerData = JsonUtility.FromJson<PlayerData>(fileContent); }
+                catch { playerData = new PlayerData(); SaveGame(); }
             }
         }
         else
         {
             playerData = new PlayerData();
-            Debug.LogWarning("<color=red>Không tìm thấy file lưu game tại: </color>" + saveFilePath);
             SaveGame();
+            Debug.Log("<color=yellow>[DataManager]</color> Không tìm thấy file save cũ. Đã tạo file save MỚI tại: " + saveFilePath);
+        }
+    }
+
+    [ContextMenu("Delete Save Data")]
+    public void DeleteData()
+    {
+        // Phải đảm bảo saveFilePath không bị null nếu bấm nút trước khi Play
+        string path = string.IsNullOrEmpty(saveFilePath) ? Path.Combine(Application.persistentDataPath, "saveData.json") : saveFilePath;
+
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+            playerData = new PlayerData(); // Khởi tạo lại dữ liệu trắng
+            Debug.Log("<color=red>[DataManager]</color> Đã xóa thành công file save tại: " + path);
+        }
+        else
+        {
+            Debug.LogWarning("<color=yellow>[DataManager]</color> Không có file save nào để xóa tại: " + path);
         }
     }
 
@@ -99,16 +88,12 @@ public class DataManager : MonoBehaviour
     {
         using (Aes aesAlg = Aes.Create())
         {
-            aesAlg.Key = encryptionKey;
-            aesAlg.IV = encryptionIV;
+            aesAlg.Key = encryptionKey; aesAlg.IV = encryptionIV;
             ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV);
             using (MemoryStream msEncrypt = new MemoryStream())
             {
                 using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
-                using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
-                {
-                    swEncrypt.Write(plainText);
-                }
+                using (StreamWriter swEncrypt = new StreamWriter(csEncrypt)) { swEncrypt.Write(plainText); }
                 return Convert.ToBase64String(msEncrypt.ToArray());
             }
         }
@@ -119,51 +104,71 @@ public class DataManager : MonoBehaviour
         byte[] cipherBytes = Convert.FromBase64String(cipherText);
         using (Aes aesAlg = Aes.Create())
         {
-            aesAlg.Key = encryptionKey;
-            aesAlg.IV = encryptionIV;
+            aesAlg.Key = encryptionKey; aesAlg.IV = encryptionIV;
             ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
             using (MemoryStream msDecrypt = new MemoryStream(cipherBytes))
             using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
-            using (StreamReader srDecrypt = new StreamReader(csDecrypt))
-            {
-                return srDecrypt.ReadToEnd();
-            }
+            using (StreamReader srDecrypt = new StreamReader(csDecrypt)) { return srDecrypt.ReadToEnd(); }
         }
     }
 
-    [ContextMenu("Delete Save Data")]
-    public void DeleteData()
+    // --- DATA ACCESSORS ---
+    public int GetCurrentLevel() => playerData.currentLevel;
+    public int GetTotalCoins() => playerData.wallet.totalCoins;
+    public int GetHearts() => playerData.wallet.heart;
+    public string GetNextHeartTime() => playerData.wallet.nextHeartTime;
+    public List<MechanicData> GetMechanics() => playerData.progress.mechanics;
+    public BoosterData GetBooster(int id) => playerData.inventory.boosters.Find(b => b.id == id);
+    public MechanicData GetMechanic(int id) => playerData.progress.mechanics.Find(m => m.id == id);
+
+    public void AddCoins(int amount)
     {
-        if(File.Exists(saveFilePath))
+        playerData.wallet.totalCoins += amount;
+        OnChangeCoins?.Invoke(playerData.wallet.totalCoins);
+    }
+
+    public void UseCoins(int amount)
+    {
+        playerData.wallet.totalCoins -= amount;
+        OnChangeCoins?.Invoke(playerData.wallet.totalCoins);
+    }
+
+    public void UseHeart(string nextHeartTime)
+    {
+        if(playerData.wallet.heart > 0)
         {
-            File.Delete(saveFilePath);
-            playerData = new PlayerData(); // Khoi tao du lieu mac dinh sau khi xoa file luu
-            Debug.Log("<color=green>Đã xóa dữ liệu game tại: </color>" + saveFilePath);
+            playerData.wallet.heart--;
+            playerData.wallet.nextHeartTime = nextHeartTime;
+            OnChangeHeart?.Invoke(playerData.wallet.heart);
         }
     }
 
-    // Tự động lưu game khi người chơi tắt App hoặc thu nhỏ màn hình (Rất quan trọng để tối ưu I/O)
-    private void OnApplicationPause(bool pauseStatus)
+    public void AddHeart(int amount, string nextHeartTime)
     {
-        if (pauseStatus) SaveGame();
+        playerData.wallet.heart = Math.Min(playerData.wallet.heart + amount, 5);
+        playerData.wallet.nextHeartTime = nextHeartTime;
+        OnChangeHeart?.Invoke(playerData.wallet.heart);
     }
 
-    private void OnApplicationQuit()
+    public void LevelUp(LevelLoader.GameDifficult gameDifficult, int maxLevel)
     {
+        if(playerData.currentLevel < maxLevel) playerData.currentLevel++;
+        
+        GameConfigSO config = Resources.Load<GameConfigSO>("GameConfig");
+        int reward = (gameDifficult == LevelLoader.GameDifficult.Easy) ? (config?.coinRewardEasy ?? 40) : 
+                     (gameDifficult == LevelLoader.GameDifficult.Hard) ? (config?.coinRewardHard ?? 80) : (config?.coinRewardSuperHard ?? 120);
+
+        AddCoins(reward);
+
+        // Auto unlock boosters based on level
+        foreach(var b in playerData.inventory.boosters)
+        {
+            if(playerData.currentLevel == b.unlockedLevel) b.isUnlocked = true;
+        }
+
         SaveGame();
+        OnChangeLevel?.Invoke(playerData.currentLevel);
     }
-
-    // --- HELPER METHODS (DRY Principle) ---
-    public BoosterData GetBooster(int id)
-    {
-        return playerData.boosters.Find(b => b.id == id);
-    }
-
-    public MechanicData GetMechanic(int id)
-    {
-        return playerData.mechanics.Find(m => m.id == id);
-    }
-    // -------------------------------------
 
     public int GetAmountOfBoosterByID(int id)
     {
@@ -177,8 +182,6 @@ public class DataManager : MonoBehaviour
         if (b != null)
         {
             b.count--;
-            // Đã xóa SaveGame() ở đây để tối ưu I/O. File sẽ tự save khi OnApplicationPause.
-            Debug.Log("Use Booster");
             OnChangeCountBooster?.Invoke(id, b.count);
         }
     }
@@ -190,114 +193,32 @@ public class DataManager : MonoBehaviour
         {
             b.count += amount;
             UseCoins(price);
-            Debug.Log("Add Booster");
             OnChangeCountBooster?.Invoke(id, b.count);
         }
-    }
-
-    public void AddCoins(int amount)
-    {
-        playerData.totalCoins += amount;
-        Debug.Log("Add Coins");
-        OnChangeCoins?.Invoke(playerData.totalCoins);
-    }
-
-    public void UseCoins(int amount)
-    {
-        playerData.totalCoins -= amount;
-        Debug.Log("USe Coins");
-        OnChangeCoins?.Invoke(playerData.totalCoins);
-    }
-
-    public void UseHeart(string nextHeartTime)
-    {
-        if(playerData.heart > 0)
-        {
-            playerData.heart--;
-            playerData.nextHeartTime = nextHeartTime;
-            OnChangeHeart?.Invoke(playerData.heart);
-        }
-    }
-
-    public void AddHeart(int amount, string nextHeartTime)
-    {
-        playerData.heart = Math.Min(playerData.heart+=amount, 5);
-        playerData.nextHeartTime = nextHeartTime;
-        OnChangeHeart?.Invoke(playerData.heart);
-    }
-
-    public void LevelUp(LevelLoader.GameDifficult gameDifficult, int maxLevel)
-    {
-        if(playerData.currentLevel < maxLevel)
-        {
-            playerData.currentLevel++;
-        }
-        
-        GameConfigSO config = Resources.Load<GameConfigSO>("GameConfig");
-        int rewardE = config != null ? config.coinRewardEasy : 40;
-        int rewardH = config != null ? config.coinRewardHard : 80;
-        int rewardVH = config != null ? config.coinRewardSuperHard : 120;
-
-        switch(gameDifficult)
-        {
-            case LevelLoader.GameDifficult.Easy:
-                AddCoins(rewardE);
-                break;
-            case LevelLoader.GameDifficult.Hard:
-                AddCoins(rewardH);
-                break;
-            case LevelLoader.GameDifficult.VeryHard:
-                AddCoins(rewardVH);
-                break;
-        }
-
-        // Fix lỗi Index bằng cách gọi GetBooster(ID)
-        var addMove = GetBooster((int)Constants.BoosterType.AddMove);
-        if(addMove != null && playerData.currentLevel == addMove.unlockedLevel)
-            UnlockBooster(addMove.id);
-
-        var shuffle = GetBooster((int)Constants.BoosterType.Shuffle);
-        if(shuffle != null && playerData.currentLevel == shuffle.unlockedLevel)
-            UnlockBooster(shuffle.id);
-
-        var hint = GetBooster((int)Constants.BoosterType.Hint);
-        if(hint != null && playerData.currentLevel == hint.unlockedLevel)
-            UnlockBooster(hint.id);
-
-        SaveGame(); // Vẫn giữ SaveGame ở đây vì qua Level là một cột mốc quan trọng (Checkpoint)
-        OnChangeLevel?.Invoke(playerData.currentLevel);
     }
 
     public void UnlockBooster(int id)
     {
         var b = GetBooster(id);
         if (b != null) b.isUnlocked = true;
-        else Debug.Log("Khong tim thay booster");
     }
 
     public bool IsUnLockedBooster(int id)
     {
         var b = GetBooster(id);
-        if (b != null) return b.isUnlocked;
-        
-        Debug.Log("Khong tim thay booster");
-        return false;
+        return b != null && b.isUnlocked;
     }
 
     public bool IsFirstTimeUserBooster(int id)
     {
         var b = GetBooster(id);
-        if (b != null) return b.isFirstTime;
-
-        Debug.Log("Khong tim thay booster");
-        return false;
+        return b != null && b.isFirstTime;
     }
 
     public void UsedBooster(int id)
     {
         var b = GetBooster(id);
         if (b != null) b.isFirstTime = false;
-        else Debug.Log("Khong tim thay booster");
     }
 
     public int GetUnclockedLevel(int id)
@@ -306,10 +227,10 @@ public class DataManager : MonoBehaviour
         return b != null ? b.unlockedLevel : 0;
     }
 
-    public void PlayedMechanic(int id)
+    public int GetLevelUnlockMechanic(int id)
     {
         var m = GetMechanic(id);
-        if (m != null) m.isFirstTimePlay = false;
+        return m != null ? m.levelUnclock : 0;
     }
 
     public bool IsFirstTimePlayMechanic(int id)
@@ -318,9 +239,12 @@ public class DataManager : MonoBehaviour
         return m != null && playerData.currentLevel == m.levelUnclock && m.isFirstTimePlay;
     }
 
-    public int GetLevelUnlockMechanic(int id)
+    public void PlayedMechanic(int id)
     {
         var m = GetMechanic(id);
-        return m != null ? m.levelUnclock : 0;
+        if (m != null) m.isFirstTimePlay = false;
     }
+
+    private void OnApplicationPause(bool pauseStatus) { if (pauseStatus) SaveGame(); }
+    private void OnApplicationQuit() { SaveGame(); }
 }

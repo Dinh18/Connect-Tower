@@ -18,11 +18,11 @@ public class ShuffleBooster : MonoBehaviour, IBooster
 
     public void AddBooster(int amount)
     {
-        DataManager.Instance.AddBooster((int)Constants.BoosterType.Shuffle,amount, price);
+        CoreServices.Get<DataManager>().AddBooster((int)Constants.BoosterType.Shuffle,amount, price);
     }
     public void Excute()
     {
-        DataManager.Instance.UseBooster((int)Constants.BoosterType.Shuffle);
+        CoreServices.Get<DataManager>().UseBooster((int)Constants.BoosterType.Shuffle);
         if(boosterManager == null) Debug.Log("boosterManager is null");
         AudioManager.Instance.PlayShuffleAudio();
         StartCoroutine(boosterManager.ShuffleBlock());
@@ -30,7 +30,7 @@ public class ShuffleBooster : MonoBehaviour, IBooster
 
     public int GetNumsBooster()
     {
-        return DataManager.Instance.GetAmountOfBoosterByID((int)Constants.BoosterType.Shuffle);
+        return CoreServices.Get<DataManager>().GetAmountOfBoosterByID((int)Constants.BoosterType.Shuffle);
     }
 
     public void Setup(BoosterManager boosterManager)

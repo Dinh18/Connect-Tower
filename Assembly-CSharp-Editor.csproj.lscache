@@ -52,6 +52,7 @@ TemporaryDependencyNodeTargetIdentifier=netstandard2.1
 [sourceFiles]
 Assets/Editor/
  AIUnityBridge.cs
+ AssetReorganizer.cs
  LevelEditor.cs
  LevelGridBuilder.cs
  MakeLevel_2.cs

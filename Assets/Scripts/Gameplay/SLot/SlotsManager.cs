@@ -17,7 +17,6 @@ public class SlotsManager : MonoBehaviour
     public static event Action<int, int> OnChangeFinishedSlots;
     void Awake()
     {
-        slotPrefab = Resources.Load<GameObject>(Constants.SLOT_PREFAB_PATH);
         CoreServices.Register<SlotsManager>(this);
     }
     void Start()
@@ -32,12 +31,9 @@ public class SlotsManager : MonoBehaviour
     {
         SlotController.OnSlotCompleted -= CheckLevelComplete;
     }
-
-    
-
-
     public void PoolSlot(int numsSlot)
     {
+        if(slotPrefab == null) slotPrefab = Resources.Load<GameObject>(Constants.SLOT_PREFAB_PATH);
         for(int i = 0; i < numsSlot; i++)
         {
             GameObject slot = Instantiate(slotPrefab, gridRoot);

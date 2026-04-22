@@ -51,6 +51,7 @@ TemporaryDependencyNodeTargetIdentifier=netstandard2.1
 
 [sourceFiles]
 Assets/Scripts/Core/
+ AppBootstrapper.cs
  AudioManager.cs
  CameraController.cs
  CoreServices.cs
@@ -63,78 +64,83 @@ Assets/Scripts/Core/
  TutorialManager.cs
 Assets/Scripts/Data/
  BlockTopic.cs
+ BoosterData.cs
  DataManager.cs
  GameConfigSO.cs
  LevelDataSO.cs
  MakeLevel.cs
+ MechanicData.cs
  PlayerData.cs
-Assets/Scripts/
- Empty.cs
- Gameplay/Block/
-  BlockController.cs
-  BlocksManager.cs
-  ItemImageBlock.cs
- Gameplay/Booster/
-  AddMoveBooster.cs
-  BoosterManager.cs
-  HintAnimation.cs
-  HintBooster.cs
-  IBooster.cs
-  ShuffleBooster.cs
- Gameplay/
-  Level/LevelLoader.cs
-  SLot/
-   BackgroundSlot.cs
-   BorderHeaderSlot.cs
-   HeaderSlot.cs
-   ImageBackgroundSlot.cs
-   MergeSlotVFX.cs
-   SlotController.cs
-   SlotsManager.cs
-   SlotVFX.cs
-   StackHolder.cs
-   TopicHeaderSlot.cs
-  Tutorials/
-   FirstTimePlayHiddenBlock.cs
-   FirstTimePlayTutorial.cs
-   FirstTimeUseBooster.cs
-   TutorialDimBackground.cs
-   TutorialTask.cs
- UI/
-  AddBoosterUI.cs
-  AddMoveEffect.cs
+Assets/Scripts/Gameplay/Block/
+ BlockController.cs
+ BlocksManager.cs
+ ItemImageBlock.cs
+Assets/Scripts/Gameplay/Booster/
+ AddMoveBooster.cs
+ BoosterManager.cs
+ HintAnimation.cs
+ HintBooster.cs
+ IBooster.cs
+ ShuffleBooster.cs
+Assets/Scripts/Gameplay/
+ Level/LevelLoader.cs
+ Slot/
+  BackgroundSlot.cs
+  BorderHeaderSlot.cs
+  HeaderSlot.cs
+  ImageBackgroundSlot.cs
+  MergeSlotVFX.cs
+  SlotController.cs
+  SlotsManager.cs
+  SlotVFX.cs
+  StackHolder.cs
+  TopicHeaderSlot.cs
+ Tutorials/
+  FirstTimePlayHiddenBlock.cs
+  FirstTimePlayTutorial.cs
+  FirstTimeUseBooster.cs
+  TutorialDimBackground.cs
+  TutorialTask.cs
+Assets/Scripts/UI/
+ AddBoosterUI.cs
+ Animations/
   AnimationButton.cs
-  BackgroundButton.cs
-  BoosterButton.cs
+  PopupAnimation.cs
+ BackgroundButton.cs
+ Effects/
+  AddMoveEffect.cs
   CoinEffect.cs
   CoinFlyEffect.cs
-  EndGameUI.cs
   HintEffect.cs
+  ShuffleEffect.cs
+ Elements/
+  BoosterButton.cs
   HomeButton.cs
-  IBoosterEffect.cs
-  IMenu.cs
+  PlayButton.cs
+  ShopButton.cs
+ IBoosterEffect.cs
+ IMenu.cs
+ JuicyLoadingText.cs
+ LevelUIController.cs
+ LoadingImage.cs
+ Panels/
   InGameUIManager.cs
-  JuicyLoadingText.cs
+  LevelUIManager.cs
+  MainMenuUIManager.cs
+  ShopPanel.cs
+ Popups/
+  EndGameUI.cs
   LevelCompletedUI.cs
   LevelFailedUI.cs
-  LevelUIController.cs
-  LevelUIManager.cs
-  LoadingImage.cs
-  MainMenuUIManager.cs
-  PlayButton.cs
-  PopupAnimation.cs
   RefillHeartPopup.cs
-  SafeAreaFitter.cs
   SettingPopup.cs
-  ShopButton.cs
-  ShopPanel.cs
-  ShuffleEffect.cs
-  TextProOnACurve.cs
-  TextProOnAnArch.cs
-  UIManager.cs
- Utilities/
-  Constants.cs
-  LevelEditorUtils.cs
+ SafeAreaFitter.cs
+ TextProOnACurve.cs
+ TextProOnAnArch.cs
+ UIManager.cs
+Assets/Scripts/Utilities/
+ Constants.cs
+ LevelEditorUtils.cs
 Temp/obj/Assembly-CSharp/.NETStandard,Version=v2.1.AssemblyAttributes.cs
 
 [metadataReferences]

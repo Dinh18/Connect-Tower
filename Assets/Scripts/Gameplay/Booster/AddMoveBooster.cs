@@ -8,9 +8,11 @@ public class AddMoveBooster : MonoBehaviour ,IBooster
     private Constants.BoosterType boosterType = Constants.BoosterType.AddMove;
     private int price = 900;
     private int unlockLevel = 1;
+    private DataManager dataManager;
     
     void Start()
     {
+        dataManager = CoreServices.Get<DataManager>();
         if (BoosterManager.Instance != null)
         {
             BoosterManager.Instance.RegisterBooster(this);
@@ -20,20 +22,20 @@ public class AddMoveBooster : MonoBehaviour ,IBooster
     public Constants.BoosterType GetBoosterType() => boosterType;
     public void AddBooster(int amount)
     {
-        DataManager.Instance.AddBooster((int)Constants.BoosterType.AddMove,amount, price);
+        dataManager.AddBooster((int)Constants.BoosterType.AddMove,amount, price);
     }
 
     public void Excute()
     {
         CoreServices.Get<GameManager>().AddMove(amount);
-        DataManager.Instance.UseBooster((int)Constants.BoosterType.AddMove);
+        dataManager.UseBooster((int)Constants.BoosterType.AddMove);
         AudioManager.Instance.PlayAddMoveAudio();
         Debug.Log("Da them luot di chuyen");
     }
 
     public int GetNumsBooster()
     {
-        return DataManager.Instance.GetAmountOfBoosterByID((int)Constants.BoosterType.AddMove);
+        return dataManager.GetAmountOfBoosterByID((int)Constants.BoosterType.AddMove);
     }
 
     public void Setup(BoosterManager boosterManager)

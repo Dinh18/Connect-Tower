@@ -20,12 +20,12 @@ public class HintBooster : MonoBehaviour, IBooster
 
     public void AddBooster(int amount)
     {
-        DataManager.Instance.AddBooster((int) Constants.BoosterType.Hint,amount, price);
+        CoreServices.Get<DataManager>().AddBooster((int) Constants.BoosterType.Hint,amount, price);
     }
 
     public void Excute()
     {
-        DataManager.Instance.UseBooster((int)Constants.BoosterType.Hint);
+        CoreServices.Get<DataManager>().UseBooster((int)Constants.BoosterType.Hint);
         bool searched = boosterManager.SearchedBlocks();
         if(searched)
         {
@@ -37,7 +37,7 @@ public class HintBooster : MonoBehaviour, IBooster
 
     public int GetNumsBooster()
     {
-        return DataManager.Instance.GetAmountOfBoosterByID((int)Constants.BoosterType.Hint);
+        return CoreServices.Get<DataManager>().GetAmountOfBoosterByID((int)Constants.BoosterType.Hint);
     }
 
     public void Setup(BoosterManager boosterManager)

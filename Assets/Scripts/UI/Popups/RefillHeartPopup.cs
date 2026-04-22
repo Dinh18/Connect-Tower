@@ -11,6 +11,7 @@ public class RefillHeartPopup : MonoBehaviour, IMenu
     [SerializeField] private GameObject dimImage;
     // [SerializeField] private Text timeText;
     private MainMenuUIManager mainMenuUIManager;
+    private DataManager dataManager;
     void OnEnable()
     {
         closeButton.onClick.AddListener(OnclickClose);
@@ -25,6 +26,7 @@ public class RefillHeartPopup : MonoBehaviour, IMenu
         refillButton.onClick.RemoveListener(OnClickRefillHeart);
         DataManager.OnChangeHeart-=UpdateHeardCountText;
     }
+
     public void Hide()
     {
         this.gameObject.SetActive(false);
@@ -34,31 +36,30 @@ public class RefillHeartPopup : MonoBehaviour, IMenu
     public void Setup(UIManager uIManager)
     {
         this.uIManager = uIManager;
-        
-        
+        this.dataManager = CoreServices.Get<DataManager>();
     }
 
     public void Show()
     {
         this.gameObject.SetActive(true);
         dimImage.SetActive(true);
-        UpdateHeardCountText(DataManager.Instance.playerData.heart);
+        UpdateHeardCountText(dataManager.GetHearts());
     }
     private void OnclickWatchVideo()
     {
-        DataManager.Instance.AddHeart(1,DataManager.Instance.playerData.nextHeartTime);
+        dataManager.AddHeart(1,dataManager.GetNextHeartTime());
     }
     private void OnClickRefillHeart()
     {
-        if(DataManager.Instance.playerData.heart >= 5)
+        if(dataManager.GetHearts() >= 5)
         {
             OnclickClose();
             return;
         }
-        if(DataManager.Instance.playerData.totalCoins > 900)
+        if(dataManager.GetTotalCoins() > 900)
         {
-            DataManager.Instance.AddHeart(5 - DataManager.Instance.playerData.heart,"");
-            DataManager.Instance.UseCoins(900);
+            dataManager.AddHeart(5 - dataManager.GetHearts(),"");
+            dataManager.UseCoins(900);
             mainMenuUIManager.UpdateCoinText();
             OnclickClose();
         }

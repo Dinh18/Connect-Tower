@@ -6,12 +6,14 @@ using UnityEngine.UI;
 public class MainMenuUIManager : MonoBehaviour, IMenu
 {
     private UIManager uIManager;
+    private DataManager dataManager;
     [Header("Button References")]
     [SerializeField] private Button addCoins;
     [SerializeField] private Button setting;
     [SerializeField] private Button playButton;
     [SerializeField] private Button homeButton;
     [SerializeField] private Button shopButton;
+    [SerializeField] private Button cupButton;
     [Header("Coins Text Setting")]
     [SerializeField] private Text coinText;
     // [SerializeField] private float countDuration = 1.5f;
@@ -28,6 +30,7 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
     [Header("Animation Setting")]
     private BackgroundButton shopBackGround;
     private BackgroundButton homeBackGround;
+    private BackgroundButton cupBackGround;
     [Header("UI References")]
     [SerializeField] private GameObject homeButtonBackground;
     [SerializeField] private GameObject shopButtonBackground;
@@ -36,17 +39,16 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
     {
         shopBackGround = shopButton.GetComponent<BackgroundButton>();
         homeBackGround = homeButton.GetComponent<BackgroundButton>();
+        cupBackGround = cupButton.GetComponent<BackgroundButton>();
     }
 
-    void Start()
-    {
-        this.uIManager = CoreServices.Get<UIManager>();
-    }
+
 
     void OnEnable()
     {
         homeButton.onClick.AddListener(OnClickHome);
         shopButton.onClick.AddListener(OnClickShop);
+        cupButton.onClick.AddListener(OnClickLeaderBoard);
         playButton.onClick.AddListener(OnClickPlay);
         addCoins.onClick.AddListener(OnClickShop);
         addHeartButton.onClick.AddListener(OnClickAddHeart);
@@ -56,6 +58,7 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
     {
         homeButton.onClick.RemoveListener(OnClickHome);
         shopButton.onClick.RemoveListener(OnClickShop);
+        cupButton.onClick.RemoveListener(OnClickLeaderBoard);
         playButton.onClick.RemoveListener(OnClickPlay);
         addCoins.onClick.RemoveListener(OnClickShop);
         addHeartButton.onClick.RemoveListener(OnClickAddHeart);
@@ -63,12 +66,14 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
 
     public void Setup(UIManager uIManager)
     {
+        this.uIManager = uIManager;
+        this.dataManager = CoreServices.Get<DataManager>();
         
         refillHeartPopup.Setup(uIManager);
         refillHeartPopup.ConfigMainMenu(this);
 
-        oldCoins = DataManager.Instance.playerData.totalCoins;
-        coinText.text = DataManager.Instance.playerData.totalCoins.ToString();
+        oldCoins = dataManager.GetTotalCoins();
+        coinText.text = dataManager.GetTotalCoins().ToString();
 
         setting.onClick.RemoveAllListeners();
         setting.onClick.AddListener(uIManager.OpenSetting);
@@ -77,16 +82,14 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         DataManager.OnChangeHeart+=UpdateHeartCountText;
 
 
-        UpdateHeartCountText(DataManager.Instance.playerData.heart);
+        UpdateHeartCountText(dataManager.GetHearts());
 
-        if(DataManager.Instance.playerData.heart < 5) enableAddHeartButton = true;
+        if(dataManager.GetHearts() < 5) enableAddHeartButton = true;
         else enableAddHeartButton = false;
 
         if (shopBackGround == null) shopBackGround = shopButton.GetComponent<BackgroundButton>();
         if (homeBackGround == null) homeBackGround = homeButton.GetComponent<BackgroundButton>();
-        
-        // shopBackGround.Init();
-        // homeBackGround.Init();
+        if (cupButton == null)  cupBackGround =  cupButton.GetComponent<BackgroundButton>();
 
         levelUIManager.Show();
 
@@ -100,16 +103,25 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         homeBackGround.Select();
         uIManager.CloseShop();   
         shopBackGround.UnSelect();
+        cupBackGround.UnSelect();
     }
     public void OnClickShop()
     {
         shopBackGround.Select();
         uIManager.OpenShop(true);
         homeBackGround.UnSelect();
+        cupBackGround.UnSelect();
+    }
+    public void OnClickLeaderBoard()
+    {
+        homeBackGround.UnSelect();
+        uIManager.CloseShop();   
+        shopBackGround.UnSelect();
+        cupBackGround.Select();
     }
     private void OnClickPlay()
     {
-        if(DataManager.Instance.playerData.heart > 0)
+        if(dataManager.GetHearts() > 0)
         {
             CoreServices.Get<GameManager>().ChangeState(GameManager.GameState.Playing);
         }
@@ -126,13 +138,13 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
 
     public void UpdateCoinText()
     {
-        coinText.text = DataManager.Instance.playerData.totalCoins.ToString();
+        coinText.text =dataManager.GetTotalCoins().ToString();
     }
 
     public void AddCoin(int winAmount)
     {
         // 1. Lấy tổng tiền cuối cùng (Đã trừ tiền mua Booster, đã cộng tiền Win)
-        int finalCoins = DataManager.Instance.playerData.totalCoins;
+        int finalCoins = dataManager.GetTotalCoins();
         
         // 2. Tính ra số tiền ở "Trạng thái trung gian" (Chỉ trừ Booster, chưa cộng Win)
         int coinsBeforeWin = finalCoins - winAmount; 
@@ -221,8 +233,9 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
 
     public void Show()
     {
+        if(dataManager == null) dataManager = CoreServices.Get<DataManager>();
         this.gameObject.SetActive(true);
-        oldCoins = DataManager.Instance.playerData.totalCoins;
+        oldCoins = dataManager.GetTotalCoins();
         coinText.text = oldCoins.ToString();
         levelUIManager.Show();
         OnClickHome();
