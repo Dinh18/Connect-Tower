@@ -11,20 +11,20 @@ public class BoosterButton : MonoBehaviour
     // private UIManager uIManager; // Đã loại bỏ
     [SerializeField] Text countText;
     [SerializeField] GameObject addImage;
-    [SerializeField] AddBoosterUI addBoosterUI;
+    // [SerializeField] AddBoosterUI addBoosterUI;
     [SerializeField] GameObject lockElements;
     [SerializeField] GameObject unlockElements;
 
     void OnEnable()
     {
         boosterButton.onClick.AddListener(OnButtonClicked);
-        DataManager.OnChangeCountBooster += UpdateCountText;
+        GameEventBus.Subscribe<BoosterCountUpdatedEvent>(UpdateCountText);
     }
 
     void OnDisable()
     {
         boosterButton.onClick.RemoveListener(OnButtonClicked);
-        DataManager.OnChangeCountBooster -= UpdateCountText;
+        GameEventBus.UnSubscribe<BoosterCountUpdatedEvent>(UpdateCountText);
     }
 
     void Awake()
@@ -39,7 +39,7 @@ public class BoosterButton : MonoBehaviour
 
     public void Setup(UIManager uIManager)
     {
-        addBoosterUI.Setup(uIManager);
+        // addBoosterUI.Setup(uIManager);
         dataManager = CoreServices.Get<DataManager>(); 
     }
 
@@ -53,15 +53,17 @@ public class BoosterButton : MonoBehaviour
 
         if(dataManager.GetCurrentLevel() == dataManager.GetUnclockedLevel(id) && dataManager.IsFirstTimeUserBooster(id))
         {
-            addBoosterUI.SetupButton(this);
-            OpenAddBoosterPopup(true);
+            // addBoosterUI.SetupButton(this);
+            GameEventBus.Publish(new RequestOpenBoosterPopupEvent { type = booster.GetBoosterType() });
         }
 
-        UpdateCountText(id, dataManager.GetAmountOfBoosterByID(id));
+        UpdateCountText(new BoosterCountUpdatedEvent { boosterId = id, count = dataManager.GetAmountOfBoosterByID(id) });
     }
 
-    public void UpdateCountText(int id, int amount)
+    public void UpdateCountText(BoosterCountUpdatedEvent boosterCountUpdated)
     {
+        int id = boosterCountUpdated.boosterId;
+        int amount = boosterCountUpdated.count;
         if(id != (int) booster.GetBoosterType()) return;
         if(amount <= 0)
         {
@@ -76,17 +78,10 @@ public class BoosterButton : MonoBehaviour
 
     public void OnButtonClicked()
     {
-        if (!dataManager.IsUnLockedBooster((int)booster.GetBoosterType())) return;
-
-        int id = (int)booster.GetBoosterType();
-        if(dataManager.IsFirstTimeUserBooster(id) && TutorialManager.Instance.currentTutorial == TutorialManager.TutorialType.BoosterUI)
+        if (booster.GetNumsBooster() <= 0)
         {
-            TutorialManager.Instance.EndBoosterTutorial(id);
-        }
-
-        if(booster.GetNumsBooster() <= 0)
-        {
-            OpenAddBoosterPopup(false);
+            // Bắn tín hiệu: "Tôi đang hết loại Booster này, hãy mở popup đi"
+            GameEventBus.Publish(new RequestOpenBoosterPopupEvent { type = booster.GetBoosterType() });
             return;
         }
 
@@ -97,22 +92,22 @@ public class BoosterButton : MonoBehaviour
         boosterButton.interactable = true;
     }
 
-    private void OpenAddBoosterPopup(bool isFirstTime)
+    private void OpenAddBoosterPopup()
     {
-        string header = booster.GetName();
-        string coin = booster.GetPrice().ToString();
-        // Bắn tín hiệu qua EventBus
-        GameEventBus.OnRequestAddBooster?.Invoke(addBoosterUI, this, header, coin, booster.GetBoosterType(), isFirstTime);
+        GameEventBus.Publish(new RequestOpenBoosterPopupEvent
+        {
+            type = booster.GetBoosterType(),
+        });
     }
 
     public void OnClickAddBoosterButton()
     {
         // Bắn tín hiệu qua EventBus
-        GameEventBus.OnClickAddBooster?.Invoke(this);
+        GameEventBus.Publish(new AddBoosterEvent{ boosterButton = this });
     }
 
-    public void PlayAddEffect()
-    {
-        StartCoroutine(addBoosterUI.AddBoosterEffect(this.gameObject.GetComponent<RectTransform>()));
-    }
+    // public void PlayAddEffect()
+    // {
+    //     StartCoroutine(addBoosterUI.AddBoosterEffect(this.gameObject.GetComponent<RectTransform>()));
+    // }
 }

@@ -12,7 +12,7 @@ public class LevelCompletedUI : MonoBehaviour, IMenu
 
     void OnEnable()
     {
-        continueButton.onClick.AddListener(() => GameEventBus.OnRequestBackHome?.Invoke());
+        continueButton.onClick.AddListener(() => CoreServices.Get<GameManager>().ChangeState(GameManager.GameState.MainMenu));
     }
 
     void OnDisable()

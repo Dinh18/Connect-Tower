@@ -23,14 +23,17 @@ public class CoinFlyEffect : MonoBehaviour
 
         Sequence coinSequence = DOTween.Sequence();
 
-        coinSequence.Append(rectTransform.DOMove(firstPos,0.5f));
-        coinSequence.Append(rectTransform.DOMove(targetUI.transform.position,0.5f));
+        coinSequence.Append(rectTransform.DOMove(firstPos,0.5f).SetEase(Ease.InQuad));
+        coinSequence.Append(rectTransform.DOMove(targetUI.transform.position,0.5f).SetEase(Ease.InQuad));
+        coinSequence.Join(rectTransform.DOScale(0.5f, 0.5f));
 
         coinSequence.OnComplete(() =>
         {
             onHitTarget?.Invoke();
             if (CoinEffect.Instance != null)
             {
+
+                rectTransform.localScale = Vector3.one; // Reset scale trước khi trả về pool
                 CoinEffect.Instance.ReturnCoin(gameObject);
             }
             else

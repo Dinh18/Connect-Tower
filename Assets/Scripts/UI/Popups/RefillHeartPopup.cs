@@ -14,17 +14,17 @@ public class RefillHeartPopup : MonoBehaviour, IMenu
     private DataManager dataManager;
     void OnEnable()
     {
-        closeButton.onClick.AddListener(OnclickClose);
+        closeButton.onClick.AddListener(() => GameEventBus.Publish(new RequestCloseBoosterPopupEvent()));
         watchVideo.onClick.AddListener(OnclickWatchVideo);
         refillButton.onClick.AddListener(OnClickRefillHeart);
-        DataManager.OnChangeHeart+=UpdateHeardCountText;
+        GameEventBus.Subscribe<HeartUpdatedEvent>(UpdateHeardCountText);
     }
     void OnDisable()
     {
-        closeButton.onClick.RemoveListener(OnclickClose);
+        closeButton.onClick.RemoveListener(() => GameEventBus.Publish(new RequestCloseBoosterPopupEvent()));
         watchVideo.onClick.RemoveListener(OnclickWatchVideo);
         refillButton.onClick.RemoveListener(OnClickRefillHeart);
-        DataManager.OnChangeHeart-=UpdateHeardCountText;
+        GameEventBus.UnSubscribe<HeartUpdatedEvent>(UpdateHeardCountText);
     }
 
     public void Hide()
@@ -43,7 +43,7 @@ public class RefillHeartPopup : MonoBehaviour, IMenu
     {
         this.gameObject.SetActive(true);
         dimImage.SetActive(true);
-        UpdateHeardCountText(dataManager.GetHearts());
+        UpdateHeardCountText(new HeartUpdatedEvent { heartCount = dataManager.GetHearts() });
     }
     private void OnclickWatchVideo()
     {
@@ -53,7 +53,7 @@ public class RefillHeartPopup : MonoBehaviour, IMenu
     {
         if(dataManager.GetHearts() >= 5)
         {
-            OnclickClose();
+            GameEventBus.Publish(new RequestCloseBoosterPopupEvent());
             return;
         }
         if(dataManager.GetTotalCoins() > 900)
@@ -61,16 +61,12 @@ public class RefillHeartPopup : MonoBehaviour, IMenu
             dataManager.AddHeart(5 - dataManager.GetHearts(),"");
             dataManager.UseCoins(900);
             mainMenuUIManager.UpdateCoinText();
-            OnclickClose();
+            GameEventBus.Publish(new RequestCloseBoosterPopupEvent());
         }
         else
         {
             mainMenuUIManager.OnClickShop();
         }
-    }
-    private void OnclickClose()
-    {
-        uIManager.PopPopup();
     }
     public void ConfigMainMenu(MainMenuUIManager mainMenuUIManager)
     {
@@ -82,9 +78,9 @@ public class RefillHeartPopup : MonoBehaviour, IMenu
         // refillButton.onClick.RemoveAllListeners();
         // refillButton.onClick.AddListener(OnClickRefillHeart);
     }
-    private void UpdateHeardCountText(int amount)
+    private void UpdateHeardCountText(HeartUpdatedEvent heartUpdated)
     {
-        heardCountText.text = amount.ToString();
+        heardCountText.text = heartUpdated.heartCount.ToString();
     }
 
     public GameObject GetGameObject()

@@ -12,9 +12,12 @@ public class LevelFailedUI : MonoBehaviour, IMenu
 
     void OnEnable()
     {
-        backMainMenuButton.onClick.AddListener(() => GameEventBus.OnRequestBackHome?.Invoke());
-        tryAgainButton.onClick.AddListener(() => GameEventBus.OnRequestTryAgain?.Invoke());
-        addMoveButton.onClick.AddListener(() => GameEventBus.OnRequestAddMoveToContinue?.Invoke());
+        // backMainMenuButton.onClick.AddListener(() => GameEventBus.OnRequestBackHome?.Invoke());
+        // tryAgainButton.onClick.AddListener(() => GameEventBus.OnRequestTryAgain?.Invoke());
+        // addMoveButton.onClick.AddListener(() => GameEventBus.OnRequestAddMoveToContinue?.Invoke());
+        backMainMenuButton.onClick.AddListener(OnClickBackHome);
+        tryAgainButton.onClick.AddListener(() => CoreServices.Get<GameManager>().RestartLevel());
+        addMoveButton.onClick.AddListener(() => CoreServices.Get<GameManager>().AddMoveToContinue(5));
     }
 
     void OnDisable()
@@ -38,6 +41,12 @@ public class LevelFailedUI : MonoBehaviour, IMenu
         blockLeft.DOScale(1, 0.5f).SetEase(Ease.OutBack);
         blockRight.DOScale(1, 0.5f).SetEase(Ease.OutBack);
         titleText.DOScale(1, 0.5f).SetEase(Ease.OutBack);
+    }
+
+    private void OnClickBackHome()
+    {
+        CoreServices.Get<GameManager>().UseHeart();
+        CoreServices.Get<GameManager>().ChangeState(GameManager.GameState.MainMenu);
     }
 
     public void Hide() => gameObject.SetActive(false);

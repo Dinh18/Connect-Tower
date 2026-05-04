@@ -14,7 +14,6 @@ public class SafeAreaFitter : MonoBehaviour
         // Canvas[] canvas = GameObject.FindObjectsByType<Canvas>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
         CanvasScaler scaler = GetComponentInParent<CanvasScaler>();
         float sizeScreen = (float)Screen.width/ (float)Screen.height;
-        Debug.Log(sizeScreen);
         // foreach(Canvas cv in canvas)
         // {
         //     CanvasScaler scaler = cv.GetComponent<CanvasScaler>();

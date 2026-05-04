@@ -24,13 +24,15 @@ public class GamePlayController : MonoBehaviour
     private void HandleSlotClicked(SlotController slot)
     {
         if(CoreServices.Get<GameManager>().GetCurrState() != GameManager.GameState.Playing) return;
-        if(TutorialManager.Instance.currentTutorial != TutorialManager.TutorialType.None)
+
+        // Bỏ qua xử lý logic game nếu Tutorial đang chạy
+        var tutorialService = CoreServices.Get<TutorialService>();
+        if (tutorialService != null && tutorialService.IsTutorialActive())
         {
-            if(TutorialManager.Instance.currentTutorial == TutorialManager.TutorialType.GridPlay)
+            if(!tutorialService.ProcessInput(slot))
             {
-                if(!TutorialManager.Instance.ProcessTutorialClick(slot)) return;
+                return;
             }
-            else return;
         }
 
         HapticManager.Instance.PlayHaptic();

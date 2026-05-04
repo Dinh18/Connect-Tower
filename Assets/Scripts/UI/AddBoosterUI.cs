@@ -4,6 +4,7 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
+
 public class AddBoosterUI : MonoBehaviour, IMenu
 {
     [SerializeField] private Text headerText;
@@ -19,11 +20,12 @@ public class AddBoosterUI : MonoBehaviour, IMenu
     [SerializeField] private List<RectTransform> boosterIcon;
     [SerializeField] private GameObject dimImage;
     private BoosterButton boosterButton;
+    private Constants.BoosterType boosterType;
 
     public void Setup(UIManager uIManager)
     {
         closeButton.onClick.RemoveAllListeners();
-        closeButton.onClick.AddListener(OnClickClose);
+        closeButton.onClick.AddListener(() => GameEventBus.Publish(new RequestCloseBoosterPopupEvent()));
     }
 
     public void Show()
@@ -32,8 +34,15 @@ public class AddBoosterUI : MonoBehaviour, IMenu
         dimImage.SetActive(true);
     }
 
-    public void SetConfig(BoosterButton boosterButton ,string header, string coins, Constants.BoosterType boosterType, bool isFirstTime)
+    public void SetConfig(RequestOpenBoosterPopupEvent requestOpenBoosterPopup)
     {
+        int boosterID = (int)requestOpenBoosterPopup.type;
+        DataManager dataManager = CoreServices.Get<DataManager>();
+        bool isFirstTime = dataManager.IsFirstTimeUserBooster(boosterID);
+        string header = dataManager.GetBooster(boosterID).name;
+        int coins = dataManager.GetBooster(boosterID).price;
+        boosterType = requestOpenBoosterPopup.type;
+
         if(isFirstTime)
         {
             claimButton.gameObject.SetActive(true);
@@ -46,12 +55,12 @@ public class AddBoosterUI : MonoBehaviour, IMenu
             addButton.gameObject.SetActive(true);
             closeButton.gameObject.SetActive(true);
         }
-        this.boosterButton = boosterButton;
+
         headerText.text = header;
-        coinsText.text = coins;
+        coinsText.text = coins.ToString();
         
-        addButton.onClick.RemoveAllListeners();
-        addButton.onClick.AddListener(boosterButton.OnClickAddBoosterButton);
+        // addButton.onClick.RemoveAllListeners();
+        // addButton.onClick.AddListener(boosterButton.OnClickAddBoosterButton);
         
         claimButton.onClick.RemoveAllListeners();
         claimButton.onClick.AddListener(OnClickClaim);
@@ -73,6 +82,11 @@ public class AddBoosterUI : MonoBehaviour, IMenu
         }
     }
 
+    public void SetupBoosterButton(AddBoosterEvent addBoosterEvent)
+    {
+        this.boosterButton = addBoosterEvent.boosterButton;
+    }
+
     public void Hide()
     {
         this.gameObject.SetActive(false);
@@ -81,7 +95,7 @@ public class AddBoosterUI : MonoBehaviour, IMenu
 
     public void OnClickClose()
     {
-        GameEventBus.OnRequestClosePopup?.Invoke();
+        GameEventBus.Publish(new RequestCloseBoosterPopupEvent());
     }
 
     public IEnumerator AddBoosterEffect(RectTransform rectTransform)
@@ -116,15 +130,14 @@ public class AddBoosterUI : MonoBehaviour, IMenu
     public void OnClickClaim()
     {
         string instruction;
-        var type = boosterButton.GetBooster().GetBoosterType();
+        var type = boosterType;
         if(type == Constants.BoosterType.AddMove)
-            instruction = "Use the Extra Move Booster to get extra moves!";
+            instruction = "Use the Extra Move to get extra moves!";
         else if(type == Constants.BoosterType.Shuffle)
             instruction = "Use it to shuffle the board!";
         else
             instruction = "Use it to reveal a correct placement";
 
-        TutorialManager.Instance.StartUseBoosterTutorial(boosterButton.gameObject, instruction);
         OnClickClose();
     }
 

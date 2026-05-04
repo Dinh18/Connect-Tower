@@ -14,7 +14,7 @@ public class SlotsManager : MonoBehaviour
     private Stack<GameObject> slotPool = new Stack<GameObject>();
     private GameObject slotPrefab;
     private bool levelCompleted;
-    public static event Action<int, int> OnChangeFinishedSlots;
+    // Event handled by GameEventBus
     void Awake()
     {
         CoreServices.Register<SlotsManager>(this);
@@ -48,7 +48,7 @@ public class SlotsManager : MonoBehaviour
     {
         finishedTopic = 0;
         this.numsTopic = numsTopic;
-        OnChangeFinishedSlots?.Invoke(finishedTopic,numsTopic);
+        GameEventBus.Publish(new FinishedSlotsUpdatedEvent { finishedSlots = finishedTopic, totalSlots = numsTopic });
         foreach(Transform child in gridRoot.transform)
         {
             if(child.gameObject.activeSelf)
@@ -113,7 +113,7 @@ public class SlotsManager : MonoBehaviour
     private void CheckLevelComplete(int topicID)
     {
         finishedTopic++;
-        OnChangeFinishedSlots?.Invoke(finishedTopic, numsTopic);
+        GameEventBus.Publish(new FinishedSlotsUpdatedEvent { finishedSlots = finishedTopic, totalSlots = numsTopic });
         foreach(SlotController slot in levelLoader.slots)
         {
             if(!slot.isRevealed && slot.blockTopic.topicID == topicID){

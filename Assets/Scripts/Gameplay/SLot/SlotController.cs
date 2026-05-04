@@ -396,20 +396,18 @@ public class SlotController : MonoBehaviour
         });
     }
 
-    public void MoveToShuffle(Transform gridRoot, List<BlockController> diffcultBlocks, Dictionary<int, List<BlockController>> sameBlocks)
+    public List<BlockController> MoveToShuffle(List<BlockController> diffcultBlocks, Dictionary<int, List<BlockController>> sameBlocks)
     {
+        int countBlock = 0;
+        List<BlockController> poppedBlocks = new List<BlockController>();
         while(blocks.Count > 0)
         {
             BlockController block = blocks.Pop();
             if(!block.isRevealed)
             {
                 blocks.Push(block);
-                return;
+                break;
             }
-            Vector3[] pathArr = new Vector3[] {arcPeak.transform.position, new Vector3 (gridRoot.position.x, gridRoot.position.y + Constants.SLOT_HEIGHT - Constants.BLOCK_HEIGHT, gridRoot.position.z)};
-            
-            block.transform.DOKill(); // Tối ưu: DOKill trước khi gán Tween mới
-            block.transform.DOPath(pathArr, 0.5f, PathType.CatmullRom);
             
             if(sameBlocks.ContainsKey(block.GetTopicID()))
             {
@@ -420,20 +418,25 @@ public class SlotController : MonoBehaviour
             {
                 if(sameBlocks.Count < 3)
                 {
-                    List<BlockController> blocks = new List<BlockController>();
-                    blocks.Add(block);
-                    sameBlocks.Add(block.GetTopicID(), blocks);
+                    List<BlockController> newList = new List<BlockController>();
+                    newList.Add(block);
+                    sameBlocks.Add(block.GetTopicID(), newList);
                 }
                 else
                 {
                     diffcultBlocks.Add(block);
                 }
             }
+            countBlock++;
+            poppedBlocks.Add(block);
         }
+        Debug.Log($"Moved {countBlock} blocks from Slot {row} to shuffle pool");
+        return poppedBlocks;
     }
 
     public void MoveToSlot(BlockController block)
     {
+        block.transform.SetParent(CoreServices.Get<BlocksManager>().transform);
         Vector3 destination = new Vector3(stackAnchor.position.x,
                                           stackAnchor.position.y + Constants.BLOCK_HEIGHT * blocks.Count,
                                           stackAnchor.position.z);

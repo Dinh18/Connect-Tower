@@ -13,16 +13,17 @@ public class SettingPopup : MonoBehaviour, IMenu
     [SerializeField] private Button soundButton;
     [SerializeField] private Button hapticButton;
     [SerializeField] private GameObject dimImage;
-    // private PopupAnimation popupAnimation;
-    // void OnEnable()
-    // {
-    //     soundButton.onClick.AddListener(OnClickSoundButton);
-    // }
-    // void OnDisable()
-    // {
-    //     soundButton.onClick.RemoveListener(OnClickSoundButton);
-        
-    // }
+    private PopupAnimation popupAnimation;
+    void OnEnable()
+    {
+        soundButton.onClick.AddListener(OnClickSoundButton);
+        closeButton.onClick.AddListener(() => GameEventBus.Publish(new RequestCloseBoosterPopupEvent()));
+    }
+    void OnDisable()
+    {
+        soundButton.onClick.RemoveListener(OnClickSoundButton);
+        closeButton.onClick.RemoveListener(() => GameEventBus.Publish(new RequestCloseBoosterPopupEvent()));
+    }
     public void Hide()
     {
         // popupAnimation.CloseAnimation(0.3f);
@@ -43,11 +44,6 @@ public class SettingPopup : MonoBehaviour, IMenu
             backHomeButton.onClick.AddListener(uIManager.OnClickBackHome);
         }
         
-        if (closeButton != null)
-        {
-            closeButton.onClick.AddListener(uIManager.CloseSetting);
-        }
-        // popupAnimation = this.gameObject.AddComponent<PopupAnimation>();
     }
 
     public void Show()

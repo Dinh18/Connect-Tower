@@ -7,6 +7,7 @@ public class InGameUIManager : MonoBehaviour, IMenu
 {
     [Header("Moves text Setting")]
     [SerializeField] private Text movesText;
+    // [SerializeField] private Image warningBorderImage;
     [SerializeField] private Text coinsText;
     [SerializeField] private Button coinsButton;
     [SerializeField] private Text levelText;
@@ -28,6 +29,7 @@ public class InGameUIManager : MonoBehaviour, IMenu
     [SerializeField] private Color warningColor = Color.red;
     [SerializeField] private float flashSpeed = 0.5f; 
     [SerializeField] private float scaleMultiplier = 1.2f;
+    [SerializeField] private UICountdownController countdownImage;
     private bool isFlashing = false;
 
     [Header("Button References")]
@@ -36,6 +38,8 @@ public class InGameUIManager : MonoBehaviour, IMenu
     private BoosterButton[] boosterButtons;
     private GameManager gameManager;
     private LevelLoader levelLoader;
+    [SerializeField]private DifficultLevel difficultLevel;
+    [SerializeField] private AddBoosterUI addBoosterUI;
 
     private Sprite GetLevelSprite(LevelLoader.GameDifficult gameDifficult)
     {
@@ -73,26 +77,31 @@ public class InGameUIManager : MonoBehaviour, IMenu
 
     void OnEnable()
     {
-        GameManager.OnChangeMoves += UpdateMovesText;
-        SlotsManager.OnChangeFinishedSlots += UpdateProgressText;
-        SlotsManager.OnChangeFinishedSlots += UpdateFinishedSlotsSlider;
-        DataManager.OnChangeCoins += UpDateCoinText;
-        
+        GameEventBus.Subscribe<MovesUpdatedEvent>(UpdateMovesText);
+        GameEventBus.Subscribe<FinishedSlotsUpdatedEvent>(OnUpdateProgress);
+        GameEventBus.Subscribe<CoinsUpdatedEvent>(OnCoinsUpdated);
+        GameEventBus.Subscribe<RequestOpenBoosterPopupEvent>(OnOpenAddMovePopup);
+        GameEventBus.Subscribe<StartBorderFlashEvent>(StartInfiniteMovesCountDown);
+        GameEventBus.Subscribe<StopBorderFlashEvent>(StopInfiniteMovesCountDown);
+
         SettingButton.onClick.RemoveAllListeners();
-        SettingButton.onClick.AddListener(() => GameEventBus.OnRequestUI?.Invoke(GameEventBus.UIType.Settings));
+        SettingButton.onClick.AddListener(() => GameEventBus.Publish(new RequestOpenPopupEvent { targetPopup = PopupType.Setting }));
 
         coinsButton.onClick.RemoveAllListeners();
-        coinsButton.onClick.AddListener(() => GameEventBus.OnRequestUI?.Invoke(GameEventBus.UIType.Shop));
+        coinsButton.onClick.AddListener(() => GameEventBus.Publish(new RequestOpenPanelEvent { targetPanel = PanelType.Shop }));
     }
 
     void OnDisable()
     {
-        GameManager.OnChangeMoves -= UpdateMovesText;
-        SlotsManager.OnChangeFinishedSlots -= UpdateProgressText;
-        SlotsManager.OnChangeFinishedSlots -= UpdateFinishedSlotsSlider;
-        DataManager.OnChangeCoins -= UpDateCoinText;
-    }
+        GameEventBus.UnSubscribe<MovesUpdatedEvent>(UpdateMovesText);
+        GameEventBus.UnSubscribe<FinishedSlotsUpdatedEvent>(OnUpdateProgress);
+        GameEventBus.UnSubscribe<CoinsUpdatedEvent>(OnCoinsUpdated);
+        GameEventBus.UnSubscribe<RequestOpenBoosterPopupEvent>(OnOpenAddMovePopup);
+        GameEventBus.UnSubscribe<StartBorderFlashEvent>(StartInfiniteMovesCountDown);
+        GameEventBus.UnSubscribe<StopBorderFlashEvent>(StopInfiniteMovesCountDown);
 
+    }
+    
     public void Setup(UIManager uIManager)
     {
         levelLoader = CoreServices.Get<LevelLoader>();
@@ -120,11 +129,15 @@ public class InGameUIManager : MonoBehaviour, IMenu
         {
             booster.Show();
         }
-
-        UpdateFinishedSlotsSlider(0, levelLoader.GetNumsTopic());
-        UpdateProgressText(0, levelLoader.GetNumsTopic());
+        OnUpdateProgress(new FinishedSlotsUpdatedEvent { finishedSlots = 0, totalSlots = levelLoader.GetNumsTopic() });
         SetupProgressBar(levelLoader.gameDifficult);
         StopWarningFlash();
+        countdownImage.gameObject.SetActive(false);
+    }
+
+    public void ShowDifficultLevel()
+    {
+        if (difficultLevel != null) difficultLevel.ShowDifficultLevel();
     }
 
     private void SetupProgressBar(LevelLoader.GameDifficult gameDifficult)
@@ -153,8 +166,9 @@ public class InGameUIManager : MonoBehaviour, IMenu
         }
     }
 
-    public void UpdateMovesText(int moves)
-    {
+    public void UpdateMovesText(MovesUpdatedEvent movesUpdatedEvent)
+    { 
+        int moves = movesUpdatedEvent.currentMoves;
         movesText.text = moves.ToString();
         if(moves > 0 && moves <= 5)
         {
@@ -162,8 +176,10 @@ public class InGameUIManager : MonoBehaviour, IMenu
         }
         else
         {
-            StopWarningFlash();
+            if(isFlashing) StopWarningFlash();
         }   
+        movesText.transform.localScale = Vector3.one;
+        movesText.transform.DOPunchScale(Vector3.one * 0.2f, flashSpeed).SetEase(Ease.InOutSine);   
     }
 
     public void StartWarningFlash()
@@ -172,6 +188,9 @@ public class InGameUIManager : MonoBehaviour, IMenu
         movesText.transform.DOKill();
         movesText.DOColor(warningColor, flashSpeed).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);    
         movesText.transform.DOScale(Vector3.one * scaleMultiplier, flashSpeed).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
+        // warningBorderImage.DOKill();
+        // warningBorderImage.DOFade(borderMaxAlpha, flashSpeed).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
+        GameEventBus.Publish(new StartBorderFlashEvent { borderType = BorderType.Warning, flashSpeed = flashSpeed, flashTime = 1000f });
         isFlashing = true;
     }
 
@@ -181,21 +200,50 @@ public class InGameUIManager : MonoBehaviour, IMenu
         movesText.transform.DOKill();
         movesText.color = normalColor;
         movesText.transform.localScale = Vector3.one; 
+        // warningBorderImage.DOKill();
+        // warningBorderImage.DOFade(0f, 0.2f);
+        GameEventBus.Publish(new StopBorderFlashEvent());
         isFlashing = false;
     }
 
-    private void UpdateFinishedSlotsSlider(int finishedSlots, int numSlots)
+    public void StartInfiniteMovesCountDown(StartBorderFlashEvent startBorderFlash)
     {
+        if(startBorderFlash.borderType == BorderType.Ice)
+        {
+            countdownImage.gameObject.SetActive(true);
+            countdownImage.StartCountdown(startBorderFlash.flashTime);
+        }
+    }
+
+    private void StopInfiniteMovesCountDown(StopBorderFlashEvent stopBorderFlash)
+    {
+        countdownImage.ResetCountdown();
+        countdownImage.gameObject.SetActive(false);
+    }
+    
+
+
+    private void OnUpdateProgress(FinishedSlotsUpdatedEvent finishedSlotsUpdated)
+    {
+        // Update progress text
+        int finishedSlots = finishedSlotsUpdated.finishedSlots;
+        int numSlots = finishedSlotsUpdated.totalSlots;
+        progressText.text = finishedSlots.ToString() + "/" + numSlots.ToString();
+        // Update slider
         float value = (float) finishedSlots / numSlots;
         finishedSlotsSlider.DOValue(value, 0.5f).SetEase(Ease.OutCubic);
     }
 
-    private void UpdateProgressText(int finishedSlots, int numSlots)
+    private void OnCoinsUpdated(CoinsUpdatedEvent coinsUpdatedEvent)
     {
-        progressText.text = finishedSlots.ToString() + "/" + numSlots.ToString();
+        coinsText.text = coinsUpdatedEvent.totalCoins.ToString();
     }
 
-    private void UpDateCoinText(int coins) => coinsText.text = coins.ToString();
+    private void OnOpenAddMovePopup(RequestOpenBoosterPopupEvent requestOpenBoosterPopup)
+    {
+        addBoosterUI.SetConfig(requestOpenBoosterPopup);
+        CoreServices.Get<UIManager>().PushPopupToFront(addBoosterUI, addBoosterUI.transform);
+    }
 
     public void Hide() => this.gameObject.SetActive(false);
     public GameObject GetGameObject() => this.gameObject;

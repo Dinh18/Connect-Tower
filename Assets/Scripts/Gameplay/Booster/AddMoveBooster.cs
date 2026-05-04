@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class AddMoveBooster : MonoBehaviour ,IBooster
@@ -27,10 +28,16 @@ public class AddMoveBooster : MonoBehaviour ,IBooster
 
     public void Excute()
     {
-        CoreServices.Get<GameManager>().AddMove(amount);
         dataManager.UseBooster((int)Constants.BoosterType.AddMove);
         AudioManager.Instance.PlayAddMoveAudio();
-        Debug.Log("Da them luot di chuyen");
+        StartCoroutine(StartInfiniteMovesCoroutine(10f));
+    }
+
+    private IEnumerator StartInfiniteMovesCoroutine(float time)
+    {
+        GameEventBus.Publish(new StartBorderFlashEvent { borderType = BorderType.Ice, flashSpeed = 1f, flashTime = time });
+        yield return new WaitForSeconds(time);
+        GameEventBus.Publish(new StopBorderFlashEvent());
     }
 
     public int GetNumsBooster()

@@ -57,6 +57,7 @@ Assets/Editor/
  LevelGridBuilder.cs
  MakeLevel_2.cs
  ShopTools.cs
+Assets/Scripts/Editor/LevelSolverEditor.cs
 Temp/obj/Assembly-CSharp-Editor/.NETStandard,Version=v2.1.AssemblyAttributes.cs
 
 [metadataReferences]
@@ -331,7 +332,13 @@ Assets/Plugins/Demigiant/DOTween/
  Editor/DOTweenEditor.dll
 Library/PackageCache/
  com.coffee.ui-particle@92fb173507ec/Runtime/Coffee.UIParticle.R.dll
+ com.unity.collections@aea9d3bd5e19/
+  Unity.Collections.LowLevel.ILSupport/Unity.Collections.LowLevel.ILSupport.dll
+  Unity.Collections.Tests/
+   System.IO.Hashing/System.IO.Hashing.dll
+   System.Runtime.CompilerServices.Unsafe/System.Runtime.CompilerServices.Unsafe.dll
  com.unity.ext.nunit@031a54704bff/net40/unity-custom/nunit.framework.dll
+ com.unity.nuget.mono-cecil@d78732e851eb/Mono.Cecil.dll
  com.unity.nuget.newtonsoft-json@74deb55db2a0/Runtime/Newtonsoft.Json.dll
 Library/ScriptAssemblies/
  CandyCoded.HapticFeedback.Android.dll
@@ -342,6 +349,23 @@ Library/ScriptAssemblies/
  MCPForUnity.Runtime.dll
  Unity.2D.Sprite.AIIntegration.Editor.dll
  Unity.2D.Sprite.Editor.dll
+ Unity.Burst.dll
+ Unity.Burst.Editor.dll
+ Unity.Collections.dll
+ Unity.Collections.Editor.dll
+ Unity.Mathematics.dll
+ Unity.Mathematics.Editor.dll
+ Unity.Rendering.LightTransport.Editor.dll
+ Unity.Rendering.LightTransport.Runtime.dll
+ Unity.RenderPipelines.Core.Editor.dll
+ Unity.RenderPipelines.Core.Editor.Shared.dll
+ Unity.RenderPipelines.Core.Runtime.dll
+ Unity.RenderPipelines.Core.Runtime.Shared.dll
+ Unity.RenderPipelines.Core.ShaderLibrary.dll
+ Unity.RenderPipelines.GPUDriven.Runtime.dll
+ Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.dll
+ Unity.Searcher.Editor.dll
+ Unity.ShaderGraph.Editor.dll
  Unity.TextMeshPro.dll
  Unity.TextMeshPro.Editor.dll
  Unity.VisualStudio.Editor.dll
@@ -358,7 +382,7 @@ Temp/bin/Debug/
  Unity.Properties.SourceGenerator.dll
  Unity.SourceGenerators.dll
  Unity.UIToolkit.SourceGenerator.dll
-C:/Users/thedinh/.vscode/extensions/visualstudiotoolsforunity.vstuc-1.2.1/Analyzers/Microsoft.Unity.Analyzers.dll
+C:/Users/thedinh/.vscode/extensions/visualstudiotoolsforunity.vstuc-1.2.2/Analyzers/Microsoft.Unity.Analyzers.dll
 
 [analyzerConfigFiles]
 Temp/obj/Assembly-CSharp-Editor/Assembly-CSharp-Editor.GeneratedMSBuildEditorConfig.editorconfig

@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
     private GameState prevState = GameState.None;
     private int moves;
     private int maxMoves;
+    private bool isInfiniteMovesActive = false;
 
     // Dependencies injected via Init
     private CameraController cameraController;
@@ -34,8 +35,18 @@ public class GameManager : MonoBehaviour
         ChangeState(GameState.MainMenu);
     }
 
-    void OnEnable() { SlotController.OnMoveFisnished += Move; }
-    void OnDisable() { SlotController.OnMoveFisnished -= Move; }
+    void OnEnable()
+    { 
+        SlotController.OnMoveFisnished += Move;
+        GameEventBus.Subscribe<StartBorderFlashEvent>(StartInfiniteMovesBooster);
+        GameEventBus.Subscribe<StopBorderFlashEvent>(StopInfiniteMovesBooster);
+    }
+    void OnDisable()
+    {
+        SlotController.OnMoveFisnished -= Move;
+        GameEventBus.UnSubscribe<StartBorderFlashEvent>(StartInfiniteMovesBooster);
+        GameEventBus.UnSubscribe<StopBorderFlashEvent>(StopInfiniteMovesBooster);
+    }
 
     public GameState GetCurrState() => currState;
     public GameState GetPrevState() => prevState;
@@ -47,21 +58,35 @@ public class GameManager : MonoBehaviour
         this.moves = maxMoves;
         this.maxMoves = maxMoves;
         OnChangeMoves?.Invoke(moves);
-        GameEventBus.OnMovesUpdated?.Invoke(moves);
+        GameEventBus.Publish(new MovesUpdatedEvent { currentMoves = this.moves });
         cameraController.FitCamera(slotsManager.row1, slotsManager.row2);
     }
 
     public void Move(bool isMoving)
     {
+        if(isInfiniteMovesActive) return;
         if(!isMoving)
         {
             moves--;
             OnChangeMoves?.Invoke(moves);
-            GameEventBus.OnMovesUpdated?.Invoke(moves);
+            GameEventBus.Publish(new MovesUpdatedEvent { currentMoves = this.moves });
             
             if(moves <= 0 && !slotsManager.GetLevelComleted())
                 ChangeState(GameState.Lose);
         }
+    }
+
+    private void StartInfiniteMovesBooster(StartBorderFlashEvent startBorderFlash)
+    {
+        if(startBorderFlash.borderType == BorderType.Ice)
+        {
+            isInfiniteMovesActive = true;
+        }
+    }
+
+    private void StopInfiniteMovesBooster(StopBorderFlashEvent stopBorderFlash)
+    {
+        isInfiniteMovesActive = false;
     }
 
     public void UseHeart() => heartManager.UseHeart();
@@ -69,7 +94,20 @@ public class GameManager : MonoBehaviour
     {
         this.moves += moves;
         OnChangeMoves?.Invoke(this.moves);
-        GameEventBus.OnMovesUpdated?.Invoke(this.moves);
+        // GameEventBus.OnMovesUpdated?.Invoke(this.moves);
+        GameEventBus.Publish(new MovesUpdatedEvent { currentMoves = this.moves });
+    }
+    public void RestartLevel()
+    {
+        SetupLevel(maxMoves);
+        levelLoader.LoadLevel();
+        ChangeState(GameState.Playing);
+    }
+
+    public void AddMoveToContinue(int extraMoves)
+    {
+        AddMove(extraMoves);
+        ChangeState(GameState.Playing);
     }
     
     public void ChangeState(GameState newState)
@@ -79,12 +117,12 @@ public class GameManager : MonoBehaviour
         prevState = currState;
         currState = newState;
 
-        if(currState == GameState.Playing && prevState != GameState.Pause)
+        if(currState == GameState.Playing && prevState != GameState.Pause && prevState != GameState.Lose)
         {
             levelLoader.LoadLevel();
         }
 
-        GameEventBus.OnGameStateChanged?.Invoke(currState);
+        GameEventBus.Publish<GameStateChangedEvent>(new GameStateChangedEvent { newState = currState });
         Debug.Log($"[GameManager] State Changed: {prevState} -> {currState}");
     }
 }

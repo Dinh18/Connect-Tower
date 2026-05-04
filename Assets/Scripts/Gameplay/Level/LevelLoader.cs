@@ -52,19 +52,8 @@ public class LevelLoader : MonoBehaviour
         gameManager.SetupLevel(levelData.moves);
         
         foreach(SlotController slot in slots) slot.SetupIceSlot();
-
-        // Tutorial Logic
-        if(dataManager.GetCurrentLevel() == 0)
-        {
-            TutorialManager.Instance.SetupFirstTimeTutorial();
-            TutorialManager.Instance.StartFirstTimeTutorial();
-        }
-
-        foreach(var mechanic in dataManager.GetMechanics())
-        {
-            if(dataManager.IsFirstTimePlayMechanic(mechanic.id))
-                TutorialManager.Instance.StartMechanicTutorial(mechanic.id);
-        }
+        
+        GameEventBus.Publish(new LevelLoadedEvent { levelIndex = dataManager.GetCurrentLevel() });
     }
 
     public int GetCurrentLevelReward()

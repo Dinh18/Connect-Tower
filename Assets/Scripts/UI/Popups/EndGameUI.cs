@@ -8,7 +8,9 @@ public class EndGameUI : MonoBehaviour
     [Header("Panel Refrences")]
     private LevelCompletedUI levelCompleted;
     private LevelFailedUI levelFailed;
-    [SerializeField] private Transform dimImage;
+    [SerializeField] private GameObject dimImage;
+    [SerializeField] private GameObject levelCompletedVFX;
+    [SerializeField] private GameObject hardLevelFrame; // Khung viền đỏ cho level khó
     private UIManager uIManager;
 
     void Awake()
@@ -42,13 +44,39 @@ public class EndGameUI : MonoBehaviour
     
     public void ShowLevelCompletedPanel()
     {
+        StartCoroutine(LevelCompletedCoroutine());
+    }
 
+    private IEnumerator LevelCompletedCoroutine()
+    {
+        AudioManager.Instance.PlayFireWorkAudio();
+        levelCompletedVFX.transform.localScale = Vector3.zero;
+        levelCompletedVFX.SetActive(true);
+
+        // Tạm dừng Particle System để đợi hiệu ứng xuất hiện xong
+        ParticleSystem[] particles = levelCompletedVFX.GetComponentsInChildren<ParticleSystem>();
+        foreach (var ps in particles)
+        {
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
+
+        levelCompletedVFX.transform.DOScale(1, 0.5f).SetEase(Ease.OutBack);
+
+        // Chờ animation scale hoàn thành (0.5s)
+        yield return new WaitForSeconds(0.5f);
+
+        // Bắt đầu chạy pháo giấy confetti
+        foreach (var ps in particles)
+        {
+            ps.Play();
+        }
+
+        // Đợi thêm 1.5s để xem pháo giấy (tổng thời gian delay vẫn là 2s)
+        yield return new WaitForSeconds(2f);
+
+        levelCompletedVFX.SetActive(false);
+        dimImage.SetActive(true);
         levelFailed.Hide();
-
-        // ShowDimImage();
-        // dimImage.Set
-        this.gameObject.SetActive(true);
-
         levelCompleted.Show();
     }
 
@@ -56,21 +84,16 @@ public class EndGameUI : MonoBehaviour
     public void ShowLevelFailedPanel()
     {
         AudioManager.Instance.PlayLVLLoseAudio();
-        // ShowDimImage();
-        this.gameObject.SetActive(true);
+        dimImage.SetActive(true);
         levelCompleted.Hide();
         levelFailed.Show();
         
     }
-    private void ShowDimImage()
-    {
-        this.gameObject.SetActive(true);
-        dimImage.transform.DOKill();
-        dimImage.transform.localScale = Vector3.zero;
-        dimImage.transform.DOScale(1, 0.5f).SetEase(Ease.OutBack);
-    }
     public void Hide()
     {
-        this.gameObject.SetActive(false);
+        dimImage.SetActive(false);
+        if (hardLevelFrame != null) hardLevelFrame.SetActive(false);
+        levelCompleted.Hide();
+        levelFailed.Hide();
     }
 }

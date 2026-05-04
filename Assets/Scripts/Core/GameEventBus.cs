@@ -1,39 +1,151 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
+public enum PanelType
+{
+    MainMenu,
+    InGame,
+    Shop,
+    ShopFromMainMenu,
+    EndGameWin,
+    EndGameLose
+}
 
+public enum PopupType
+{
+    RefillHeart,
+    Booster,
+    Setting
+}
+public enum BorderType
+{
+    Warning,
+    Ice
+}
+public interface IGameEvent{}
 public static class GameEventBus
 {
-    // --- GAME STATE EVENTS ---
-    public static Action<GameManager.GameState> OnGameStateChanged;
-    public static Action<int> OnMovesUpdated;
-    public static Action OnLevelCompleted;
-    public static Action OnLevelFailed;
+    private static readonly Dictionary<Type, Delegate> _eventListeners = new Dictionary<Type, Delegate>();
 
-    // --- UI NAVIGATION EVENTS ---
-    public enum UIType
+    public static void Subscribe<T>(Action<T> listener) where T : IGameEvent
     {
-        MainMenu,
-        InGame,
-        Settings,
-        Shop,
-        ShopFromMainMenu,
-        AddBooster,
-        RefillHeart,
-        EndGameWin,
-        EndGameLose
+        Type eventType = typeof(T);
+        if(_eventListeners.ContainsKey(eventType))
+        {
+            _eventListeners[eventType] = Delegate.Combine(_eventListeners[eventType], listener);
+        }
+        else
+        {
+            _eventListeners[eventType] = listener;
+        }
     }
 
-    public static Action<UIType> OnRequestUI;
-    public static Action OnRequestClosePopup;
-    public static Action<int> OnRequestAddMove;
-    
-    // --- SPECIAL UI ACTIONS ---
-    public static Action OnRequestBackHome;
-    public static Action OnRequestTryAgain;
-    public static Action OnRequestAddMoveToContinue;
+    public static void UnSubscribe<T>(Action<T> listener) where T : IGameEvent
+    {
+        Type eventType = typeof(T);
+        var currentDelegate = _eventListeners[eventType];
+        var newDelegate = Delegate.Remove(currentDelegate, listener);
+        if(newDelegate == null)
+        {
+            _eventListeners.Remove(eventType);
+        }
+        else
+        {
+            _eventListeners[eventType] = newDelegate;
+        }
+    }
 
-    // --- BOOSTER EVENTS ---
-    public static Action<AddBoosterUI, BoosterButton, string, string, Constants.BoosterType, bool> OnRequestAddBooster;
-    public static Action OnRequestCloseShop;
-    public static Action<BoosterButton> OnClickAddBooster;
+    public static void Publish<T>(T gameEvent) where T : IGameEvent
+    {
+        Type eventType = typeof(T);
+        if(_eventListeners.ContainsKey(eventType))
+        {
+            if(_eventListeners[eventType] is Action<T> action)
+            {
+                action.Invoke(gameEvent);
+            }
+        }
+    }
+
+    public static void ClearAllListeners()
+    {
+        _eventListeners.Clear();
+    }
+}
+public struct StartBorderFlashEvent : IGameEvent
+{
+    public BorderType borderType;
+    public float flashSpeed;
+    public float flashTime;
+}
+
+public struct StopBorderFlashEvent : IGameEvent
+{
+    
+}
+
+public struct GameStateChangedEvent : IGameEvent
+{
+    public GameManager.GameState newState;
+}
+
+public struct MovesUpdatedEvent : IGameEvent
+{
+    public int currentMoves;
+}
+
+public struct RequestOpenPanelEvent : IGameEvent
+{
+    public PanelType targetPanel;
+}
+
+public struct RequestOpenPopupEvent : IGameEvent
+{
+    public PopupType targetPopup;
+}
+
+public struct RequestCloseBoosterPopupEvent : IGameEvent
+{
+    
+}
+
+public struct RequestOpenBoosterPopupEvent : IGameEvent
+{
+    public Constants.BoosterType type;
+}
+public struct LevelLoadedEvent : IGameEvent
+{
+    public int levelIndex;
+}
+
+public struct FinishedSlotsUpdatedEvent : IGameEvent
+{
+    public int finishedSlots;
+    public int totalSlots;
+}
+
+public struct CoinsUpdatedEvent : IGameEvent
+{
+    public int totalCoins;
+}
+
+public struct AddBoosterEvent : IGameEvent
+{
+    public BoosterButton boosterButton;
+}
+
+public struct HeartUpdatedEvent : IGameEvent
+{
+    public int heartCount;
+}
+
+public struct BoosterCountUpdatedEvent : IGameEvent
+{
+    public int boosterId;
+    public int count;
+}
+
+public struct LevelUpdatedEvent : IGameEvent
+{
+    public int newLevel;
 }

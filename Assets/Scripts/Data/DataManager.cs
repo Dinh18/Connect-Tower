@@ -10,10 +10,7 @@ public class DataManager : MonoBehaviour
     public PlayerData playerData;
     private string saveFilePath;
 
-    public static event Action<int> OnChangeCoins;
-    public static event Action<int> OnChangeLevel;
-    public static event Action<int,int> OnChangeCountBooster;
-    public static event Action<int> OnChangeHeart;
+    // Events are now handled by GameEventBus
 
     public void Init()
     {
@@ -124,13 +121,13 @@ public class DataManager : MonoBehaviour
     public void AddCoins(int amount)
     {
         playerData.wallet.totalCoins += amount;
-        OnChangeCoins?.Invoke(playerData.wallet.totalCoins);
+        GameEventBus.Publish(new CoinsUpdatedEvent { totalCoins = playerData.wallet.totalCoins });
     }
 
     public void UseCoins(int amount)
     {
         playerData.wallet.totalCoins -= amount;
-        OnChangeCoins?.Invoke(playerData.wallet.totalCoins);
+        GameEventBus.Publish(new CoinsUpdatedEvent { totalCoins = playerData.wallet.totalCoins });
     }
 
     public void UseHeart(string nextHeartTime)
@@ -139,7 +136,7 @@ public class DataManager : MonoBehaviour
         {
             playerData.wallet.heart--;
             playerData.wallet.nextHeartTime = nextHeartTime;
-            OnChangeHeart?.Invoke(playerData.wallet.heart);
+            GameEventBus.Publish(new HeartUpdatedEvent { heartCount = playerData.wallet.heart });
         }
     }
 
@@ -147,7 +144,7 @@ public class DataManager : MonoBehaviour
     {
         playerData.wallet.heart = Math.Min(playerData.wallet.heart + amount, 5);
         playerData.wallet.nextHeartTime = nextHeartTime;
-        OnChangeHeart?.Invoke(playerData.wallet.heart);
+        GameEventBus.Publish(new HeartUpdatedEvent { heartCount = playerData.wallet.heart });
     }
 
     public void LevelUp(LevelLoader.GameDifficult gameDifficult, int maxLevel)
@@ -167,7 +164,7 @@ public class DataManager : MonoBehaviour
         }
 
         SaveGame();
-        OnChangeLevel?.Invoke(playerData.currentLevel);
+        GameEventBus.Publish(new LevelUpdatedEvent { newLevel = playerData.currentLevel });
     }
 
     public int GetAmountOfBoosterByID(int id)
@@ -182,7 +179,7 @@ public class DataManager : MonoBehaviour
         if (b != null)
         {
             b.count--;
-            OnChangeCountBooster?.Invoke(id, b.count);
+            GameEventBus.Publish(new BoosterCountUpdatedEvent { boosterId = id, count = b.count });
         }
     }
 
@@ -193,7 +190,7 @@ public class DataManager : MonoBehaviour
         {
             b.count += amount;
             UseCoins(price);
-            OnChangeCountBooster?.Invoke(id, b.count);
+            GameEventBus.Publish(new BoosterCountUpdatedEvent { boosterId = id, count = b.count });
         }
     }
 

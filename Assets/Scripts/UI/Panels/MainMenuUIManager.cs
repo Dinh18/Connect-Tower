@@ -42,7 +42,10 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         cupBackGround = cupButton.GetComponent<BackgroundButton>();
     }
 
-
+    void Start()
+    {
+        
+    }
 
     void OnEnable()
     {
@@ -52,6 +55,7 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         playButton.onClick.AddListener(OnClickPlay);
         addCoins.onClick.AddListener(OnClickShop);
         addHeartButton.onClick.AddListener(OnClickAddHeart);
+        GameEventBus.Subscribe<HeartUpdatedEvent>(OnHeartUpdated);
     }
 
     void OnDisable()
@@ -62,11 +66,12 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         playButton.onClick.RemoveListener(OnClickPlay);
         addCoins.onClick.RemoveListener(OnClickShop);
         addHeartButton.onClick.RemoveListener(OnClickAddHeart);
+        GameEventBus.UnSubscribe<HeartUpdatedEvent>(OnHeartUpdated);
     }
 
     public void Setup(UIManager uIManager)
     {
-        this.uIManager = uIManager;
+        this.uIManager = CoreServices.Get<UIManager>();
         this.dataManager = CoreServices.Get<DataManager>();
         
         refillHeartPopup.Setup(uIManager);
@@ -76,13 +81,10 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         coinText.text = dataManager.GetTotalCoins().ToString();
 
         setting.onClick.RemoveAllListeners();
-        setting.onClick.AddListener(uIManager.OpenSetting);
-
-        DataManager.OnChangeHeart-=UpdateHeartCountText;
-        DataManager.OnChangeHeart+=UpdateHeartCountText;
+        setting.onClick.AddListener(() => GameEventBus.Publish(new RequestOpenPopupEvent{targetPopup = PopupType.Setting}));
 
 
-        UpdateHeartCountText(dataManager.GetHearts());
+        GameEventBus.Subscribe<HeartUpdatedEvent>(OnHeartUpdated);
 
         if(dataManager.GetHearts() < 5) enableAddHeartButton = true;
         else enableAddHeartButton = false;
@@ -201,6 +203,11 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         coinText.transform.DOPunchScale(new Vector3(0.2f, 0.2f, 0), 0.1f).SetEase(Ease.InOutBounce);
     }
 
+    private void OnHeartUpdated(HeartUpdatedEvent ev)
+    {
+        UpdateHeartCountText(ev.heartCount);
+    }
+
     private void UpdateHeartCountText(int heart)
     {
         heartCountText.text = heart.ToString();
@@ -239,6 +246,7 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         coinText.text = oldCoins.ToString();
         levelUIManager.Show();
         OnClickHome();
+        OnHeartUpdated(new HeartUpdatedEvent { heartCount = dataManager.GetHearts() });
     }
 
     public GameObject GetGameObject()

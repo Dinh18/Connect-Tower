@@ -6,6 +6,7 @@ public class AppBootstrapper : MonoBehaviour
     [SerializeField] private DataManager dataManager;
     [SerializeField] private GameManager gameManager;
     [SerializeField] private UIManager uiManager;
+    [SerializeField] private TutorialUIController tutorialUIController;
     
     [Header("Gameplay Systems")]
     [SerializeField] private LevelLoader levelLoader;
@@ -27,6 +28,7 @@ public class AppBootstrapper : MonoBehaviour
         CoreServices.Register(blocksManager);
         CoreServices.Register(heartManager);
         CoreServices.Register(cameraController);
+        CoreServices.Register(tutorialUIController);
         
         // 3. Level Loader (Cần data và các manager gameplay)
         levelLoader.Init(slotsManager, blocksManager, gameManager, dataManager);
