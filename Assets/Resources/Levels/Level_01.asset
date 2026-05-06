@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Level_01
   m_EditorClassIdentifier: Assembly-CSharp::LevelDataSO
   level: 1
-  numsTopic: 2
+  numsTopic: 1
   difficult: 0
   moves: 10
-  row1: 3
+  row1: 2
   row2: 0
   slots:
   - slotType: 0
@@ -35,20 +35,5 @@ MonoBehaviour:
     questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0
-      blockTopic: {fileID: 11400000, guid: 6d25b8a301d4f9e449a604f093872108, type: 2}
-      indexSprite: 0
-    - typeBlock: 0
-      blockTopic: {fileID: 11400000, guid: 6d25b8a301d4f9e449a604f093872108, type: 2}
-      indexSprite: 1
-    - typeBlock: 0
-      blockTopic: {fileID: 11400000, guid: 6d25b8a301d4f9e449a604f093872108, type: 2}
-      indexSprite: 2
-    - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 27d30a38d595de94591d1f11cbc32f07, type: 2}
-      indexSprite: 3
-  - slotType: 0
-    questionTopic: {fileID: 0}
-    blocks:
-    - typeBlock: 0
-      blockTopic: {fileID: 11400000, guid: 6d25b8a301d4f9e449a604f093872108, type: 2}
       indexSprite: 3

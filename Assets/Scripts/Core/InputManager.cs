@@ -20,8 +20,17 @@ public class InputManager : MonoBehaviour
     {
         DetectInput();
     }
+    private bool isInputBlocked = false;
+
+    public void SetInputBlocked(bool blocked)
+    {
+        isInputBlocked = blocked;
+    }
+
     public void DetectInput()
     {
+        if(isInputBlocked) return;
+        
         if(Input.touchCount > 0)
         {
             Touch touch = Input.GetTouch(0);

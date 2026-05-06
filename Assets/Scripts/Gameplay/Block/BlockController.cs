@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class BlockController : MonoBehaviour
 {
@@ -39,12 +40,13 @@ public class BlockController : MonoBehaviour
     [SerializeField] private ColorBlock colorBlock;
     [SerializeField] private GameObject outLine;
     [SerializeField] private ItemImageBlock itemImageBlock;
-    [SerializeField] private Sprite hideImage;
+    [SerializeField] private GameObject hideImage;
     [SerializeField] private GameObject hideVFX;
     [SerializeField] private GameObject iceVFX;
     [SerializeField] private ParticleSystem difVFX;
     [SerializeField] private GameObject iceImage;
     [SerializeField] private Transform visual;
+    [SerializeField] private GameObject maskHole;
     
     public bool isRevealed;
     
@@ -75,11 +77,15 @@ public class BlockController : MonoBehaviour
         this.topic = topic;
         this.type = type;
         this.itemImage = itemImage;
+        itemImageBlock.AddImage(itemImage);
+        itemImageBlock.ShowImage();
         HideIceImage();
         iceVFX.SetActive(false);
+        hideImage.SetActive(false);
         hideVFX.SetActive(false);
         difVFX.Stop();
         ResetOutLint();
+        maskHole.SetActive(false);
         ChangeState(BlockState.None);
         
         if(slot.slotType == SlotController.SlotType.Ice)
@@ -90,7 +96,9 @@ public class BlockController : MonoBehaviour
         if(type == BlockType.Hide)
         {
             ChangeMaterialOutLine(Constants.MATERIAL_COLOR_HIDE_PATH);
-            itemImageBlock.AddImage(hideImage);
+            hideImage.SetActive(true);
+            maskHole.SetActive(true);
+            itemImageBlock.HideImage();
             isRevealed = false;
         }
         else
@@ -112,9 +120,10 @@ public class BlockController : MonoBehaviour
     public void Reveal()
     {
         ChangeMaterialOutLine(Constants.MATERIAL_COLOR_W_PATH);
-        itemImageBlock.AddImage(itemImage);
-        
+        itemImageBlock.ShowImage();
+        hideImage.SetActive(false);
         hideVFX.SetActive(true);
+        maskHole.SetActive(false);
         isRevealed = true;
         AudioManager.Instance.PlayHideBlockAudio();
     }

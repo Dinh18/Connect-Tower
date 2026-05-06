@@ -243,6 +243,43 @@ public class InGameUIManager : MonoBehaviour, IMenu
     {
         addBoosterUI.SetConfig(requestOpenBoosterPopup);
         CoreServices.Get<UIManager>().PushPopupToFront(addBoosterUI, addBoosterUI.transform);
+        
+        BoosterButton matchingBoosterButton = null;
+        if (boosterButtons != null)
+        {
+            foreach (var bb in boosterButtons)
+            {
+                if (bb.GetBooster().GetBoosterType() == requestOpenBoosterPopup.type)
+                {
+                    matchingBoosterButton = bb;
+                    break;
+                }
+            }
+        }
+
+        if (matchingBoosterButton != null)
+        {
+            addBoosterUI.SetupButton(matchingBoosterButton);
+
+            DataManager dataManager = CoreServices.Get<DataManager>();
+            int boosterID = (int)requestOpenBoosterPopup.type;
+            if (dataManager.IsFirstTimeUserBooster(boosterID))
+            {
+                var tutorialService = CoreServices.Get<TutorialService>();
+                if (tutorialService != null)
+                {
+                    string useInstruction = "";
+                    if (requestOpenBoosterPopup.type == Constants.BoosterType.AddMove)
+                        useInstruction = "Use the Extra Move to get extra moves!";
+                    else if (requestOpenBoosterPopup.type == Constants.BoosterType.Shuffle)
+                        useInstruction = "Use it to shuffle the board!";
+                    else
+                        useInstruction = "Use it to reveal a correct placement";
+
+                    tutorialService.StartBoosterTutorial(addBoosterUI.GetClaimButton(), matchingBoosterButton.GetComponent<Button>(), "Claim your free booster!", useInstruction);
+                }
+            }
+        }
     }
 
     public void Hide() => this.gameObject.SetActive(false);

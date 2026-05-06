@@ -77,6 +77,7 @@ public class SlotsManager : MonoBehaviour
             slot.name = "Slot_0_" + i;
             slot.transform.localPosition = new Vector3(startX_Row1 + (i * Constants.SLOT_WIDTH), 0, 0);
             SlotController s = slot.GetComponent<SlotController>();
+            if(slotSetup[j] == null) return;
             s.Setup(slotSetup[j].slotType, 0,slotSetup[j].questionTopic ? slotSetup[j].questionTopic : null);
             slot.SetActive(true);
             slots.Add(s);

@@ -26,8 +26,8 @@ public class WalletData
 public class InventoryData
 {
     public List<BoosterData> boosters = new List<BoosterData>{
-        new BoosterData(0, "Add Move", "Use the Extra Move to get extra moves!", 3, 900, 3, false, true),
-        new BoosterData(1, "Shuffle", "Use it to shuffle the board!", 3, 800,9, false, true),
+        new BoosterData(0, "Add Move", "Use the Extra Move to get extra moves!", 3, 900, 2, false, true),
+        new BoosterData(1, "Shuffle", "Use it to shuffle the board!", 3, 800, 3, false, true),
         new BoosterData(2, "Hint", "Use it to reveal a correct placement", 3, 900,13, false, true)
     };
 }

@@ -17,7 +17,7 @@ TagManager:
   - Slot
   - Item
   - Ground
-  - 
+  - HightLight
   - 
   - 
   - 
@@ -55,6 +55,9 @@ TagManager:
     locked: 0
   - name: VFX
     uniqueID: 2767791871
+    locked: 0
+  - name: DimLayer
+    uniqueID: 1861147151
     locked: 0
   m_RenderingLayers:
   - Default

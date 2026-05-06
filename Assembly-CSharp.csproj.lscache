@@ -83,6 +83,7 @@ Assets/Scripts/Gameplay/Booster/
  HintAnimation.cs
  HintBooster.cs
  IBooster.cs
+ MagnifyingGlassEffect.cs
  ShuffleBooster.cs
 Assets/Scripts/Gameplay/
  Level/LevelLoader.cs

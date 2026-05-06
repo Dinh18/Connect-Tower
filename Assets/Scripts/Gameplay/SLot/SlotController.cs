@@ -145,7 +145,8 @@ public class SlotController : MonoBehaviour
     {
         if(isMoving || isFinished || gameManager.GetCurrState() == GameManager.GameState.Pause
             || gameManager.GetCurrState() == GameManager.GameState.Lose
-            || !isRevealed) return false;
+            || !isRevealed || (this.blocks.Count > 0 && this.blocks.Peek().GetTopicID() != otherSlot.blocks.Peek().GetTopicID()))
+                 return false;
             
         if(slotType == SlotType.Ice)
         {

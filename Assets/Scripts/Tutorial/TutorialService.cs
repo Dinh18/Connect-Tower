@@ -48,8 +48,6 @@ public class TutorialService : MonoBehaviour
     {
         var sequence = new TutorialSequence();
         sequence.AddStep(new ClickSlotStep(1, "To move the block, please tap it!"));
-        sequence.AddStep(new ClickSlotStep(2, "Move the block by tapping an empty space!"));
-        sequence.AddStep(new ClickSlotStep(1, "Stacked blocks of the same category move together!"));
         sequence.AddStep(new ClickSlotStep(0, "Stacked blocks of the same category move together!"));
 
         StartSequence(sequence);
@@ -59,11 +57,19 @@ public class TutorialService : MonoBehaviour
     {
         var sequence = new TutorialSequence();
         string instruction = "";
-        if (mechanicId == 0) instruction = "Move blocks to reveal mystery!";
-        else if (mechanicId == 1) instruction = "Complete the category to unveil the curtain!";
-        else instruction = "Must stack blocks are in category!";
+        if (mechanicId == 0) instruction = "Move blocks to reveal the mystery!";
+        else if (mechanicId == 1) instruction = "Complete a category to unveil the curtain!";
+        else instruction = "Match blocks of the same category to break the ice!";
 
         sequence.AddStep(new ShowMechanicStep(mechanicId, instruction));
+        StartSequence(sequence);
+    }
+
+    public void StartBoosterTutorial(UnityEngine.UI.Button claimButton, UnityEngine.UI.Button boosterButton, string claimText, string useText)
+    {
+        var sequence = new TutorialSequence();
+        sequence.AddStep(new ClickButtonStep(claimButton, claimText));
+        sequence.AddStep(new ClickButtonStep(boosterButton, useText));
         StartSequence(sequence);
     }
 
@@ -72,7 +78,12 @@ public class TutorialService : MonoBehaviour
         if (currentSequence != null && currentSequence.IsActive) return;
 
         currentSequence = sequence;
-        currentSequence.OnSequenceComplete += () => currentSequence = null;
+        currentSequence.OnSequenceComplete += () => 
+        {
+            currentSequence = null;
+            var tutorialUI = CoreServices.Get<TutorialUIController>();
+            if (tutorialUI != null) tutorialUI.EndTutorial();
+        };
         currentSequence.Start();
     }
 
@@ -90,4 +101,3 @@ public class TutorialService : MonoBehaviour
         return false;
     }
 }
-

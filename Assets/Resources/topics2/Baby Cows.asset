@@ -16,7 +16,7 @@ MonoBehaviour:
   blockColor: 2
   topicID: 3
   blocksSprite:
-  - {fileID: 21300000, guid: ec1110905911f734aa16147aa51e25d7, type: 3}
-  - {fileID: 21300000, guid: c3ea6a3ac87a11f4eb78c57fe922580e, type: 3}
-  - {fileID: 21300000, guid: 0311b259ce4fccb4297b23068eedf7e3, type: 3}
-  - {fileID: 21300000, guid: 0311b259ce4fccb4297b23068eedf7e3, type: 3}
+  - {fileID: 21300000, guid: 6eea20a573efe8e4db7525ad9e371db3, type: 2}
+  - {fileID: 21300000, guid: 0ca9ae8ee1ce4b5408ad15e6706ffd4a, type: 2}
+  - {fileID: 21300000, guid: f94235333018f594981c5480b75e87ee, type: 2}
+  - {fileID: 21300000, guid: f94235333018f594981c5480b75e87ee, type: 2}

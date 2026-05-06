@@ -26,6 +26,8 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip selectSlotAudio;
     [SerializeField] private AudioClip moveFailAudio;
     [SerializeField] private AudioClip fireWorkAudio;
+    [SerializeField] private AudioClip buttonDownAudio;
+    [SerializeField] private AudioClip buttonUpAudio;
     private bool isSoundOn;
     void Awake()
     {
@@ -58,6 +60,8 @@ public class AudioManager : MonoBehaviour
     public void PlaySelectSlotAudio() => PlaySFX(selectSlotAudio);
     public void PlayMoveFailAudio() => PlaySFX(moveFailAudio);
     public void PlayFireWorkAudio() => PlaySFX(fireWorkAudio);
+    public void PlayButtonDownAudio() => PlaySFX(buttonDownAudio);
+    public void PlayButtonUpAudio() => PlaySFX(buttonUpAudio);
     public void PlayPopMovedAudio(int count)
     {
         switch(count)

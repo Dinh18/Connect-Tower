@@ -129,17 +129,15 @@ public class AddBoosterUI : MonoBehaviour, IMenu
 
     public void OnClickClaim()
     {
-        string instruction;
-        var type = boosterType;
-        if(type == Constants.BoosterType.AddMove)
-            instruction = "Use the Extra Move to get extra moves!";
-        else if(type == Constants.BoosterType.Shuffle)
-            instruction = "Use it to shuffle the board!";
-        else
-            instruction = "Use it to reveal a correct placement";
+        int id = (int)boosterType;
+        DataManager dataManager = CoreServices.Get<DataManager>();
+        
+        dataManager.AddFreeBooster(id, 1);
+        dataManager.UsedBooster(id);
 
         OnClickClose();
     }
 
     public GameObject GetGameObject() => this.gameObject;
+    public Button GetClaimButton() => claimButton;
 }

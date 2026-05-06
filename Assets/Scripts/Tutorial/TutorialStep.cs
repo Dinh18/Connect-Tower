@@ -101,6 +101,60 @@ public class ShowMechanicStep : TutorialStep
         if (tutorialUI != null)
         {
             tutorialUI.EndTutorial(); // Dùng tạm EndTutorial() để tắt UI
+            tutorialUI.OnBackgroundClicked();
+        }
+    }
+}
+
+public class ClickButtonStep : TutorialStep
+{
+    private UnityEngine.UI.Button targetButton;
+    private string instruction;
+
+    public ClickButtonStep(UnityEngine.UI.Button targetButton, string instruction)
+    {
+        this.targetButton = targetButton;
+        this.instruction = instruction;
+    } 
+
+    public override void Enter()
+    {
+        TutorialUIController tutorialUI = CoreServices.Get<TutorialUIController>();
+        if(tutorialUI != null && targetButton != null)
+        {
+            tutorialUI.StartTutorial(targetButton.gameObject, instruction);
+        }
+        if (targetButton != null)
+        {
+            targetButton.onClick.AddListener(OnButtonClicked);
+        }
+    }
+
+    private void OnButtonClicked()
+    {
+        CompleteStep();
+    }
+
+    public override bool Execute(object data)
+    {
+        if (data is GameObject clickedObj && clickedObj == targetButton?.gameObject)
+        {
+            CompleteStep();
+            return true;
+        }
+        return false;
+    }
+
+    public override void Exit()
+    {
+        var tutorialUI = CoreServices.Get<TutorialUIController>();
+        if (tutorialUI != null)
+        {
+            tutorialUI.EndTutorial();
+        }
+        if (targetButton != null)
+        {
+            targetButton.onClick.RemoveListener(OnButtonClicked);
         }
     }
 }

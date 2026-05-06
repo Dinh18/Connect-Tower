@@ -17,7 +17,45 @@ public class TutorialUIController : MonoBehaviour
     void Awake()
     {
         CoreServices.Register<TutorialUIController>(this);
-        tutorialCanvas.SetActive(false);
+
+        if (dimImage != null)
+        {
+            // Tự động gán sự kiện click cho dimImage
+            Button btn = dimImage.GetComponent<Button>();
+            if (btn == null) btn = dimImage.AddComponent<Button>();
+            btn.onClick.RemoveListener(OnBackgroundClicked); // Prevent duplicates
+            btn.onClick.AddListener(OnBackgroundClicked);
+
+            // Đảm bảo dimImage nhận được click
+            Image img = dimImage.GetComponent<Image>();
+            if (img != null) img.raycastTarget = true;
+        }
+
+        // Tắt raycastTarget của các thành phần con để tránh block click
+        if (mechanicImage != null) mechanicImage.raycastTarget = false;
+        if (tutorialText != null) tutorialText.raycastTarget = false;
+        if (closeText != null) closeText.raycastTarget = false;
+        if (handImage != null)
+        {
+            Image handImg = handImage.GetComponent<Image>();
+            if (handImg != null) handImg.raycastTarget = false;
+        }
+    }
+
+    void Update()
+    {
+        if (currentElevatedTarget != null && handImage != null && handImage.activeSelf)
+        {
+            RectTransform targetRect = currentElevatedTarget.GetComponent<RectTransform>();
+            if (targetRect != null)
+            {
+                handImage.GetComponent<RectTransform>().position = targetRect.position;
+            }
+            else
+            {
+                handImage.transform.position = Camera.main.WorldToScreenPoint(currentElevatedTarget.transform.position);
+            }
+        }
     }
 
     public void StartTutorial(GameObject target, string instruction)
@@ -31,7 +69,7 @@ public class TutorialUIController : MonoBehaviour
         RectTransform targetRect = target.GetComponent<RectTransform>();
         if(targetRect != null)
         {
-            if (handImage != null) handImage.transform.position = targetRect.position;
+            if (handImage != null) handImage.GetComponent<RectTransform>().position = targetRect.position;
             dimImage.SetActive(true);
             ElevateTarget(target);
         }
@@ -94,10 +132,6 @@ public class TutorialUIController : MonoBehaviour
 
     public void OnBackgroundClicked()
     {
-        var tutorialService = CoreServices.Get<TutorialService>();
-        if (tutorialService != null && tutorialService.IsTutorialActive())
-        {
-            tutorialService.ProcessInput(null); // Passing null to complete steps waiting for any click
-        }
+        tutorialCanvas.SetActive(false);
     }
 }

@@ -194,6 +194,16 @@ public class DataManager : MonoBehaviour
         }
     }
 
+    public void AddFreeBooster(int id, int amount)
+    {
+        var b = GetBooster(id);
+        if (b != null)
+        {
+            b.count += amount;
+            GameEventBus.Publish(new BoosterCountUpdatedEvent { boosterId = id, count = b.count });
+        }
+    }
+
     public void UnlockBooster(int id)
     {
         var b = GetBooster(id);

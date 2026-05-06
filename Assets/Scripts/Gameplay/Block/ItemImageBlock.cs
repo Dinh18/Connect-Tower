@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class ItemImageBlock : MonoBehaviour
 {
-    [SerializeField]private Image image;
+    [SerializeField]private SpriteRenderer image;
     public void AddImage(Sprite sprite)
     {
         
@@ -25,10 +25,10 @@ public class ItemImageBlock : MonoBehaviour
 
     public void ShowImage()
     {
-        this.gameObject.SetActive(true);
+        image.maskInteraction = SpriteMaskInteraction.None;
     }
     public void HideImage()
     {
-        this.gameObject.SetActive(false);
+        image.maskInteraction = SpriteMaskInteraction.VisibleInsideMask;
     }
 }

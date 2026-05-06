@@ -16,7 +16,7 @@ MonoBehaviour:
   blockColor: 9
   topicID: 10
   blocksSprite:
-  - {fileID: 21300000, guid: 63e8005ca787a6349bfded22cb226fee, type: 3}
-  - {fileID: 21300000, guid: 53358528dad16414c9b5ba7f1881be0a, type: 3}
-  - {fileID: 21300000, guid: efd3b0ed1db9a7243a7304c009a6d637, type: 3}
-  - {fileID: 21300000, guid: 59f5eb8f60c453d4b96e30e84d5de7c7, type: 3}
+  - {fileID: 21300000, guid: 0deafe52d7d4f9e4b9bae92e871a4f41, type: 2}
+  - {fileID: 21300000, guid: 5eca5ec6c1ffa1249a67c420493c9dd3, type: 2}
+  - {fileID: 21300000, guid: 97ece8ac039237549bc0a3bce3c28800, type: 2}
+  - {fileID: 21300000, guid: 5ab60e514a889cc49a01e1a18aa04c32, type: 2}

@@ -57,7 +57,9 @@ Assets/Editor/
  LevelGridBuilder.cs
  MakeLevel_2.cs
  ShopTools.cs
-Assets/Scripts/Editor/LevelSolverEditor.cs
+Assets/Scripts/Editor/
+ AutoSliceSpriteTool.cs
+ LevelSolverEditor.cs
 Temp/obj/Assembly-CSharp-Editor/.NETStandard,Version=v2.1.AssemblyAttributes.cs
 
 [metadataReferences]

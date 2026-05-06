@@ -12,6 +12,9 @@ public class BoosterManager : MonoBehaviour
     [SerializeField] private SlotsManager slotsManager;
     [SerializeField] private BlocksManager blocksManager;
     [SerializeField] private Transform centerPivot;
+    [SerializeField] private GameObject dimImage;
+    [SerializeField] private GameObject blackHole;
+
     
     // Biến Singleton để các Booster tự tìm đến
     public static BoosterManager Instance { get; private set; }
@@ -39,9 +42,13 @@ public class BoosterManager : MonoBehaviour
         List<BlockController> diffcultBLocks = new List<BlockController>();
         Dictionary<int, List<BlockController>> sameBlocks = new Dictionary<int, List<BlockController>>();
         Sequence sequence = DOTween.Sequence();
-        //----------------Đưa các block về 1 điểm----------------
+        //----------------Đưa các block về xếp thành vòng tròn----------------
         int moveIndex = 0;
         float moveDuration = 0.4f;
+        
+        List<BlockController> allPoppedBlocks = new List<BlockController>();
+        List<SlotController> originSlots = new List<SlotController>();
+
         foreach(SlotController slot in slotsManager.GetAllSlots())
         {
             if(slot.isFinished || !slot.isRevealed || slot.slotType == SlotController.SlotType.Ice) continue;
@@ -49,22 +56,61 @@ public class BoosterManager : MonoBehaviour
             List<BlockController> poppedBlocks = slot.MoveToShuffle(diffcultBLocks, sameBlocks);
             foreach(BlockController block in poppedBlocks)
             {
-                Vector3 randomOffset = UnityEngine.Random.insideUnitSphere * 1.5f;
-                Vector3 gatherPos = centerPivot.position + randomOffset;
-                Vector3[] pathArr = new Vector3[] {slot.arcPeak.transform.position, gatherPos};
-                
-                block.transform.SetParent(centerPivot);
-                block.transform.DOKill();
-                sequence.Insert(moveIndex * 0.02f, block.transform.DOPath(pathArr, moveDuration, PathType.CatmullRom).SetEase(Ease.InBack));
-                moveIndex++;
+                allPoppedBlocks.Add(block);
+                originSlots.Add(slot);
             }
+        }
+
+        float radius = 2f; // Bán kính vòng tròn
+        int totalBlocks = allPoppedBlocks.Count;
+        
+
+        for(int i = 0; i < totalBlocks; i++)
+        {
+            BlockController block = allPoppedBlocks[i];
+            SlotController slot = originSlots[i];
+
+            float angle = i * Mathf.PI * 2f / totalBlocks;
+            Vector3 offset = new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0) * radius;
+            Vector3 gatherPos = centerPivot.position + offset;
+            Vector3[] pathArr = new Vector3[] {slot.arcPeak.transform.position, gatherPos};
+            
+            block.transform.SetParent(centerPivot);
+            block.transform.DOKill();
+            sequence.Insert(moveIndex * 0.02f, block.transform.DOPath(pathArr, moveDuration, PathType.CatmullRom).SetEase(Ease.InBack));
+            moveIndex++;
         }
 
         //----------------Xoay tâm để tạo hiệu ứng đã xáo trộn----------------
         float spinDuration = 1f;
         float spinDelay = moveIndex * 0.02f + moveDuration + 0.1f;
+        // 1. Ép size về 0 trước khi bật
+        blackHole.transform.localScale = Vector3.zero;
+        
+        // 2. Dọn rác Particle cũ (Rất quan trọng để tránh chớp hình)
+        ParticleSystem bhParticle = blackHole.GetComponent<ParticleSystem>();
+        if (bhParticle != null) 
+        {
+            bhParticle.Clear();
+            bhParticle.Play();
+        }
+
+        // 3. Bật Hố đen
+        blackHole.SetActive(true);
+        blackHole.transform.DOKill();
+        
+        // 4. CHẠY TWEEN ĐỘC LẬP (Xóa lệnh sequence.Insert đi)
+        // Dùng Ease.OutQuad sẽ giúp hố đen nở ra từ tốn và mượt mà hơn Ease.OutBack
+        blackHole.transform.DOScale(Vector3.one, spinDelay).SetEase(Ease.OutQuad);
         int rounds = 3;
-        sequence.Insert(spinDelay,centerPivot.DORotate(new Vector3(0,0,360 * rounds),spinDuration, RotateMode.FastBeyond360).SetEase(Ease.InCubic));
+        sequence.Insert(spinDelay,centerPivot.DORotate(new Vector3(0,0,-360 * rounds),spinDuration, RotateMode.FastBeyond360).SetEase(Ease.InCubic));
+        for(int i = 0; i < totalBlocks; i++)
+        {
+            Transform blockTransform = allPoppedBlocks[i].gameObject.transform;
+
+            sequence.Insert(spinDelay,blockTransform.DOLocalMove(Vector3.zero,spinDuration));
+            sequence.Insert(spinDelay,blockTransform.DOScale(Vector3.zero,spinDuration));
+        }
 
         //----------------Rải các block ra lại các slot----------------
         List<SlotController> randomSlots = new List<SlotController>(slotsManager.GetAllSlots());
@@ -120,16 +166,28 @@ public class BoosterManager : MonoBehaviour
                 
                 // Chạy animation rơi cũng từ đúng cái absoluteDropTime này
                 sequence.Insert(absoluteDropTime, block.transform.DOPath(path.ToArray(), duration, PathType.CatmullRom).SetEase(Ease.OutQuad));
+                sequence.Insert(absoluteDropTime, block.transform.DOScale(Vector3.one,duration));
 
                 slot.blocks.Push(block);
 
                 index++;
             }
         }
+        
+        sequence.InsertCallback(dropStartTime,() =>
+        {
+            blackHole.transform.DOScale(Vector3.zero,0.5f).SetEase(Ease.OutQuad).OnComplete(() =>
+            {
+                blackHole.SetActive(false);
+                blackHole.transform.localScale = Vector3.one;
+            });
+        });
+        
 
         // Tùy chọn: Reset góc quay khi tất cả đã xong (Tính tổng thời gian thả cục cuối cùng)
         sequence.OnComplete(() => {
             centerPivot.rotation = Quaternion.identity;
+           
             Debug.Log("Shuffle Animation Hoàn Tất!");
         });
     }   
@@ -148,74 +206,101 @@ public class BoosterManager : MonoBehaviour
     [Header("Hint References")]
     [SerializeField] private GameObject hintImage1;
     [SerializeField] private GameObject hintImage2;
+    [SerializeField] private MagnifyingGlassEffect magnifyingGlass;
 
     public bool SearchedBlocks()
     {
-        Dictionary<int, List<BlockController>> blocksByTopicID = new Dictionary<int, List<BlockController>>();
-        List<SlotController> randomSlot = new List<SlotController>();
-
-        foreach(SlotController slot in slotsManager.GetAllSlots())
+        bool hasHiddenBlocks = false;
+        foreach(SlotController slot in CoreServices.Get<SlotsManager>().GetAllSlots())
         {
-            if(slot.isFinished || !slot.isRevealed) continue;
-            randomSlot.Add(slot);
-        }
-
-        ShuffleList(randomSlot);
-
-        foreach(SlotController slot in randomSlot)
-        {
+            if(!slot.isRevealed) hasHiddenBlocks = true;
             foreach(BlockController block in slot.blocks)
             {
-                if(!block.isRevealed) continue;
-
-                if(visitedBlock.ContainsKey(block.GetTopicID()))
-                {
-                    if(visitedBlock[block.GetTopicID()].Contains(block)) continue;
-                }
-
-                if(blocksByTopicID.ContainsKey(block.GetTopicID())) blocksByTopicID[block.GetTopicID()].Add(block);
-                else
-                {
-                    List<BlockController> blocks = new List<BlockController>();
-                    blocks.Add(block);
-                    blocksByTopicID.Add(block.GetTopicID(), blocks);
-                }
+                if(!block.isRevealed) hasHiddenBlocks = true;
             }
         }
 
-        foreach((int topicID, List<BlockController> blocks) in blocksByTopicID)
-        {
-            if(blocks.Count < 2) continue;
-            
-            StartCoroutine(HintCoroutine(0.5f, hintImage1, hintImage2, blocks[0], blocks[1]));
+        if (!hasHiddenBlocks) return false;
 
-            if(visitedBlock.ContainsKey(topicID))
-            {
-                visitedBlock[topicID].Add(blocks[0]);
-                visitedBlock[topicID].Add(blocks[1]);
-            }
-            else
-            {
-                List<BlockController> blockControllers = new List<BlockController>();
-                blockControllers.Add(blocks[0]);
-                blockControllers.Add(blocks[1]);
-                visitedBlock.Add(topicID, blockControllers);
-            }
-            return true;
-        }
+        dimImage.SetActive(true);
+        CoreServices.Get<InputManager>().SetInputBlocked(true);
 
-        foreach((int topicID, List<BlockController> blocks) in blocksByTopicID)
-        {
-            if(visitedBlock.ContainsKey(topicID))
-            {
-                visitedBlock[topicID].Add(blocks[0]);
-                StartCoroutine(HintCoroutine(0.5f, hintImage1, hintImage2, blocks[0]));
-                return true;
-            }
-        }
+        float duration = 7f; 
+        magnifyingGlass.Activate(mainCamera, duration, () => {
+            dimImage.SetActive(false);
+            CoreServices.Get<InputManager>().SetInputBlocked(false);
+        });
 
-        return false;
+        return true;
     }
+
+    // public bool SearchedBlocks()
+    // {
+    //     Dictionary<int, List<BlockController>> blocksByTopicID = new Dictionary<int, List<BlockController>>();
+    //     List<SlotController> randomSlot = new List<SlotController>();
+
+    //     foreach(SlotController slot in slotsManager.GetAllSlots())
+    //     {
+    //         if(slot.isFinished || !slot.isRevealed) continue;
+    //         randomSlot.Add(slot);
+    //     }
+
+    //     ShuffleList(randomSlot);
+
+    //     foreach(SlotController slot in randomSlot)
+    //     {
+    //         foreach(BlockController block in slot.blocks)
+    //         {
+    //             if(!block.isRevealed) continue;
+
+    //             if(visitedBlock.ContainsKey(block.GetTopicID()))
+    //             {
+    //                 if(visitedBlock[block.GetTopicID()].Contains(block)) continue;
+    //             }
+
+    //             if(blocksByTopicID.ContainsKey(block.GetTopicID())) blocksByTopicID[block.GetTopicID()].Add(block);
+    //             else
+    //             {
+    //                 List<BlockController> blocks = new List<BlockController>();
+    //                 blocks.Add(block);
+    //                 blocksByTopicID.Add(block.GetTopicID(), blocks);
+    //             }
+    //         }
+    //     }
+
+    //     foreach((int topicID, List<BlockController> blocks) in blocksByTopicID)
+    //     {
+    //         if(blocks.Count < 2) continue;
+            
+    //         StartCoroutine(HintCoroutine(0.5f, hintImage1, hintImage2, blocks[0], blocks[1]));
+
+    //         if(visitedBlock.ContainsKey(topicID))
+    //         {
+    //             visitedBlock[topicID].Add(blocks[0]);
+    //             visitedBlock[topicID].Add(blocks[1]);
+    //         }
+    //         else
+    //         {
+    //             List<BlockController> blockControllers = new List<BlockController>();
+    //             blockControllers.Add(blocks[0]);
+    //             blockControllers.Add(blocks[1]);
+    //             visitedBlock.Add(topicID, blockControllers);
+    //         }
+    //         return true;
+    //     }
+
+    //     foreach((int topicID, List<BlockController> blocks) in blocksByTopicID)
+    //     {
+    //         if(visitedBlock.ContainsKey(topicID))
+    //         {
+    //             visitedBlock[topicID].Add(blocks[0]);
+    //             StartCoroutine(HintCoroutine(0.5f, hintImage1, hintImage2, blocks[0]));
+    //             return true;
+    //         }
+    //     }
+
+    //     return false;
+    // }
 
     public IEnumerator HintCoroutine(float time, GameObject hintImage1, GameObject hintImage2, BlockController block1, BlockController block2 = null)
     {

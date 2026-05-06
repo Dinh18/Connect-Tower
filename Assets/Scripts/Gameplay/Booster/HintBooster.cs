@@ -25,14 +25,17 @@ public class HintBooster : MonoBehaviour, IBooster
 
     public void Excute()
     {
-        CoreServices.Get<DataManager>().UseBooster((int)Constants.BoosterType.Hint);
         bool searched = boosterManager.SearchedBlocks();
         if(searched)
         {
+            CoreServices.Get<DataManager>().UseBooster((int)Constants.BoosterType.Hint);
             AudioManager.Instance.PlayHintBoosterAudio();
             Debug.Log("Thuc hien Hint thanh cong");
         } 
-        else Debug.Log("Hint khong thanh cong");
+        else 
+        {
+            Debug.Log("Hint khong thanh cong");
+        }
     }
 
     public int GetNumsBooster()
