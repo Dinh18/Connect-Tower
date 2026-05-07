@@ -17,12 +17,12 @@ public class SettingPopup : MonoBehaviour, IMenu
     void OnEnable()
     {
         soundButton.onClick.AddListener(OnClickSoundButton);
-        closeButton.onClick.AddListener(() => GameEventBus.Publish(new RequestCloseBoosterPopupEvent()));
+        closeButton.onClick.AddListener(() => GameEventBus.Publish(new RequestClosePopupEvent()));
     }
     void OnDisable()
     {
         soundButton.onClick.RemoveListener(OnClickSoundButton);
-        closeButton.onClick.RemoveListener(() => GameEventBus.Publish(new RequestCloseBoosterPopupEvent()));
+        closeButton.onClick.RemoveListener(() => GameEventBus.Publish(new RequestClosePopupEvent()));
     }
     public void Hide()
     {

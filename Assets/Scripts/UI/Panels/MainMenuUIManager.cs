@@ -166,6 +166,7 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         // yield return new WaitForSeconds(0.5f);
 
         Vector2 screenCenter = new Vector2(Screen.width / 2f, Screen.height / 2f);
+        // float radius = 100f;
         
         int visualCoins = 10;
         int coinValueBase = winAmount / visualCoins;
@@ -175,9 +176,12 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         {
             GameObject coinObj = CoinEffect.Instance.GetCoin();
             CoinFlyEffect coinEffect = coinObj.GetComponent<CoinFlyEffect>();
-
+            
             // Tính toán xem ĐỒNG XU NÀY mang giá trị bao nhiêu tiền
             int finalValueForThisCoin = coinValueBase + (i == visualCoins - 1 ? coinValueRemainder : 0);
+
+            // Vector2 randomOffset = UnityEngine.Random.insideUnitCircle * radius;
+            // Vector2 coinPos = screenCenter + randomOffset;
 
             coinEffect.StartBurstAndFly(screenCenter, coinText.GetComponent<RectTransform>(), () => 
             {

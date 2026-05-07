@@ -104,7 +104,7 @@ public struct RequestOpenPopupEvent : IGameEvent
     public PopupType targetPopup;
 }
 
-public struct RequestCloseBoosterPopupEvent : IGameEvent
+public struct RequestClosePopupEvent : IGameEvent
 {
     
 }
@@ -112,6 +112,7 @@ public struct RequestCloseBoosterPopupEvent : IGameEvent
 public struct RequestOpenBoosterPopupEvent : IGameEvent
 {
     public Constants.BoosterType type;
+    public RectTransform boosterTransform;
 }
 public struct LevelLoadedEvent : IGameEvent
 {
@@ -148,4 +149,10 @@ public struct BoosterCountUpdatedEvent : IGameEvent
 public struct LevelUpdatedEvent : IGameEvent
 {
     public int newLevel;
+}
+
+public struct RequestAddBoosterEffectEvent : IGameEvent
+{
+    public RectTransform boosterTransfrom;
+    public Sprite spriteIcon;
 }

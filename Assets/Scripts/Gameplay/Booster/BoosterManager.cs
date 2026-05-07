@@ -84,32 +84,40 @@ public class BoosterManager : MonoBehaviour
         //----------------Xoay tâm để tạo hiệu ứng đã xáo trộn----------------
         float spinDuration = 1f;
         float spinDelay = moveIndex * 0.02f + moveDuration + 0.1f;
+        
         // 1. Ép size về 0 trước khi bật
         blackHole.transform.localScale = Vector3.zero;
         
-        // 2. Dọn rác Particle cũ (Rất quan trọng để tránh chớp hình)
-        ParticleSystem bhParticle = blackHole.GetComponent<ParticleSystem>();
-        if (bhParticle != null) 
+        // 2. Dọn rác Particle cũ & Ép ScalingMode để DOScale có tác dụng (Sửa lỗi hiển thị luôn)
+        ParticleSystem[] pSystems = blackHole.GetComponentsInChildren<ParticleSystem>(true);
+        foreach (var ps in pSystems)
         {
-            bhParticle.Clear();
-            bhParticle.Play();
+            var main = ps.main;
+            main.scalingMode = ParticleSystemScalingMode.Hierarchy;
+            ps.Clear();
+            ps.Play();
         }
 
         // 3. Bật Hố đen
         blackHole.SetActive(true);
         blackHole.transform.DOKill();
         
-        // 4. CHẠY TWEEN ĐỘC LẬP (Xóa lệnh sequence.Insert đi)
-        // Dùng Ease.OutQuad sẽ giúp hố đen nở ra từ tốn và mượt mà hơn Ease.OutBack
+        // 4. CHẠY TWEEN CHO HỐ ĐEN (Xuất hiện -> Tích tụ)
+        // Nở ra từ từ để đón blocks
         blackHole.transform.DOScale(Vector3.one, spinDelay).SetEase(Ease.OutQuad);
+        
+        // Tích tụ năng lượng (Thu nhỏ lại một chút) ở cuối pha hút
+        float accumulateTime = spinDelay + spinDuration - 0.3f;
+        sequence.Insert(accumulateTime, blackHole.transform.DOScale(new Vector3(0.5f, 0.5f, 0.5f), 0.3f).SetEase(Ease.InQuad));
+
         int rounds = 3;
         sequence.Insert(spinDelay,centerPivot.DORotate(new Vector3(0,0,-360 * rounds),spinDuration, RotateMode.FastBeyond360).SetEase(Ease.InCubic));
         for(int i = 0; i < totalBlocks; i++)
         {
             Transform blockTransform = allPoppedBlocks[i].gameObject.transform;
 
-            sequence.Insert(spinDelay,blockTransform.DOLocalMove(Vector3.zero,spinDuration));
-            sequence.Insert(spinDelay,blockTransform.DOScale(Vector3.zero,spinDuration));
+            sequence.Insert(spinDelay,blockTransform.DOLocalMove(Vector3.zero,spinDuration).SetEase(Ease.InCubic));
+            sequence.Insert(spinDelay,blockTransform.DOScale(Vector3.zero,spinDuration).SetEase(Ease.InCubic));
         }
 
         //----------------Rải các block ra lại các slot----------------
@@ -174,12 +182,16 @@ public class BoosterManager : MonoBehaviour
             }
         }
         
+        // BÙNG NỔ! Phóng to cực nhanh rồi biến mất
         sequence.InsertCallback(dropStartTime,() =>
         {
-            blackHole.transform.DOScale(Vector3.zero,0.5f).SetEase(Ease.OutQuad).OnComplete(() =>
+            blackHole.transform.DOScale(new Vector3(2.5f, 2.5f, 2.5f), 0.1f).SetEase(Ease.OutFlash).OnComplete(() =>
             {
-                blackHole.SetActive(false);
-                blackHole.transform.localScale = Vector3.one;
+                blackHole.transform.DOScale(Vector3.zero, 0.4f).SetEase(Ease.InBack).OnComplete(() =>
+                {
+                    blackHole.SetActive(false);
+                    blackHole.transform.localScale = Vector3.one;
+                });
             });
         });
         

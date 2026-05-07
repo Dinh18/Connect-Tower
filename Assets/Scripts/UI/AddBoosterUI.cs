@@ -17,15 +17,28 @@ public class AddBoosterUI : MonoBehaviour, IMenu
     [SerializeField] private Sprite addMoveIcon;
     [SerializeField] private Sprite shuffleIcon;
     [SerializeField] private Sprite hintIcon;
-    [SerializeField] private List<RectTransform> boosterIcon;
     [SerializeField] private GameObject dimImage;
+    
+    private RectTransform boosterTransform;
     private BoosterButton boosterButton;
     private Constants.BoosterType boosterType;
 
     public void Setup(UIManager uIManager)
     {
+        // closeButton.onClick.RemoveAllListeners();
+        // closeButton.onClick.AddListener(OnClickClose);
+    }
+
+    void OnEnable()
+    {
+        closeButton.onClick.AddListener(OnClickClose); 
+        addButton.onClick.AddListener(OnClickBuyBooster);      
+    }
+
+    void OnDisable()
+    {
         closeButton.onClick.RemoveAllListeners();
-        closeButton.onClick.AddListener(() => GameEventBus.Publish(new RequestCloseBoosterPopupEvent()));
+        addButton.onClick.RemoveAllListeners();
     }
 
     public void Show()
@@ -42,6 +55,7 @@ public class AddBoosterUI : MonoBehaviour, IMenu
         string header = dataManager.GetBooster(boosterID).name;
         int coins = dataManager.GetBooster(boosterID).price;
         boosterType = requestOpenBoosterPopup.type;
+        boosterTransform = requestOpenBoosterPopup.boosterTransform;
 
         if(isFirstTime)
         {
@@ -95,30 +109,23 @@ public class AddBoosterUI : MonoBehaviour, IMenu
 
     public void OnClickClose()
     {
-        GameEventBus.Publish(new RequestCloseBoosterPopupEvent());
+        GameEventBus.Publish(new RequestClosePopupEvent());
+        Debug.Log("Gửi event đóng add booster popup");
     }
 
-    public IEnumerator AddBoosterEffect(RectTransform rectTransform)
-    {
-        foreach(RectTransform icon in boosterIcon)
-        {
-            Vector3 originPos = icon.anchoredPosition;
-            icon.DOKill();
-            icon.gameObject.SetActive(true);
-            if(boosterButton.GetBooster().GetBoosterType() == Constants.BoosterType.AddMove)
-                icon.GetComponent<Image>().sprite = addMoveIcon;
-            else if(boosterButton.GetBooster().GetBoosterType() == Constants.BoosterType.Shuffle)
-                icon.GetComponent<Image>().sprite = shuffleIcon;
-            else
-                icon.GetComponent<Image>().sprite = hintIcon;
+    
 
-            icon.DOMove(rectTransform.position, 0.7f).SetEase(Ease.OutQuad).OnComplete(() =>
-            {
-                icon.gameObject.SetActive(false);
-                icon.anchoredPosition = originPos;
-                AudioManager.Instance.PlayAddBoosterAudio();
-            });
-            yield return new WaitForSeconds(0.1f);
+    public void OnClickBuyBooster()
+    {
+        if(boosterButton.GetBooster().GetPrice() > CoreServices.Get<DataManager>().GetTotalCoins())
+        {
+            GameEventBus.Publish(new RequestOpenPanelEvent{targetPanel = PanelType.Shop});
+        }
+        else
+        {
+            boosterButton.GetBooster().AddBooster(3);
+            GameEventBus.Publish(new RequestAddBoosterEffectEvent{boosterTransfrom = boosterButton.GetComponent<RectTransform>(), spriteIcon = boosterIconImage.sprite});
+            OnClickClose();
         }
     }
 

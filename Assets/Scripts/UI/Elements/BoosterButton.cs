@@ -54,7 +54,7 @@ public class BoosterButton : MonoBehaviour
         if(dataManager.GetCurrentLevel() == dataManager.GetUnclockedLevel(id) && dataManager.IsFirstTimeUserBooster(id))
         {
             // addBoosterUI.SetupButton(this);
-            GameEventBus.Publish(new RequestOpenBoosterPopupEvent { type = booster.GetBoosterType() });
+            GameEventBus.Publish(new RequestOpenBoosterPopupEvent { type = booster.GetBoosterType(), boosterTransform = this.GetComponent<RectTransform>()});
         }
 
         UpdateCountText(new BoosterCountUpdatedEvent { boosterId = id, count = dataManager.GetAmountOfBoosterByID(id) });
@@ -81,7 +81,7 @@ public class BoosterButton : MonoBehaviour
         if (booster.GetNumsBooster() <= 0)
         {
             // Bắn tín hiệu: "Tôi đang hết loại Booster này, hãy mở popup đi"
-            GameEventBus.Publish(new RequestOpenBoosterPopupEvent { type = booster.GetBoosterType() });
+            GameEventBus.Publish(new RequestOpenBoosterPopupEvent { type = booster.GetBoosterType() , boosterTransform = this.GetComponent<RectTransform>()});
             return;
         }
 
@@ -92,13 +92,6 @@ public class BoosterButton : MonoBehaviour
         boosterButton.interactable = true;
     }
 
-    private void OpenAddBoosterPopup()
-    {
-        GameEventBus.Publish(new RequestOpenBoosterPopupEvent
-        {
-            type = booster.GetBoosterType(),
-        });
-    }
 
     public void OnClickAddBoosterButton()
     {

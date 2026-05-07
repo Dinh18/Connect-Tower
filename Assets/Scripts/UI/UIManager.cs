@@ -40,7 +40,7 @@ public class UIManager : MonoBehaviour
         GameEventBus.Subscribe<RequestOpenPanelEvent>(HandleOpenPanelRequest);
         GameEventBus.Subscribe<GameStateChangedEvent>(UpdateUI);
         GameEventBus.Subscribe<RequestOpenPopupEvent>(HandleOpenPopupRequest);
-        GameEventBus.Subscribe<RequestCloseBoosterPopupEvent>(HandleClosePopupRequest);
+        GameEventBus.Subscribe<RequestClosePopupEvent>(HandleClosePopupRequest);
     }
 
     void OnDisable()
@@ -48,7 +48,7 @@ public class UIManager : MonoBehaviour
         GameEventBus.UnSubscribe<RequestOpenPanelEvent>(HandleOpenPanelRequest);
         GameEventBus.UnSubscribe<GameStateChangedEvent>(UpdateUI);
         GameEventBus.UnSubscribe<RequestOpenPopupEvent>(HandleOpenPopupRequest);
-        GameEventBus.UnSubscribe<RequestCloseBoosterPopupEvent>(HandleClosePopupRequest);
+        GameEventBus.UnSubscribe<RequestClosePopupEvent>(HandleClosePopupRequest);
 
     }
 
@@ -72,7 +72,7 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    private void HandleClosePopupRequest(RequestCloseBoosterPopupEvent requestClosePopup)
+    private void HandleClosePopupRequest(RequestClosePopupEvent requestClosePopup)
     {
         PopPopup();
     }

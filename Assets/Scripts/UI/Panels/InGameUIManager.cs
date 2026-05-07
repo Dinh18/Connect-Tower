@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
@@ -40,6 +41,8 @@ public class InGameUIManager : MonoBehaviour, IMenu
     private LevelLoader levelLoader;
     [SerializeField]private DifficultLevel difficultLevel;
     [SerializeField] private AddBoosterUI addBoosterUI;
+    [SerializeField] private List<RectTransform> boosterIcon;
+
 
     private Sprite GetLevelSprite(LevelLoader.GameDifficult gameDifficult)
     {
@@ -80,9 +83,11 @@ public class InGameUIManager : MonoBehaviour, IMenu
         GameEventBus.Subscribe<MovesUpdatedEvent>(UpdateMovesText);
         GameEventBus.Subscribe<FinishedSlotsUpdatedEvent>(OnUpdateProgress);
         GameEventBus.Subscribe<CoinsUpdatedEvent>(OnCoinsUpdated);
-        GameEventBus.Subscribe<RequestOpenBoosterPopupEvent>(OnOpenAddMovePopup);
+        GameEventBus.Subscribe<RequestOpenBoosterPopupEvent>(OnOpenAddBoosterPopup);
+        GameEventBus.Subscribe<RequestClosePopupEvent>(OnCloseAddBoosterPopup);
         GameEventBus.Subscribe<StartBorderFlashEvent>(StartInfiniteMovesCountDown);
         GameEventBus.Subscribe<StopBorderFlashEvent>(StopInfiniteMovesCountDown);
+        GameEventBus.Subscribe<RequestAddBoosterEffectEvent>(OnPlayAddBoosterEffect);
 
         SettingButton.onClick.RemoveAllListeners();
         SettingButton.onClick.AddListener(() => GameEventBus.Publish(new RequestOpenPopupEvent { targetPopup = PopupType.Setting }));
@@ -96,9 +101,12 @@ public class InGameUIManager : MonoBehaviour, IMenu
         GameEventBus.UnSubscribe<MovesUpdatedEvent>(UpdateMovesText);
         GameEventBus.UnSubscribe<FinishedSlotsUpdatedEvent>(OnUpdateProgress);
         GameEventBus.UnSubscribe<CoinsUpdatedEvent>(OnCoinsUpdated);
-        GameEventBus.UnSubscribe<RequestOpenBoosterPopupEvent>(OnOpenAddMovePopup);
+        GameEventBus.UnSubscribe<RequestOpenBoosterPopupEvent>(OnOpenAddBoosterPopup);
+        GameEventBus.UnSubscribe<RequestClosePopupEvent>(OnCloseAddBoosterPopup);
         GameEventBus.UnSubscribe<StartBorderFlashEvent>(StartInfiniteMovesCountDown);
         GameEventBus.UnSubscribe<StopBorderFlashEvent>(StopInfiniteMovesCountDown);
+        GameEventBus.UnSubscribe<RequestAddBoosterEffectEvent>(OnPlayAddBoosterEffect);
+
 
     }
     
@@ -239,7 +247,7 @@ public class InGameUIManager : MonoBehaviour, IMenu
         coinsText.text = coinsUpdatedEvent.totalCoins.ToString();
     }
 
-    private void OnOpenAddMovePopup(RequestOpenBoosterPopupEvent requestOpenBoosterPopup)
+    private void OnOpenAddBoosterPopup(RequestOpenBoosterPopupEvent requestOpenBoosterPopup)
     {
         addBoosterUI.SetConfig(requestOpenBoosterPopup);
         CoreServices.Get<UIManager>().PushPopupToFront(addBoosterUI, addBoosterUI.transform);
@@ -280,6 +288,37 @@ public class InGameUIManager : MonoBehaviour, IMenu
                 }
             }
         }
+    }
+
+    private void OnCloseAddBoosterPopup(RequestClosePopupEvent evt)
+    {
+        CoreServices.Get<UIManager>().PopPopup();
+        Debug.Log("Nhận event đóng add booster popup");
+    }
+
+    private IEnumerator AddBoosterEffect(RectTransform boosterTransform, Sprite sprite)
+    {
+        foreach(RectTransform icon in boosterIcon)
+        {
+            Vector3 originPos = icon.anchoredPosition;
+            icon.DOKill();
+            icon.gameObject.SetActive(true);
+            
+            icon.gameObject.GetComponent<Image>().sprite = sprite;
+
+            icon.DOMove(boosterTransform.position, 0.7f).SetEase(Ease.OutQuad).OnComplete(() =>
+            {
+                icon.gameObject.SetActive(false);
+                icon.anchoredPosition = originPos;
+                AudioManager.Instance.PlayAddBoosterAudio();
+            });
+            yield return new WaitForSeconds(0.1f);
+        }
+    }
+
+    public void OnPlayAddBoosterEffect(RequestAddBoosterEffectEvent evt)
+    {
+        StartCoroutine(AddBoosterEffect(evt.boosterTransfrom, evt.spriteIcon));
     }
 
     public void Hide() => this.gameObject.SetActive(false);
