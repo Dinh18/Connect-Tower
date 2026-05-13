@@ -24,7 +24,8 @@ public class ShuffleBooster : MonoBehaviour, IBooster
     {
         CoreServices.Get<DataManager>().UseBooster((int)Constants.BoosterType.Shuffle);
         if(boosterManager == null) Debug.Log("boosterManager is null");
-        AudioManager.Instance.PlayShuffleAudio();
+        // AudioManager.Instance.PlayShuffleAudio();
+        GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.Shuffle});
         boosterManager.ShuffleBlock();
     }
 

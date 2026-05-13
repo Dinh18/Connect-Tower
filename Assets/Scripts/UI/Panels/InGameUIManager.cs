@@ -33,9 +33,6 @@ public class InGameUIManager : MonoBehaviour, IMenu
     [SerializeField] private UICountdownController countdownImage;
     private bool isFlashing = false;
 
-    [Header("Button References")]
-    [SerializeField] private Button SettingButton;
-
     private BoosterButton[] boosterButtons;
     private GameManager gameManager;
     private LevelLoader levelLoader;
@@ -88,9 +85,7 @@ public class InGameUIManager : MonoBehaviour, IMenu
         GameEventBus.Subscribe<StartBorderFlashEvent>(StartInfiniteMovesCountDown);
         GameEventBus.Subscribe<StopBorderFlashEvent>(StopInfiniteMovesCountDown);
         GameEventBus.Subscribe<RequestAddBoosterEffectEvent>(OnPlayAddBoosterEffect);
-
-        SettingButton.onClick.RemoveAllListeners();
-        SettingButton.onClick.AddListener(() => GameEventBus.Publish(new RequestOpenPopupEvent { targetPopup = PopupType.Setting }));
+        // GameEventBus.Subscribe<LoadingFinished>(ShowDifficultLevel);
 
         coinsButton.onClick.RemoveAllListeners();
         coinsButton.onClick.AddListener(() => GameEventBus.Publish(new RequestOpenPanelEvent { targetPanel = PanelType.Shop }));
@@ -106,6 +101,8 @@ public class InGameUIManager : MonoBehaviour, IMenu
         GameEventBus.UnSubscribe<StartBorderFlashEvent>(StartInfiniteMovesCountDown);
         GameEventBus.UnSubscribe<StopBorderFlashEvent>(StopInfiniteMovesCountDown);
         GameEventBus.UnSubscribe<RequestAddBoosterEffectEvent>(OnPlayAddBoosterEffect);
+        // GameEventBus.UnSubscribe<LoadingFinished>(ShowDifficultLevel);
+
 
 
     }
@@ -143,10 +140,10 @@ public class InGameUIManager : MonoBehaviour, IMenu
         countdownImage.gameObject.SetActive(false);
     }
 
-    public void ShowDifficultLevel()
-    {
-        if (difficultLevel != null) difficultLevel.ShowDifficultLevel();
-    }
+    // public void ShowDifficultLevel(LoadingFinished evt)
+    // {
+    //     if (difficultLevel != null) difficultLevel.ShowDifficultLevel();
+    // }
 
     private void SetupProgressBar(LevelLoader.GameDifficult gameDifficult)
     {
@@ -310,7 +307,8 @@ public class InGameUIManager : MonoBehaviour, IMenu
             {
                 icon.gameObject.SetActive(false);
                 icon.anchoredPosition = originPos;
-                AudioManager.Instance.PlayAddBoosterAudio();
+                // AudioManager.Instance.PlayAddBoosterAudio();
+                GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.AddBooster});
             });
             yield return new WaitForSeconds(0.1f);
         }

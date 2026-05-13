@@ -7,13 +7,12 @@ public class SettingPopup : MonoBehaviour, IMenu
 {
     private UIManager uIManager;
     [SerializeField] private Button closeButton;
-    [SerializeField] private Button backHomeButton;
+    // [SerializeField] private Button backHomeButton;
     [SerializeField] private GameObject soundInActive;
     [SerializeField] private GameObject hapticInActive;
     [SerializeField] private Button soundButton;
     [SerializeField] private Button hapticButton;
     [SerializeField] private GameObject dimImage;
-    private PopupAnimation popupAnimation;
     void OnEnable()
     {
         soundButton.onClick.AddListener(OnClickSoundButton);
@@ -39,10 +38,10 @@ public class SettingPopup : MonoBehaviour, IMenu
         soundButton.onClick.AddListener(OnClickSoundButton);
         hapticButton.onClick.AddListener(OnClickHapticButton);
 
-        if (backHomeButton != null)
-        {
-            backHomeButton.onClick.AddListener(uIManager.OnClickBackHome);
-        }
+        // if (backHomeButton != null)
+        // {
+        //     backHomeButton.onClick.AddListener(uIManager.OnClickBackHome);
+        // }
         
     }
 
@@ -51,13 +50,13 @@ public class SettingPopup : MonoBehaviour, IMenu
         this.gameObject.SetActive(true);
         dimImage.SetActive(true);
 
-        if(backHomeButton != null)
-        {
-            bool inGame = uIManager.isCurrentlyInGame();
-            backHomeButton.gameObject.SetActive(inGame);
-        }
+        // if(backHomeButton != null)
+        // {
+        //     bool inGame = uIManager.isCurrentlyInGame();
+        //     backHomeButton.gameObject.SetActive(inGame);
+        // }
 
-        if(AudioManager.Instance.IsSoundOn()) soundInActive.SetActive(false);
+        if(CoreServices.Get<AudioManager>().IsSoundOn()) soundInActive.SetActive(false);
         else soundInActive.SetActive(true);
         if(HapticManager.Instance.IsHapticOn()) hapticInActive.SetActive(false);
         else hapticInActive.SetActive(true);
@@ -66,7 +65,7 @@ public class SettingPopup : MonoBehaviour, IMenu
 
     private void OnClickSoundButton()
     {
-        if(AudioManager.Instance.ToggleSound()) soundInActive.SetActive(false);
+        if(CoreServices.Get<AudioManager>().ToggleSound()) soundInActive.SetActive(false);
         else soundInActive.SetActive(true);
     }
 

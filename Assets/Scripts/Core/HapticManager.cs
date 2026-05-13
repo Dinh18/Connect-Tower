@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using CandyCoded.HapticFeedback;
 using UnityEngine;
@@ -6,6 +7,7 @@ public class HapticManager : MonoBehaviour
 {
     public static HapticManager Instance;
     private bool isHapticOn;
+    public static Action<bool> OnToggle;
     void Awake()
     {
         Instance = this;
@@ -29,6 +31,7 @@ public class HapticManager : MonoBehaviour
         isHapticOn = !isHapticOn;
         PlayerPrefs.SetInt("HapticState", isHapticOn ? 1 : 0);
         PlayerPrefs.Save();
+        OnToggle?.Invoke(isHapticOn);
         return isHapticOn;
     }
 

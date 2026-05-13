@@ -65,6 +65,7 @@ Assets/Scripts/Core/
  HeartManager.cs
  InputManager.cs
 Assets/Scripts/Data/
+ AudioSO.cs
  BlockTopic.cs
  BoosterData.cs
  DataManager.cs
@@ -121,6 +122,8 @@ Assets/Scripts/UI/
   BoosterButton.cs
   HomeButton.cs
   PlayButton.cs
+  SettingMenu.cs
+  SettingToggleButton.cs
   ShopButton.cs
  IBoosterEffect.cs
  IMenu.cs
@@ -136,6 +139,7 @@ Assets/Scripts/UI/
   EndGameUI.cs
   LevelCompletedUI.cs
   LevelFailedUI.cs
+  QuitLevelPopup.cs
   RefillHeartPopup.cs
   SettingPopup.cs
  SafeAreaFitter.cs

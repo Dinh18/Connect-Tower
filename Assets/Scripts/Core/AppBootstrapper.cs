@@ -7,6 +7,7 @@ public class AppBootstrapper : MonoBehaviour
     [SerializeField] private GameManager gameManager;
     [SerializeField] private UIManager uiManager;
     [SerializeField] private TutorialUIController tutorialUIController;
+    [SerializeField] private AudioManager audioManager;
     
     [Header("Gameplay Systems")]
     [SerializeField] private LevelLoader levelLoader;
@@ -15,6 +16,7 @@ public class AppBootstrapper : MonoBehaviour
     [SerializeField] private HeartManager heartManager;
     [SerializeField] private CameraController cameraController;
     [SerializeField] private BoosterManager boosterManager;
+    [SerializeField] private GamePlayController gamePlayController;
 
     void Awake()
     {
@@ -29,6 +31,8 @@ public class AppBootstrapper : MonoBehaviour
         CoreServices.Register(heartManager);
         CoreServices.Register(cameraController);
         CoreServices.Register(tutorialUIController);
+        CoreServices.Register(gamePlayController);
+        CoreServices.Register(audioManager);
         
         // 3. Level Loader (Cần data và các manager gameplay)
         levelLoader.Init(slotsManager, blocksManager, gameManager, dataManager);
@@ -38,6 +42,8 @@ public class AppBootstrapper : MonoBehaviour
         
         // 5. UI (Giao diện hiển thị)
         uiManager.Init(gameManager, dataManager);
+
+        audioManager.Init();
         
         // 6. Booster Manager
         CoreServices.Register(boosterManager);

@@ -29,7 +29,7 @@ public class HintBooster : MonoBehaviour, IBooster
         if(searched)
         {
             CoreServices.Get<DataManager>().UseBooster((int)Constants.BoosterType.Hint);
-            AudioManager.Instance.PlayHintBoosterAudio();
+            GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.HintBooster});
             Debug.Log("Thuc hien Hint thanh cong");
         } 
         else 

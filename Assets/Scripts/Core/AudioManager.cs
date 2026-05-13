@@ -1,84 +1,46 @@
+using System;
 using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
-    public static AudioManager Instance;
-    [SerializeField] private AudioSource audioSource;
-    [SerializeField] private AudioClip addMoveAudio;
-    [SerializeField] private AudioClip buttonAudio;
-    [SerializeField] private AudioClip blockFailAudio;
-    [SerializeField] private AudioClip clothAudio;
-    [SerializeField] private AudioClip freezeUpAudio;
-    [SerializeField] private AudioClip hintBoosterAudio;
-    [SerializeField] private AudioClip blockIceFinishedAudio;
-    [SerializeField] private AudioClip lvlWinAudio;
-    [SerializeField] private AudioClip lvlLoseAudio;
-    [SerializeField] private AudioClip coinCollectAudio;
-    [SerializeField] private AudioClip moveWooshAudio;
-    [SerializeField] private AudioClip PopMoved_Audio_1;
-    [SerializeField] private AudioClip PopMoved_Audio_2;
-    [SerializeField] private AudioClip PopMoved_Audio_3;
-    [SerializeField] private AudioClip PopMoved_Audio_4;
-    [SerializeField] private AudioClip slotFinishedAudio;
-    [SerializeField] private AudioClip shuffleAudio;
-    [SerializeField] private AudioClip hideBlockAudio;
-    [SerializeField] private AudioClip addBoosterAudio;
-    [SerializeField] private AudioClip selectSlotAudio;
-    [SerializeField] private AudioClip moveFailAudio;
-    [SerializeField] private AudioClip fireWorkAudio;
-    [SerializeField] private AudioClip buttonDownAudio;
-    [SerializeField] private AudioClip buttonUpAudio;
+    [SerializeField] private AudioSource sfxSource;
+    private AudioSO[] audios;
     private bool isSoundOn;
-    void Awake()
+    public static event Action<bool> OnToggle;
+    public void Init()
     {
-        Instance = this;
         LoadAudioSetting();
-        CoreServices.Register<AudioManager>(this);
+        audios = Resources.LoadAll<AudioSO>(Constants.AUDIOS_PATH);
     }
-    public void PlaySFX(AudioClip audioClip)
+    void OnEnable()
     {
-        if(audioClip == null) return;
-        audioSource.volume = isSoundOn ? 1 : 0;
-        audioSource.PlayOneShot(audioClip);
+        GameEventBus.Subscribe<RequestPlaySFX>(PlaySFX);
     }
-
-    public void PlayAddMoveAudio() => PlaySFX(addMoveAudio);
-    public void PlayButtonAudio() => PlaySFX(buttonAudio);
-    public void PlayBlockFailAudio() => PlaySFX(blockFailAudio);
-    public void PlayClothAudio() => PlaySFX(clothAudio);
-    public void PlayFreezeUpAudio() => PlaySFX(freezeUpAudio);
-    public void PlayHintBoosterAudio() => PlaySFX(hintBoosterAudio);
-    public void PlayBlockIceFinishedAudio() => PlaySFX(blockIceFinishedAudio);
-    public void PlayLVLWinAudio() => PlaySFX(lvlWinAudio);
-    public void PlayLVLLoseAudio() => PlaySFX(lvlLoseAudio);
-    public void PlayCoinCollectAudio() => PlaySFX(coinCollectAudio);
-    public void PlayMoveWooshAudio() => PlaySFX(moveWooshAudio);
-    public void PlaySlotFinishedAudio() => PlaySFX(slotFinishedAudio);
-    public void PlayShuffleAudio() => PlaySFX(shuffleAudio);
-    public void PlayHideBlockAudio() => PlaySFX(hideBlockAudio);
-    public void PlayAddBoosterAudio() => PlaySFX(addBoosterAudio);
-    public void PlaySelectSlotAudio() => PlaySFX(selectSlotAudio);
-    public void PlayMoveFailAudio() => PlaySFX(moveFailAudio);
-    public void PlayFireWorkAudio() => PlaySFX(fireWorkAudio);
-    public void PlayButtonDownAudio() => PlaySFX(buttonDownAudio);
-    public void PlayButtonUpAudio() => PlaySFX(buttonUpAudio);
-    public void PlayPopMovedAudio(int count)
+    void OnDisable()
     {
-        switch(count)
+        GameEventBus.UnSubscribe<RequestPlaySFX>(PlaySFX);
+    }
+    public AudioSO GetAudioData(SoundID soundID)
+    {
+        foreach(var audio in audios)
         {
-            case 1:
-                PlaySFX(PopMoved_Audio_1);
-                break;
-            case 2:
-                PlaySFX(PopMoved_Audio_2);
-                break;
-            case 3:
-                PlaySFX(PopMoved_Audio_3);
-                break;
-            case 4:
-                PlaySFX(PopMoved_Audio_4);
-                break;
-            
+            if(audio.soundID == soundID) return audio;
+        }
+        return null;
+    }
+    public void PlaySFX(RequestPlaySFX evt)
+    {
+        if (!isSoundOn || evt.soundID == SoundID.None) return;
+
+        AudioSO data = GetAudioData(evt.soundID);
+        if (data != null && data.audioClip != null)
+        {
+            // Tạm thời dùng PlayOneShot, nhưng nên thay bằng việc lấy AudioSource từ Pool
+            sfxSource.PlayOneShot(data.audioClip);
+        }
+        else
+        {
+            Debug.LogWarning($"[AudioManager] Không tìm thấy audio clip cho: {evt.soundID}");
         }
     }
     private void LoadAudioSetting()
@@ -91,6 +53,7 @@ public class AudioManager : MonoBehaviour
         isSoundOn = !isSoundOn;
         PlayerPrefs.SetInt("SoundState", isSoundOn ? 1 : 0);
         PlayerPrefs.Save();
+        OnToggle?.Invoke(isSoundOn);
         return isSoundOn;
     }
 

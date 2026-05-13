@@ -13,15 +13,21 @@ public class DifficultLevel : MonoBehaviour
         dimImage.SetActive(true);
         for(int i = 0; i < skullGameObject.Length; i++)
         {
-            skullGameObject[i].DOKill();
-            Color color = skullGameObject[i].color;
+            int index = i;
+            skullGameObject[index].DOKill();
+            Vector3 orginPos = skullGameObject[index].GetComponent<RectTransform>().position;
+            Color color = skullGameObject[index].color;
             color.a = 0f;
-            skullGameObject[i].color = color;
-            skullGameObject[i].gameObject.SetActive(true);
+            skullGameObject[index].color = color;
+            skullGameObject[index].gameObject.SetActive(true);
             Sequence sequence = DOTween.Sequence();
-            // sequence.Append(skullGameObject[i].DOFade(0, 0.5f));
-            sequence.Append(skullGameObject[i].DOFade(1, 3f));
-            sequence.Join(skullGameObject[i].GetComponent<RectTransform>().DOAnchorPosY( 100, 3f).SetEase(Ease.OutQuad));
+            // sequence.Append(skullGameObject[index].DOFade(0, 0.5f));
+            sequence.Append(skullGameObject[index].DOFade(1, 3f));
+            sequence.Join(skullGameObject[index].GetComponent<RectTransform>().DOAnchorPosY(100, 3f).SetEase(Ease.OutQuad));
+            sequence.OnComplete(() =>
+            {
+                skullGameObject[index].GetComponent<RectTransform>().position = orginPos;
+            });
         }
         StartCoroutine(HideDifficultLevel());
     }

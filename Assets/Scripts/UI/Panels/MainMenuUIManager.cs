@@ -199,7 +199,8 @@ public class MainMenuUIManager : MonoBehaviour, IMenu
         coinText.text = oldCoins.ToString();
 
         // Chơi âm thanh ăn tiền (sẽ kêu "Ting ting ting" theo từng đồng rất đã tai)
-        AudioManager.Instance.PlayCoinCollectAudio();
+        // AudioManager.Instance.PlayCoinCollectAudio();
+        GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.CoinCollect});
 
 
         Debug.Log("oldCoins: " + oldCoins);

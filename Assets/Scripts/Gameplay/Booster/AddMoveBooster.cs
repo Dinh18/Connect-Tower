@@ -29,7 +29,9 @@ public class AddMoveBooster : MonoBehaviour ,IBooster
     public void Excute()
     {
         dataManager.UseBooster((int)Constants.BoosterType.AddMove);
-        AudioManager.Instance.PlayAddMoveAudio();
+        // AudioManager.Instance.PlayAddMoveAudio();
+        GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.AddMove});
+
         StartCoroutine(StartInfiniteMovesCoroutine(10f));
     }
 

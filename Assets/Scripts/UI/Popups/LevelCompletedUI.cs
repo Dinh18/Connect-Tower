@@ -33,7 +33,8 @@ public class LevelCompletedUI : MonoBehaviour, IMenu
 
     private IEnumerator ShowCoroutine()
     {
-        AudioManager.Instance.PlayLVLWinAudio();
+        // AudioManager.Instance.PlayLVLWinAudio();
+        GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.LevelWin});
         coinImage.DOKill();
         coinImage.localScale = Vector3.zero;
         coinImage.DOScale(1, 0.5f).SetEase(Ease.OutBack);

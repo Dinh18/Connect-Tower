@@ -3,7 +3,15 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public enum GameState { None, MainMenu, Playing, Pause, Win, Lose, Resume }
+    public enum GameState
+    {
+        None,
+        MainMenu,
+        Playing, 
+        Pause, 
+        Win, 
+        Lose, 
+        Resume }
     
     private GameState currState = GameState.None;
     private GameState prevState = GameState.None;
@@ -52,7 +60,10 @@ public class GameManager : MonoBehaviour
     public GameState GetPrevState() => prevState;
     public int GetMaxMoves() => maxMoves;
     public int GetMoves() => moves;
-
+    public bool Moved()
+    {
+        return moves < maxMoves;
+    }
     public void SetupLevel(int maxMoves)
     {
         this.moves = maxMoves;
@@ -120,6 +131,7 @@ public class GameManager : MonoBehaviour
         if(currState == GameState.Playing && prevState != GameState.Pause && prevState != GameState.Lose)
         {
             levelLoader.LoadLevel();
+            CoreServices.Get<GamePlayController>().ResetSelection();
         }
 
         GameEventBus.Publish<GameStateChangedEvent>(new GameStateChangedEvent { newState = currState });

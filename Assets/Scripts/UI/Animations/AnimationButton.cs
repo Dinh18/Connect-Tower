@@ -26,12 +26,20 @@ public class AnimationButton : MonoBehaviour, IPointerDownHandler, IPointerUpHan
 
     void Awake()
     {
-        originalScale = transform.localScale;
+        if (transform.localScale != Vector3.zero)
+        {
+            originalScale = transform.localScale;
+        }
+        else
+        {
+            originalScale = Vector3.one;
+        }
     }
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        AudioManager.Instance.PlayButtonDownAudio();
+        // AudioManager.Instance.PlayButtonDownAudio();
+        GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.ButtonDown});
         transform.DOKill();
         // HapticManager.Instance.PlayHaptic();
         
@@ -50,7 +58,8 @@ public class AnimationButton : MonoBehaviour, IPointerDownHandler, IPointerUpHan
     public void OnPointerUp(PointerEventData eventData)
     {
         // AudioManager.Instance.PlayButtonAudio();
-        AudioManager.Instance.PlayButtonUpAudio();
+        // AudioManager.Instance.PlayButtonUpAudio();
+        GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.ButtonUp});
         transform.DOKill();
         
         Sequence sequence = DOTween.Sequence().SetUpdate(true);

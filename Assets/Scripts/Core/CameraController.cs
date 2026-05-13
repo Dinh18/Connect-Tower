@@ -25,40 +25,62 @@ public class CameraController : MonoBehaviour
         int numRows = (row1 == 0 || row2 == 0) ? 1 : 2;
 
         // 1. Kích thước thực tế của lưới (Grid)
-        // Hàng dưới cùng ở tọa độ y = 0
-        // Nếu có 2 hàng, hàng trên ở y = SLOT_HEIGHT (khoảng 4.05)
-        // Cọc gỗ cao tương đương 4 block (~2.6) + đỉnh cọc (~0.5) = 3.1
+        // Hàng dưới cùng ở tọa độ y = 0. Cọc gỗ cao max ~3.1
         float maxPoleHeight = 3.1f;
         float gridHeight = (numRows - 1) * Constants.SLOT_HEIGHT + maxPoleHeight;
         float gridWidth = maxColumns * Constants.SLOT_WIDTH;
 
-        // 2. Tính toán Orthographic Size bao trọn Grid
-        // Màn hình điện thoại thường có tỷ lệ dài. Ta thêm Padding để không bị sát viền.
-        float paddingWidth = 2.0f; // Đã tăng thêm một chút để lấy không gian hai bên
-        float paddingHeight = (mainCamera.aspect < 0.6f) ? 4.5f : 3f; // Điện thoại dài cần nhiều padding trên dưới hơn
+        // 2. Tính toán tỷ lệ phần trăm màn hình cho UI (Dựa trên thiết kế Canvas Scaler Match = Width)
+        // Tỷ lệ màn hình chuẩn là 16:9
+        float referenceAspect = 9f / 16f; // 0.5625
+        
+        // Ở 16:9, UI phía trên (Header, Moves, Target) chiếm khoảng 28% và UI dưới (Booster, Hand) chiếm 18%
+        float baseTopUIMargin = 0.28f;
+        float baseBottomUIMargin = 0.18f;
 
-        float orthoToFitHeight = (gridHeight + paddingHeight) / 2f;
+        // Với màn hình iPad (rộng hơn) hoặc đt dài (hẹp hơn), chiều cao phần trăm UI sẽ tự scale theo
+        float aspectMultiplier = mainCamera.aspect / referenceAspect;
+        float topUIMargin = baseTopUIMargin * aspectMultiplier;
+        float bottomUIMargin = baseBottomUIMargin * aspectMultiplier;
+        
+        // Vùng không gian có thể hiển thị Grid (Playable Area)
+        float playableHeightRatio = Mathf.Clamp(1f - topUIMargin - bottomUIMargin, 0.35f, 0.8f);
+
+        // 3. Tính toán Orthographic Size để bao trọn Grid
+        // Chiều cao: Phải nằm trọn trong vùng Playable
+        float orthoToFitHeight = gridHeight / (2f * playableHeightRatio);
+
+        // Chiều rộng: Bao trọn chiều rộng với một chút padding
+        float paddingWidth = 1.8f; 
         float orthoToFitWidth = (gridWidth + paddingWidth) / (2f * mainCamera.aspect);
         
+        // Chọn size lớn nhất để đảm bảo không bị cắt viền
         float finalOrthoSize = Mathf.Max(orthoToFitHeight, orthoToFitWidth);
         mainCamera.orthographicSize = finalOrthoSize;
 
-        // 3. Tính toán trọng tâm Y thực tế của Grid
+        // 4. Tính toán Offset để canh giữa Grid vào Playable Area thay vì Screen Center
         float gridCenterY = gridHeight / 2f;
 
-        // 4. Bù trừ UI (UI Offset) cho Game 2.5D
-        // Vì hệ thống UI phía trên (Top UI: Move, Coin) tốn nhiều không gian hơn,
-        // kèm theo hiệu ứng phối cảnh 2.5D khiến các cọc vươn cao lên trên.
-        // Giải pháp: Đưa Camera LÊN TRÊN (cộng thêm Y) để toàn bộ lưới dịch XUỐNG DƯỚI.
-        float uiOffset = finalOrthoSize * 0.35f; // Tăng từ 25% lên 35% để hạ lưới xuống thêm 1 xíu nữa theo ý bạn
+        // Tỷ lệ tâm của vùng Playable tính từ dưới đáy màn hình lên
+        float centerRatio = bottomUIMargin + (playableHeightRatio / 2f);
+        
+        // Độ chênh lệch giữa tâm Playable và tâm màn hình (tính bằng world units)
+        // Tâm màn hình là 0.5. Nếu centerRatio < 0.5 (tức vùng playable thấp hơn tâm màn hình), offset sẽ âm
+        float playableOffsetFromScreenCenter = finalOrthoSize * (2f * centerRatio - 1f);
+
+        // 5. Bù trừ hiệu ứng phối cảnh 2.5D và Ưu tiên nửa dưới màn hình
+        // Các cọc gỗ vươn cao lên trên tạo cảm giác hình ảnh bị lệch lên đỉnh màn hình.
+        // Ngoài ra, để ưu tiên board nằm ở nửa dưới của màn hình (gần với các nút bấm/booster hơn),
+        // ta sẽ tăng offset lên ~40% (0.40f) của ortho size để đẩy camera LÊN nhiều hơn, 
+        // qua đó kéo toàn bộ lưới XUỐNG thấp hơn.
+        float perspectiveOffset = finalOrthoSize * 0.40f;
 
         Vector3 cameraPos = transform.position;
         cameraPos.x = 0;
-        cameraPos.y = gridCenterY + uiOffset; // CỘNG uiOffset để camera cao lên -> Lưới tụt xuống
+        // Căn tâm playable area, và cộng thêm perspectiveOffset để dời Board xuống nửa dưới màn hình
+        cameraPos.y = gridCenterY - playableOffsetFromScreenCenter + perspectiveOffset;
         cameraPos.z = -10f;
 
         transform.position = cameraPos;
     }
-
-    // Đã xóa bỏ hàm SetupCamera cũ vì dư thừa và dễ gây nhầm lẫn
 }

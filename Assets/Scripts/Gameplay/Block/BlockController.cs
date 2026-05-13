@@ -125,7 +125,8 @@ public class BlockController : MonoBehaviour
         hideVFX.SetActive(true);
         maskHole.SetActive(false);
         isRevealed = true;
-        AudioManager.Instance.PlayHideBlockAudio();
+        // AudioManager.Instance.PlayHideBlockAudio();
+        GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.HideBlock});
     }
 
     public void ChangeMaterialOutLine(string materialPath)

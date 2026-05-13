@@ -89,4 +89,6 @@ public static class Constants
     public const string NORMAL_PROGRESS = "Sprite/PROGRESS_BAR_SLIDER";
     public const string HARD_PROGRESS = "Sprite/PROGRESS_BAR_HARD_SLIDER";
     public const string SUPER_HARD_PROGRESS = "Sprite/PROGRESS_BAR_SUPERHARD_SLIDER";
+    // Audio
+    public const string AUDIOS_PATH = "AudioDatabase";
 }

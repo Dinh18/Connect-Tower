@@ -136,7 +136,8 @@ public class SlotController : MonoBehaviour
             block.transform.DOMove(targetPosition, selectDuration).SetEase(Ease.OutQuad);
             i++;
         }
-        AudioManager.Instance.PlaySelectSlotAudio();
+        // AudioManager.Instance.PlaySelectSlotAudio();
+        GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.SelectSlot}); 
 
         return true;
     }
@@ -154,14 +155,15 @@ public class SlotController : MonoBehaviour
             {
                 if(otherSlot.blocks.Peek().GetTopicID() != this.blocks.Peek().GetTopicID())
                 {
-                    AudioManager.Instance.PlayMoveFailAudio();
-                    foreach(BlockController block in otherSlot.blocks)
-                    {
-                        if(block.GetCurrState() == BlockController.BlockState.Selected)
-                        {
-                            block.PlayErrorShake(block.SelectedEffect);
-                        }
-                    }
+                    // AudioManager.Instance.PlayMoveFailAudio();
+
+                    // foreach(BlockController block in otherSlot.blocks)
+                    // {
+                    //     if(block.GetCurrState() == BlockController.BlockState.Selected)
+                    //     {
+                    //         block.PlayErrorShake(block.SelectedEffect);
+                    //     }
+                    // }
                     return false;
                 } 
             }
@@ -188,12 +190,12 @@ public class SlotController : MonoBehaviour
         blocksToMove = Math.Min(4 - blocks.Count, blockCount);
         if(blocksToMove <= 0)
         {
-            AudioManager.Instance.PlayMoveFailAudio();
+            // AudioManager.Instance.PlayMoveFailAudio();
             int i = 0;
             foreach(var block in otherSlot.blocks)
             {
                 if(i >= blockCount) break;
-                block.PlayErrorShake(block.SelectedEffect);
+                // block.PlayErrorShake(block.SelectedEffect);
                 i++;
             }
             return false;
@@ -283,7 +285,8 @@ public class SlotController : MonoBehaviour
         }
         
         isFinished = true;
-        AudioManager.Instance.PlaySlotFinishedAudio();
+        // AudioManager.Instance.PlaySlotFinishedAudio();
+        GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.SlotFinished});
         
         if(slotType == SlotType.Ice)
         {
@@ -297,7 +300,8 @@ public class SlotController : MonoBehaviour
             if (baseMeshFilter != null) baseMeshFilter.mesh = baseMeshCache;
             if (baseMeshRenderer != null) baseMeshRenderer.material = baseMaterialCache;
             
-            AudioManager.Instance.PlayBlockIceFinishedAudio();
+            // AudioManager.Instance.PlayBlockIceFinishedAudio();
+            GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.BlockIceFinished});
         } 
         
         foreach(BlockController block in blocks)
@@ -314,7 +318,9 @@ public class SlotController : MonoBehaviour
     private void BlockStartMoving()
     {
         movingBlocksCount++;
-        AudioManager.Instance.PlayMoveWooshAudio();
+        // AudioManager.Instance.PlayMoveWooshAudio();
+        GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.MoveWoosh});
+
         isMoving = true;
     }
     
@@ -339,16 +345,37 @@ public class SlotController : MonoBehaviour
                     block.FallEffect(i);
                     i++;
                 }
-                AudioManager.Instance.PlayPopMovedAudio(i);
+                SoundID sID;
+                switch(i)
+                {
+                    case 1: 
+                        sID = SoundID.PopMoved1;
+                        break;
+                    case 2: 
+                        sID = SoundID.PopMoved2;
+                        break;
+                    case 3: 
+                        sID = SoundID.PopMoved3;
+                        break;
+                    case 4: 
+                        sID = SoundID.PopMoved4;
+                        break;
+                    default:
+                        sID = SoundID.None;
+                        break;
+                    
+                }
+                GameEventBus.Publish(new RequestPlaySFX{soundID = sID});
             } 
             else
             {
-                AudioManager.Instance.PlayBlockFailAudio();
+                // AudioManager.Instance.PlayBlockFailAudio();
+                GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.BlockFail});
                 int i = 0;
                 foreach(BlockController block in blocks)
                 {
                     if(i >= blocksToMove) break;
-                    block.PlayErrorShake();
+                    // block.PlayErrorShake();
                     i++;
                 }
                 if(!isSameType) b.PlayDifVFX();
@@ -361,7 +388,9 @@ public class SlotController : MonoBehaviour
                 iceRod.transform.DOMove(new Vector3(iceRod.transform.position.x,
                                         blocks.Count * Constants.BLOCK_HEIGHT + Constants.BLOCK_HEIGHT + Constants.SLOT_HEIGHT * row, 
                                         iceRod.transform.position.z), 0.5f);
-                AudioManager.Instance.PlayFreezeUpAudio();
+                // AudioManager.Instance.PlayFreezeUpAudio();
+                GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.FreezeUp});
+                
             } 
 
             if (otherSlot != null && otherSlot.blocks.Count > 0)
@@ -385,7 +414,8 @@ public class SlotController : MonoBehaviour
         Quaternion originRot = hideSlotHolder.transform.rotation;
 
         Sequence sequence = DOTween.Sequence();
-        AudioManager.Instance.PlayClothAudio();
+        // AudioManager.Instance.PlayClothAudio();
+        GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.Cloth});
         sequence.Append(hideSlotHolder.transform.DOMoveY(originPos.y + 10f, 1f));
         sequence.Join(hideSlotHolder.transform.DORotate(new Vector3(0, 0, 15f), 0.5f));
 

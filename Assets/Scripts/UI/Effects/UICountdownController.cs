@@ -6,7 +6,6 @@ public class UICountdownController : MonoBehaviour
 {
     [Header("Settings")]
     [SerializeField] float countdownTime = 10f; // Thời gian đếm ngược tổng cộng
-    [SerializeField] bool startOnEnable = true; // Bắt đầu khi object được active
 
     private Image _image;// Tỷ lệ fill của Image (0 = đóng, 1 = mở hoàn toàn)
     private float _currentTime;

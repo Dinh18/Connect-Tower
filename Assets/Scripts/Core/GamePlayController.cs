@@ -15,7 +15,7 @@ public class GamePlayController : MonoBehaviour
         InputManager.OnSlotClicked-=HandleSlotClicked;
     }
 
-    private void ResetSelection()
+    public void ResetSelection()
     {
         hasSelected = false;
         selectedSlot = null;
@@ -43,6 +43,10 @@ public class GamePlayController : MonoBehaviour
                 hasSelected = true;
                 selectedSlot = slot;
             }
+            else
+            {
+                GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.MoveFail});
+            }
         }
         else if(hasSelected && slot != selectedSlot)
         {
@@ -50,12 +54,27 @@ public class GamePlayController : MonoBehaviour
             {
                 ResetSelection();
             }
+            else
+            {
+                MoveFail();
+            }
         }
         else if(hasSelected && slot == selectedSlot)
         {
             if(slot.UnSelect())
             {
                 ResetSelection();
+            }
+        }
+    }
+    private void MoveFail()
+    {
+        GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.MoveFail});
+        foreach(var block in selectedSlot.blocks)
+        {
+            if(block.GetCurrState() == BlockController.BlockState.Selected)
+            {
+                block.PlayErrorShake(block.SelectedEffect);
             }
         }
     }

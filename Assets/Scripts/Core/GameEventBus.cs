@@ -15,7 +15,8 @@ public enum PopupType
 {
     RefillHeart,
     Booster,
-    Setting
+    Setting,
+    QuitLevel
 }
 public enum BorderType
 {
@@ -155,4 +156,9 @@ public struct RequestAddBoosterEffectEvent : IGameEvent
 {
     public RectTransform boosterTransfrom;
     public Sprite spriteIcon;
+}
+
+public struct RequestPlaySFX : IGameEvent
+{
+    public SoundID soundID;
 }

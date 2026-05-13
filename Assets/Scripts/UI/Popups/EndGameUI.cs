@@ -49,7 +49,8 @@ public class EndGameUI : MonoBehaviour
 
     private IEnumerator LevelCompletedCoroutine()
     {
-        AudioManager.Instance.PlayFireWorkAudio();
+        // AudioManager.Instance.PlayFireWorkAudio();
+        GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.FireWork});
         levelCompletedVFX.transform.localScale = Vector3.zero;
         levelCompletedVFX.SetActive(true);
 
@@ -83,7 +84,8 @@ public class EndGameUI : MonoBehaviour
     
     public void ShowLevelFailedPanel()
     {
-        AudioManager.Instance.PlayLVLLoseAudio();
+        // AudioManager.Instance.PlayLVLLoseAudio();
+        GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.LevelLose});
         dimImage.SetActive(true);
         levelCompleted.Hide();
         levelFailed.Show();

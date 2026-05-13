@@ -14,6 +14,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private ShopPanel shop;
     [SerializeField] private LoadingImage loadingImage;
     [SerializeField] private RefillHeartPopup refillHeartPopup;
+    [SerializeField] private QuitLevelPopup quitLevelPopup;
     
     private Stack<IMenu> popupStack = new Stack<IMenu>();
     private GameManager gameManager;
@@ -69,6 +70,7 @@ public class UIManager : MonoBehaviour
         {
             case PopupType.RefillHeart: mainMenu.OpenRefillHeart(); break;
             case PopupType.Setting: OpenSetting(); break;
+            case PopupType.QuitLevel: OpenQuitLevelPopup(); break;
         }
     }
 
@@ -104,7 +106,7 @@ public class UIManager : MonoBehaviour
                         ClearPopupStack();
                         ingame.Show();
                         StartCoroutine(ShowLoadingImage(1f));
-                        // ingame.ShowDifficultLevel();
+                        // GameEventBus.Publish(new LoadingFinished{});
                     }
                     break;
             }
@@ -128,6 +130,12 @@ public class UIManager : MonoBehaviour
             shop.ShowCloseButton();
             if(gameManager != null) gameManager.ChangeState(GameManager.GameState.Pause);
         }
+    }
+
+    public void OpenQuitLevelPopup()
+    {
+        PushPopupToFront(quitLevelPopup, quitLevelPopup.transform);
+        gameManager.ChangeState(GameManager.GameState.Pause);
     }
 
     public void CloseSetting()
@@ -181,16 +189,31 @@ public class UIManager : MonoBehaviour
     {
         if(popupStack.Count > 0)
         {
-            popupStack.Pop().Hide();
-            if(gameManager.GetCurrState() == GameManager.GameState.Pause) gameManager.ChangeState(GameManager.GameState.Playing);
+            IMenu popup = popupStack.Pop();
+            GameObject goPopup = popup.GetGameObject();
+            goPopup.transform.DOScale(Vector3.zero, 0.3f).SetEase(Ease.InBack).OnComplete(() =>
+            {
+                popup.Hide();
+                if(gameManager.GetCurrState() == GameManager.GameState.Pause) gameManager.ChangeState(GameManager.GameState.Playing);
+            });
             
         } 
-        if(popupStack.Count > 0) popupStack.Peek().Show();
+        if(popupStack.Count > 0)
+        {
+            IMenu popup = popupStack.Peek();
+            GameObject goPopup = popup.GetGameObject();
+            goPopup.transform.localScale = Vector3.zero;
+            popup.Show();
+            goPopup.transform.DOScale(Vector3.one, 0.3f).SetEase(Ease.OutBack).SetUpdate(true);
+        } 
     }
 
     private void ClearPopupStack()
     {
-        foreach(IMenu popup in popupStack) popup.Hide();
+        while(popupStack.Count > 0)
+        {
+            PopPopup();
+        }
         popupStack.Clear();
     }
 
@@ -209,8 +232,13 @@ public class UIManager : MonoBehaviour
 
     public void OnClickTryAgain()
     {
-        gameManager.UseHeart();
-        if(dataManager.GetHearts() > 0) gameManager.ChangeState(GameManager.GameState.Playing);
+        CoreServices.Get<HeartManager>().UseHeart();
+        if(dataManager.GetHearts() > 0)
+        {
+            
+            CoreServices.Get<GameManager>().RestartLevel();
+            ClearPopupStack();
+        } 
         else { ClearPopupStack(); gameManager.ChangeState(GameManager.GameState.MainMenu); mainMenu.OpenRefillHeart(); }
     }
 
