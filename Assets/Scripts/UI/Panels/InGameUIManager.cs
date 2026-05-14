@@ -274,9 +274,9 @@ public class InGameUIManager : MonoBehaviour, IMenu
                 if (tutorialService != null)
                 {
                     string useInstruction = "";
-                    if (requestOpenBoosterPopup.type == Constants.BoosterType.AddMove)
+                    if (requestOpenBoosterPopup.type == BoosterType.AddMove)
                         useInstruction = "Use the Extra Move to get extra moves!";
-                    else if (requestOpenBoosterPopup.type == Constants.BoosterType.Shuffle)
+                    else if (requestOpenBoosterPopup.type == BoosterType.Shuffle)
                         useInstruction = "Use it to shuffle the board!";
                     else
                         useInstruction = "Use it to reveal a correct placement";

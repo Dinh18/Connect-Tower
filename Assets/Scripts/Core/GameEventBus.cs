@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 public enum PanelType
 {
     MainMenu,
@@ -95,6 +96,13 @@ public struct MovesUpdatedEvent : IGameEvent
     public int currentMoves;
 }
 
+public struct MovedBlocksEvent : IGameEvent
+{
+    public SlotController sourceSlot;
+    public SlotController targetSlot;
+    public int numsBlock;
+}
+
 public struct RequestOpenPanelEvent : IGameEvent
 {
     public PanelType targetPanel;
@@ -112,7 +120,7 @@ public struct RequestClosePopupEvent : IGameEvent
 
 public struct RequestOpenBoosterPopupEvent : IGameEvent
 {
-    public Constants.BoosterType type;
+    public BoosterType type;
     public RectTransform boosterTransform;
 }
 public struct LevelLoadedEvent : IGameEvent
@@ -161,4 +169,15 @@ public struct RequestAddBoosterEffectEvent : IGameEvent
 public struct RequestPlaySFX : IGameEvent
 {
     public SoundID soundID;
+}
+
+public struct RequestExecuteBoosterEvent : IGameEvent
+{
+    public BoosterType boosterType;
+    public System.Action<bool> onComplete;
+}
+
+public struct UndoAvailabilityChangedEvent : IGameEvent
+{
+    public bool canUndo;
 }

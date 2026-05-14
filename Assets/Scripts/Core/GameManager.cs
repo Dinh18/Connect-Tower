@@ -132,6 +132,7 @@ public class GameManager : MonoBehaviour
         {
             levelLoader.LoadLevel();
             CoreServices.Get<GamePlayController>().ResetSelection();
+            CoreServices.Get<GamePlayController>().ResetUndoStack();
         }
 
         GameEventBus.Publish<GameStateChangedEvent>(new GameStateChangedEvent { newState = currState });

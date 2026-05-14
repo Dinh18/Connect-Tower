@@ -183,13 +183,13 @@ public class DataManager : MonoBehaviour
         }
     }
 
-    public void AddBooster(int id, int amount, int price)
+    public void AddBooster(int id, int amount)
     {
         var b = GetBooster(id);
         if (b != null)
         {
             b.count += amount;
-            UseCoins(price);
+            UseCoins(GetBooster(id).price);
             GameEventBus.Publish(new BoosterCountUpdatedEvent { boosterId = id, count = b.count });
         }
     }

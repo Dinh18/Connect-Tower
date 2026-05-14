@@ -64,12 +64,6 @@ public static class Constants
     public const float SETTING_HEIGHT_INGAME = 950f;
     //Total topics
     public const int TOTAL_TOPICS = 26;
-    public enum BoosterType
-    {
-        AddMove = 0,
-        Shuffle = 1,
-        Hint = 2
-    }
     // level images
     public const string NORMAL_NEXT_LVL = "Sprite/NORMAL_LVL_NEXT_STAGE";
     public const string HARD_NEXT_LVL = "Sprite/HARD_LVL_NEXT_STAGE";

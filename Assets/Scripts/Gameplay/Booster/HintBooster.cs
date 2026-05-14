@@ -1,65 +1,30 @@
 using UnityEngine;
 
-public class HintBooster : MonoBehaviour, IBooster
+public class HintBooster : Booster
 {
-    private BoosterManager boosterManager;
-    private Constants.BoosterType boosterType = Constants.BoosterType.Hint;
-    private string boosterName = "Hint";
-    private int price = 900;
-    private int unlockLevel = 2;
+    [SerializeField] private FloatingNotifier floatingNotifier;
+    public override BoosterType GetBoosterType() => BoosterType.Hint;
+
+    public override void Excute()
+    {
+        GameEventBus.Publish(new RequestExecuteBoosterEvent 
+        { 
+            boosterType = BoosterType.Hint,
+            onComplete = (success) => 
+            {
+                if(success)
+                {
+                    CoreServices.Get<DataManager>().UseBooster((int)BoosterType.Hint);
+                    GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.HintBooster});
+                    Debug.Log("Thuc hien Hint thanh cong");
+                } 
+                else 
+                {
+                    floatingNotifier.ShowWarning();
+                }
+            }
+        });
+    }
+
     
-    void Start()
-    {
-        if (BoosterManager.Instance != null)
-        {
-            BoosterManager.Instance.RegisterBooster(this);
-        }
-    }
-
-    public Constants.BoosterType GetBoosterType() => boosterType;
-
-    public void AddBooster(int amount)
-    {
-        CoreServices.Get<DataManager>().AddBooster((int) Constants.BoosterType.Hint,amount, price);
-    }
-
-    public void Excute()
-    {
-        bool searched = boosterManager.SearchedBlocks();
-        if(searched)
-        {
-            CoreServices.Get<DataManager>().UseBooster((int)Constants.BoosterType.Hint);
-            GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.HintBooster});
-            Debug.Log("Thuc hien Hint thanh cong");
-        } 
-        else 
-        {
-            Debug.Log("Hint khong thanh cong");
-        }
-    }
-
-    public int GetNumsBooster()
-    {
-        return CoreServices.Get<DataManager>().GetAmountOfBoosterByID((int)Constants.BoosterType.Hint);
-    }
-
-    public void Setup(BoosterManager boosterManager)
-    {
-        this.boosterManager = boosterManager;
-    }
-
-    public int GetPrice()
-    {
-        return price;
-    }
-
-    public string GetName()
-    {
-        return boosterName;
-    }
-
-    public int GetUnlockLevel()
-    {
-        return unlockLevel;
-    }
 }

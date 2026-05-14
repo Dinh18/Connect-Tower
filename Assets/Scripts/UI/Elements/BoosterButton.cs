@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class BoosterButton : MonoBehaviour
 {
     private Button boosterButton;
-    private IBooster booster;
+    private Booster booster;
     private IBoosterEffect boosterEffect;
     private DataManager dataManager;
     // private UIManager uIManager; // Đã loại bỏ
@@ -30,12 +30,12 @@ public class BoosterButton : MonoBehaviour
     void Awake()
     {
         boosterButton = GetComponent<Button>();
-        booster = GetComponentInChildren<IBooster>();
+        booster = GetComponentInChildren<Booster>();
         boosterEffect = GetComponentInChildren<IBoosterEffect>();
     }
         
 
-    public IBooster GetBooster() => booster;
+    public Booster GetBooster() => booster;
 
     public void Setup(UIManager uIManager)
     {
@@ -80,7 +80,6 @@ public class BoosterButton : MonoBehaviour
     {
         if (booster.GetNumsBooster() <= 0)
         {
-            // Bắn tín hiệu: "Tôi đang hết loại Booster này, hãy mở popup đi"
             GameEventBus.Publish(new RequestOpenBoosterPopupEvent { type = booster.GetBoosterType() , boosterTransform = this.GetComponent<RectTransform>()});
             return;
         }

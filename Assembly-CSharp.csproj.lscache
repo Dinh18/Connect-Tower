@@ -80,12 +80,16 @@ Assets/Scripts/Gameplay/Block/
  ItemImageBlock.cs
 Assets/Scripts/Gameplay/Booster/
  AddMoveBooster.cs
+ Booster.cs
  BoosterManager.cs
  HintAnimation.cs
  HintBooster.cs
- IBooster.cs
+ HintEffectController.cs
  MagnifyingGlassEffect.cs
  ShuffleBooster.cs
+ ShuffleEffectController.cs
+ UndoBooster.cs
+ UndoEffectController.cs
 Assets/Scripts/Gameplay/
  Level/LevelLoader.cs
  Slot/
@@ -118,8 +122,10 @@ Assets/Scripts/UI/
   HintEffect.cs
   ShuffleEffect.cs
   UICountdownController.cs
+  UndoEffect.cs
  Elements/
   BoosterButton.cs
+  FloatingNotifier.cs
   HomeButton.cs
   PlayButton.cs
   SettingMenu.cs

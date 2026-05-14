@@ -21,7 +21,7 @@ public class AddBoosterUI : MonoBehaviour, IMenu
     
     private RectTransform boosterTransform;
     private BoosterButton boosterButton;
-    private Constants.BoosterType boosterType;
+    private BoosterType boosterType;
 
     public void Setup(UIManager uIManager)
     {
@@ -79,12 +79,12 @@ public class AddBoosterUI : MonoBehaviour, IMenu
         claimButton.onClick.RemoveAllListeners();
         claimButton.onClick.AddListener(OnClickClaim);
         
-        if(boosterType == Constants.BoosterType.AddMove)
+        if(boosterType == BoosterType.AddMove)
         {
             boosterIconImage.sprite = addMoveIcon;
             tutorialText.text = "Use it to get extra moves";
         }
-        else if (boosterType == Constants.BoosterType.Shuffle)
+        else if (boosterType == BoosterType.Shuffle)
         {
             boosterIconImage.sprite = shuffleIcon;
             tutorialText.text = "Use it to shuffle the blocks";

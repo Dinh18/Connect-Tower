@@ -4,6 +4,11 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
+public class PopupInfo
+{
+    public PopupType popupType;
+}
+
 public class UIManager : MonoBehaviour
 {
     [Header("Panels")]
@@ -15,6 +20,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private LoadingImage loadingImage;
     [SerializeField] private RefillHeartPopup refillHeartPopup;
     [SerializeField] private QuitLevelPopup quitLevelPopup;
+    [SerializeField] private Dictionary<PopupType,IMenu> allPopups;
     
     private Stack<IMenu> popupStack = new Stack<IMenu>();
     private GameManager gameManager;
