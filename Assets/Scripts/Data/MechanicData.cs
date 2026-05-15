@@ -1,3 +1,6 @@
+using Firebase.Firestore;
+
+[FirestoreData]
 [System.Serializable]
 public class MechanicData
 {
@@ -5,6 +8,8 @@ public class MechanicData
     public string name;
     public int levelUnclock;
     public bool isFirstTimePlay;
+
+    public MechanicData(){}
 
     public MechanicData(int id, string name, int levelUnclock, bool firstTimePlay)
     {

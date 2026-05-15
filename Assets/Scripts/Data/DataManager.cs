@@ -4,19 +4,36 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 using System.Collections.Generic;
+using Firebase.Firestore;
+using Firebase.Extensions;
+
 
 public class DataManager : MonoBehaviour
 {
     public PlayerData playerData;
     public FrameDataSO[] allFrames;
     public AvatarDataSO[] allAvatars;
+    private FirebaseFirestore db;
+    private string userId;
     private string saveFilePath;
-
-    // Events are now handled by GameEventBus
 
     public void Init()
     {
-        saveFilePath = Path.Combine(Application.persistentDataPath, "saveData.json");
+        // saveFilePath = Path.Combine(Application.persistentDataPath, "saveData.json");
+        db = FirebaseFirestore.DefaultInstance;;
+
+        userId = "Test_Player_2";
+        // Debug.Log("Dùng tạm Device ID làm User ID: " + userId);
+
+        // TODO: Khi làm hệ thống đăng nhập.
+        // if (FirebaseAuth.DefaultInstance.CurrentUser != null)
+        // {
+        //     userId = FirebaseAuth.DefaultInstance.CurrentUser.UserId;
+        // }
+        // else
+        // {
+        //     userId = "test_user_id"; // Debug cho Editor
+        // }
         LoadGame();
         CoreServices.Register<DataManager>(this);
     }
@@ -27,44 +44,78 @@ public class DataManager : MonoBehaviour
 
     public void SaveGame()
     {
-        string jsonString = JsonUtility.ToJson(playerData, true);
-        try
+        if (string.IsNullOrEmpty(userId)) return;
+        
+        // Trỏ đến đúng Document của User này
+        DocumentReference docRef = db.Collection("Users").Document(userId);
+
+        // Đẩy toàn bộ Object PlayerData lên Cloud
+        docRef.SetAsync(playerData).ContinueWithOnMainThread(task =>
         {
-            string encryptedData = EncryptString(jsonString);
-            File.WriteAllText(saveFilePath, encryptedData);
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("Lỗi khi lưu game: " + e.Message);
-            File.WriteAllText(saveFilePath, jsonString);
-        }
+            if (task.IsCompleted)
+            {
+                Debug.Log("<color=green>[Firebase]</color> Đã đồng bộ dữ liệu lên Cloud thành công!");
+            }
+            else
+            {
+                Debug.LogError("Lỗi khi lưu Cloud: " + task.Exception);
+            }
+        });
     }
 
     public void LoadGame()
     {
-        if(File.Exists(saveFilePath))
-        {
-            string fileContent = File.ReadAllText(saveFilePath);
-            try
-            {
-                string decryptedJson = DecryptString(fileContent);
-                playerData = JsonUtility.FromJson<PlayerData>(decryptedJson);
-            }
-            catch
-            {
-                // Fallback for old unencrypted files or corrupted files
-                try { playerData = JsonUtility.FromJson<PlayerData>(fileContent); }
-                catch { playerData = new PlayerData(); SaveGame(); }
-            }
-        }
-        else
-        {
-            playerData = new PlayerData();
-            SaveGame();
-            Debug.Log("<color=yellow>[DataManager]</color> Không tìm thấy file save cũ. Đã tạo file save MỚI tại: " + saveFilePath);
-        }
         allFrames = Resources.LoadAll<FrameDataSO>(Constants.FRAMES_PATH);
         allAvatars = Resources.LoadAll<AvatarDataSO>(Constants.AVATARS_PATH);
+
+        if(string.IsNullOrEmpty(userId)) return;
+
+        DocumentReference docRef = db.Collection("Users").Document(userId);
+        docRef.GetSnapshotAsync().ContinueWithOnMainThread(task =>
+        {
+            if(task.IsCompleted)
+            {
+                DocumentSnapshot snapshot = task.Result;
+                if(snapshot.Exists)
+                {
+                    playerData = snapshot.ConvertTo<PlayerData>();
+                    Debug.Log("<color=green>[Firebase]</color> Tải dữ liệu người chơi thành công!");
+                }
+                else
+                {
+                    playerData = new PlayerData();
+                    SaveGame();
+                    Debug.Log("<color=yellow>[Firebase]</color> Tạo mới dữ liệu cho người chơi lần đầu.");
+                }
+                GameEventBus.Publish(new CoinsUpdatedEvent { totalCoins = playerData.wallet.totalCoins });
+                GameEventBus.Publish(new HeartUpdatedEvent { heartCount = playerData.wallet.heart });
+            } 
+        });
+
+        
+
+        // if(File.Exists(saveFilePath))
+        // {
+        //     string fileContent = File.ReadAllText(saveFilePath);
+        //     try
+        //     {
+        //         string decryptedJson = DecryptString(fileContent);
+        //         playerData = JsonUtility.FromJson<PlayerData>(decryptedJson);
+        //     }
+        //     catch
+        //     {
+        //         // Fallback for old unencrypted files or corrupted files
+        //         try { playerData = JsonUtility.FromJson<PlayerData>(fileContent); }
+        //         catch { playerData = new PlayerData(); SaveGame(); }
+        //     }
+        // }
+        // else
+        // {
+        //     playerData = new PlayerData();
+        //     SaveGame();
+        //     Debug.Log("<color=yellow>[DataManager]</color> Không tìm thấy file save cũ. Đã tạo file save MỚI tại: " + saveFilePath);
+        // }
+        
     }
 
     [ContextMenu("Delete Save Data")]
@@ -122,7 +173,7 @@ public class DataManager : MonoBehaviour
 
     void OnDisable()
     {
-        GameEventBus.Subscribe<RequestSaveProfile>(SaveProfile);
+        GameEventBus.UnSubscribe<RequestSaveProfile>(SaveProfile);
     }
 
     // --- DATA ACCESSORS ---

@@ -1,3 +1,6 @@
+using Firebase.Firestore;
+
+[FirestoreData]
 [System.Serializable]
 public class BoosterData
 {
@@ -9,6 +12,8 @@ public class BoosterData
     public int unlockedLevel;
     public bool isUnlocked;
     public bool isFirstTime;
+
+    public BoosterData(){}
 
     public BoosterData(int id, string name, string description, int count, int price, int unlockedLevel, bool isUnlocked, bool isFirstTime)
     {

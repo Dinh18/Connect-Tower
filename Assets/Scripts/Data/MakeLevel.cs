@@ -80,15 +80,11 @@ public class MakeLevel : MonoBehaviour
         int j = 0;
         for (int i = 0; i < row1; i++)
         {
-            if (j >= slots.Count) break;
             GameObject newSlot = Instantiate(slotPrefab, transform);
             newSlot.name = "Slot_0_" + i;
-            
-            if (slots[j].position == Vector3.zero) {
-                slots[j].position = new Vector3(startX_Row1 + (i * Constants.SLOT_WIDTH), 0, 0);
-            }
-            newSlot.transform.localPosition = slots[j].position;
-
+            // Xếp từ trái sang phải dựa vào startX
+            newSlot.transform.localPosition = new Vector3(startX_Row1 + (i * Constants.SLOT_WIDTH), 0, 0);
+            // setup.slotController = newSlot.GetComponent<SlotController>();
             newSlot.GetComponent<SlotController>().Setup(slots[j].slotType, 0,slots[j].questionTopic ? slots[j].questionTopic : null);
             slotControllers.Add(newSlot.GetComponent<SlotController>());
             stackHolders.Add(newSlot.gameObject.GetComponentInChildren<StackHolder>().transform);
@@ -98,14 +94,10 @@ public class MakeLevel : MonoBehaviour
         float startX_Row2 = -(row2 - 1) * Constants.SLOT_WIDTH / 2f;
         for(int i = 0; i < row2; i++)
         {
-            if (j >= slots.Count) break;
             GameObject newSlot = Instantiate(slotPrefab, transform);
             newSlot.name = "Slot_1_" + i;
 
-            if (slots[j].position == Vector3.zero) {
-                slots[j].position = new Vector3(startX_Row2 + (i * Constants.SLOT_WIDTH), Constants.SLOT_HEIGHT, 0);
-            }
-            newSlot.transform.localPosition = slots[j].position;
+            newSlot.transform.localPosition = new Vector3(startX_Row2 + (i * Constants.SLOT_WIDTH), Constants.SLOT_HEIGHT, 0);
 
             newSlot.GetComponent<SlotController>().Setup(slots[j].slotType, 1,slots[j].questionTopic ? slots[j].questionTopic : null);
             slotControllers.Add(newSlot.GetComponent<SlotController>());
@@ -123,27 +115,21 @@ public class MakeLevel : MonoBehaviour
                 DestroyImmediate(blockHolder.GetChild(i).gameObject);
             }
 
-        int loopCount = Mathf.Min(slots.Count, slotControllers.Count);
-        for (int i = 0; i < loopCount; i++)
+        for (int i = 0; i < slots.Count; i++)
         {
             SlotSetupData setup = slots[i];
             for (int j = setup.blocks.Count-1; j >= 0; j--)
             {
                 BlockSetupData chosenTopic = setup.blocks[j];
-                if (chosenTopic == null || chosenTopic.blockTopic == null) continue;
+                if (chosenTopic == null) continue;
 
                 GameObject newBlock = Instantiate(blockPrefab, blockHolder);
 
+                // newBlock.transform.SetParent(blockHolder);
+
                 BlocksManager blocksManager = blockHolder.GetComponent<BlocksManager>();
                 
-                Sprite spriteToUse = null;
-                if (chosenTopic.blockTopic.blocksSprite != null && chosenTopic.blockTopic.blocksSprite.Count > 0)
-                {
-                    int safeIndex = chosenTopic.indexSprite % chosenTopic.blockTopic.blocksSprite.Count;
-                    spriteToUse = chosenTopic.blockTopic.blocksSprite[safeIndex];
-                }
-                
-                newBlock.GetComponent<BlockController>().Setup(blocksManager, chosenTopic.blockTopic.blockColor, chosenTopic.blockTopic, chosenTopic.typeBlock, spriteToUse, slotControllers[i]);
+                newBlock.GetComponent<BlockController>().Setup(blocksManager,chosenTopic.blockTopic.blockColor, chosenTopic.blockTopic, chosenTopic.typeBlock, chosenTopic.blockTopic.blocksSprite[chosenTopic.indexSprite], slotControllers[i]);
 
                 newBlock.transform.position = slotControllers[i].stackAnchor.position + new Vector3(0, Constants.BLOCK_HEIGHT, 0) * (setup.blocks.Count - 1 - j);
             }
@@ -223,13 +209,11 @@ public class MakeLevel : MonoBehaviour
         newLevelData.numsTopic = topics.Count;
         newLevelData.slots = new List<SlotSetupData>();
 
-        SyncPositionsFromScene();
         foreach(SlotSetupData slot in slots)
         {
             SlotSetupData slotData = new SlotSetupData();
             slotData.slotType = slot.slotType;
             slotData.questionTopic = slot.questionTopic;
-            slotData.position = slot.position;
             slotData.blocks = new List<BlockSetupData>();
             foreach(BlockSetupData block in slot.blocks)
             {
@@ -303,56 +287,6 @@ public class MakeLevel : MonoBehaviour
         }
 
         Debug.Log("Auto-filled topics successfully!");
-    }
-
-    public void LoadLevel(LevelDataSO levelData)
-    {
-        if (levelData == null) return;
-
-        Reset();
-
-        this.Level = levelData.level;
-        this.moves = levelData.moves;
-        this.row1 = levelData.row1;
-        this.row2 = levelData.row2;
-
-        HashSet<BlockTopic> uniqueTopics = new HashSet<BlockTopic>();
-        foreach(var s in levelData.slots) {
-            foreach(var b in s.blocks) {
-                if (b.blockTopic != null) uniqueTopics.Add(b.blockTopic);
-            }
-            if (s.questionTopic != null) uniqueTopics.Add(s.questionTopic);
-        }
-
-        this.topics = new List<BlockTopic>(uniqueTopics);
-        this.totalTopics = this.topics.Count;
-
-        this.amountBlockOfTopic = new List<int>();
-        for(int i = 0; i < this.topics.Count; i++) this.amountBlockOfTopic.Add(0);
-
-        this.slots = new List<SlotSetupData>();
-        foreach(var s in levelData.slots) {
-            SlotSetupData newSlot = new SlotSetupData();
-            newSlot.slotType = s.slotType;
-            newSlot.questionTopic = s.questionTopic;
-            newSlot.position = s.position;
-            
-            foreach(var b in s.blocks) {
-                BlockSetupData nb = new BlockSetupData();
-                nb.typeBlock = b.typeBlock;
-                nb.blockTopic = b.blockTopic;
-                nb.indexSprite = b.indexSprite;
-                newSlot.blocks.Add(nb);
-                
-                int tIdx = this.topics.IndexOf(b.blockTopic);
-                if (tIdx >= 0) this.amountBlockOfTopic[tIdx]++;
-            }
-            this.slots.Add(newSlot);
-        }
-
-        UpdateSlotsInEditor();
-        GenerateBlocks();
-        Debug.Log("Level loaded successfully!");
     }
 }
 

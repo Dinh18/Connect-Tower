@@ -13,14 +13,14 @@ public class MoveStep
         this.sourceSlot = sourceSlot;
         this.targetSlot = targetSlot;
         this.numsBlock = numsBlock;
-        Debug.Log("Add MoveInfo from " + sourceSlot.gameObject.name + " to " + targetSlot.gameObject.name+": "+numsBlock);
+        // Debug.Log("Add MoveInfo from " + sourceSlot.gameObject.name + " to " + targetSlot.gameObject.name+": "+numsBlock);
     }
 }
 
 public class GamePlayController : MonoBehaviour
 {
     private bool hasSelected = false;
-    private SlotController selectedSlot = null;
+    [SerializeField] private SlotController selectedSlot = null;
     [SerializeField] private Stack<MoveStep> undoStack;
 
     void OnEnable()

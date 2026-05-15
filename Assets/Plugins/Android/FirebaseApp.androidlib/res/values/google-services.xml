@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:keep="@string/gcm_defaultSenderId,@string/google_storage_bucket,@string/project_id,@string/google_api_key,@string/google_crash_reporting_api_key,@string/google_app_id">
+  <string name="gcm_defaultSenderId" translatable="false">467880881490</string>
+  <string name="google_storage_bucket" translatable="false">connect-towers.firebasestorage.app</string>
+  <string name="project_id" translatable="false">connect-towers</string>
+  <string name="google_api_key" translatable="false">AIzaSyAqtrGc0fgi2QBm8xzx8LtXZ3IyaumugT4</string>
+  <string name="google_crash_reporting_api_key" translatable="false">AIzaSyAqtrGc0fgi2QBm8xzx8LtXZ3IyaumugT4</string>
+  <string name="google_app_id" translatable="false">1:467880881490:android:aa5e02b95f14c40b431e8b</string>
+</resources>

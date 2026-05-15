@@ -28,7 +28,7 @@ public class LevelEditor : Editor
         if (GUILayout.Button("Load Level Data", GUILayout.Height(30))) {
             if (levelDataToLoad != null) {
                 Undo.RecordObject(makeLevel, "Load Level");
-                makeLevel.LoadLevel(levelDataToLoad);
+                // makeLevel.LoadLevel(levelDataToLoad);
             } else {
                 Debug.LogWarning("Please assign a LevelDataSO to load.");
             }

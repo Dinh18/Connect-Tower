@@ -10,16 +10,16 @@ public enum PopupType
     EditProfile,
 }
 
-public abstract class Popup : MonoBehaviour
+public abstract class Popup : UIView
 {
     public PopupType popupType;
     public GameObject dimImage;
-    public virtual void Hide()
+    public override void Hide()
     {
         if(dimImage != null) dimImage.SetActive(false);
         gameObject.SetActive(false);
     }
-    public virtual void Show()
+    public override void Show()
     {
         if(dimImage != null) dimImage.SetActive(true);
         gameObject.SetActive(true);

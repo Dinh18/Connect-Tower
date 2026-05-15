@@ -329,9 +329,24 @@ Temp/obj/Assembly-CSharp-Editor/.NETStandard,Version=v2.1.AssemblyAttributes.cs
  System.Transactions.dll
  System.Xml.dll
  System.Xml.Linq.dll
-Assets/Plugins/Demigiant/DOTween/
- DOTween.dll
- Editor/DOTweenEditor.dll
+Assets/ExternalDependencyManager/Editor/1.2.187/
+ Google.IOSResolver.dll
+ Google.JarResolver.dll
+ Google.PackageManagerResolver.dll
+ Google.VersionHandlerImpl.dll
+Assets/
+ ExternalDependencyManager/Editor/Google.VersionHandler.dll
+ Firebase/
+  Editor/Firebase.Editor.dll
+  Plugins/
+   Firebase.App.dll
+   Firebase.Firestore.dll
+   Firebase.Platform.dll
+   Firebase.TaskExtension.dll
+   Google.MiniJson.dll
+ Plugins/Demigiant/DOTween/
+  DOTween.dll
+  Editor/DOTweenEditor.dll
 Library/PackageCache/
  com.coffee.ui-particle@92fb173507ec/Runtime/Coffee.UIParticle.R.dll
  com.unity.collections@aea9d3bd5e19/
@@ -378,6 +393,7 @@ Library/ScriptAssemblies/
 Temp/bin/Debug/
  Assembly-CSharp-firstpass.dll
  Assembly-CSharp.dll
+ Firebase.App.Internal.dll
 
 [analyzerReferences]
 ../Unity/Hub/Editor/6000.2.14f1/Editor/Data/Tools/Unity.SourceGenerators/

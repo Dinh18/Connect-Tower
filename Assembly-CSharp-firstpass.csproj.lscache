@@ -314,6 +314,12 @@ Temp/obj/Assembly-CSharp-firstpass/.NETStandard,Version=v2.1.AssemblyAttributes.
  UnityEditor.Apple.Extensions.Common.dll
  UnityEditor.iOS.Extensions.Common.dll
  UnityEditor.iOS.Extensions.Xcode.dll
+Assets/Firebase/Plugins/
+ Firebase.App.dll
+ Firebase.Firestore.dll
+ Firebase.Platform.dll
+ Firebase.TaskExtension.dll
+ Google.MiniJson.dll
 Assets/Plugins/Demigiant/DOTween/DOTween.dll
 Library/PackageCache/
  com.coffee.ui-particle@92fb173507ec/Runtime/Coffee.UIParticle.R.dll
@@ -356,6 +362,7 @@ Library/ScriptAssemblies/
  Unity.VisualStudio.Editor.dll
  UnityEditor.UI.dll
  UnityEngine.UI.dll
+Temp/bin/Debug/Firebase.App.Internal.dll
 
 [analyzerReferences]
 ../Unity/Hub/Editor/6000.2.14f1/Editor/Data/Tools/Unity.SourceGenerators/

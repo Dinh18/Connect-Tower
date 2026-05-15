@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "467880881490",
+    "project_id": "connect-towers",
+    "storage_bucket": "connect-towers.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:467880881490:android:aa5e02b95f14c40b431e8b",
+        "android_client_info": {
+          "package_name": "com.DefaultCompany.ConnectTower"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqtrGc0fgi2QBm8xzx8LtXZ3IyaumugT4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
