@@ -22,6 +22,7 @@ public class SlotSetupData
 {
     // public List<BlockTopic> blocks= new List<BlockTopic>();
     public SlotController.SlotType slotType = SlotController.SlotType.Normal;
+    public Vector3 position;
     // [ShowIf("slotType", SlotController.SlotType.Hide)]
     public BlockTopic questionTopic;
     public List<BlockSetupData> blocks= new List<BlockSetupData>();

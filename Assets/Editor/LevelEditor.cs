@@ -9,6 +9,7 @@ public class LevelEditor : Editor
     // Setting block
     int typeBlock = 0; // 0: Normal, 1: Hide
     bool enableSceneEdit = false;
+    LevelDataSO levelDataToLoad;
 
     public override void OnInspectorGUI()
     {
@@ -21,6 +22,18 @@ public class LevelEditor : Editor
         makeLevel.Level = EditorGUILayout.IntField("Level", makeLevel.Level);
         makeLevel.moves = EditorGUILayout.IntField("Moves", makeLevel.moves);
         
+        GUILayout.Space(10);
+        EditorGUILayout.HelpBox("LOAD LEVEL", MessageType.Info);
+        levelDataToLoad = (LevelDataSO)EditorGUILayout.ObjectField("Level Data", levelDataToLoad, typeof(LevelDataSO), false);
+        if (GUILayout.Button("Load Level Data", GUILayout.Height(30))) {
+            if (levelDataToLoad != null) {
+                Undo.RecordObject(makeLevel, "Load Level");
+                makeLevel.LoadLevel(levelDataToLoad);
+            } else {
+                Debug.LogWarning("Please assign a LevelDataSO to load.");
+            }
+        }
+
         GUILayout.Space(10);
         EditorGUILayout.HelpBox("GRID SETTINGS", MessageType.Info);
         makeLevel.row1 = EditorGUILayout.IntSlider("Row 1 Slots", makeLevel.row1, 0, 10);
@@ -173,14 +186,11 @@ public class LevelEditor : Editor
         Event e = Event.current;
         int controlID = GUIUtility.GetControlID(FocusType.Passive);
         
-        float startX_Row1 = -(makeLevel.row1 - 1) * Constants.SLOT_WIDTH / 2f; 
-        float startX_Row2 = -(makeLevel.row2 - 1) * Constants.SLOT_WIDTH / 2f;
-
         int index = 0;
         for (int i = 0; i < makeLevel.row1; i++)
         {
             if (index >= makeLevel.slots.Count) break;
-            Vector3 pos = makeLevel.transform.position + new Vector3(startX_Row1 + (i * Constants.SLOT_WIDTH), 0, 0);
+            Vector3 pos = makeLevel.transform.position + makeLevel.slots[index].position;
             DrawSceneSlot(makeLevel, index, pos, e);
             index++;
         }
@@ -188,7 +198,7 @@ public class LevelEditor : Editor
         for (int i = 0; i < makeLevel.row2; i++)
         {
             if (index >= makeLevel.slots.Count) break;
-            Vector3 pos = makeLevel.transform.position + new Vector3(startX_Row2 + (i * Constants.SLOT_WIDTH), Constants.SLOT_HEIGHT, 0);
+            Vector3 pos = makeLevel.transform.position + makeLevel.slots[index].position;
             DrawSceneSlot(makeLevel, index, pos, e);
             index++;
         }
@@ -235,14 +245,19 @@ public class LevelEditor : Editor
             if (e.type == EventType.MouseDown && e.button == 0) // Left click
             {
                 Undo.RecordObject(makeLevel, "Add Block");
-                if (makeLevel.topics.Count > 0 && makeLevel.indexTopicSelected < makeLevel.topics.Count)
+                if (makeLevel.topics.Count > 0 && makeLevel.indexTopicSelected < makeLevel.topics.Count) {
                     makeLevel.AddBlockToSlot(index, makeLevel.topics[makeLevel.indexTopicSelected], typeBlock);
+                    makeLevel.UpdateSlotsInEditor();
+                    makeLevel.GenerateBlocks();
+                }
                 e.Use();
             }
             else if (e.type == EventType.MouseDown && e.button == 1) // Right click
             {
                 Undo.RecordObject(makeLevel, "Remove Block");
                 makeLevel.RemoveBlockFromSlot(index);
+                makeLevel.UpdateSlotsInEditor();
+                makeLevel.GenerateBlocks();
                 e.Use();
             }
         }
