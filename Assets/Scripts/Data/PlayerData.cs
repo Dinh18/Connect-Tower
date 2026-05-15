@@ -5,6 +5,10 @@ using System.Collections.Generic;
 public class PlayerData
 {
     public string playerName = "Player";
+    public string frameID = "0";
+    public string avatarID = "0";
+    public int currStreak = 0;
+    public int maxStreak = 0;
     public int currentLevel = 0;
     public bool isFirstTimePlay = true;
 

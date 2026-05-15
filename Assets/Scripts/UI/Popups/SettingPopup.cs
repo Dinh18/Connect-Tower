@@ -3,7 +3,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SettingPopup : MonoBehaviour, IMenu
+public class SettingPopup : Popup
 {
     private UIManager uIManager;
     [SerializeField] private Button closeButton;
@@ -12,55 +12,41 @@ public class SettingPopup : MonoBehaviour, IMenu
     [SerializeField] private GameObject hapticInActive;
     [SerializeField] private Button soundButton;
     [SerializeField] private Button hapticButton;
-    [SerializeField] private GameObject dimImage;
+    private void ClosePopup()
+    {
+        GameEventBus.Publish(new RequestClosePopupEvent());
+    }
     void OnEnable()
     {
         soundButton.onClick.AddListener(OnClickSoundButton);
-        closeButton.onClick.AddListener(() => GameEventBus.Publish(new RequestClosePopupEvent()));
+        hapticButton.onClick.AddListener(OnClickHapticButton);
+        closeButton.onClick.AddListener(ClosePopup);
     }
     void OnDisable()
     {
         soundButton.onClick.RemoveListener(OnClickSoundButton);
-        closeButton.onClick.RemoveListener(() => GameEventBus.Publish(new RequestClosePopupEvent()));
+        hapticButton.onClick.RemoveListener(OnClickHapticButton);
+        closeButton.onClick.RemoveListener(ClosePopup);
     }
-    public void Hide()
+    public override void Hide()
     {
-        // popupAnimation.CloseAnimation(0.3f);
-        this.gameObject.SetActive(false);
-        dimImage.SetActive(false);
+        base.Hide();
     }
 
 
     public void Setup(UIManager uIManager)
     {
         this.uIManager = uIManager;
-
-        soundButton.onClick.AddListener(OnClickSoundButton);
-        hapticButton.onClick.AddListener(OnClickHapticButton);
-
-        // if (backHomeButton != null)
-        // {
-        //     backHomeButton.onClick.AddListener(uIManager.OnClickBackHome);
-        // }
-        
     }
 
-    public void Show()
+    public override void Show()
     {
-        this.gameObject.SetActive(true);
-        dimImage.SetActive(true);
-
-        // if(backHomeButton != null)
-        // {
-        //     bool inGame = uIManager.isCurrentlyInGame();
-        //     backHomeButton.gameObject.SetActive(inGame);
-        // }
+        base.Show();
 
         if(CoreServices.Get<AudioManager>().IsSoundOn()) soundInActive.SetActive(false);
         else soundInActive.SetActive(true);
         if(HapticManager.Instance.IsHapticOn()) hapticInActive.SetActive(false);
         else hapticInActive.SetActive(true);
-
     }
 
     private void OnClickSoundButton()
@@ -75,8 +61,5 @@ public class SettingPopup : MonoBehaviour, IMenu
         else hapticInActive.gameObject.SetActive(true);
     }
 
-    public GameObject GetGameObject()
-    {
-        return this.gameObject;
-    }
+
 }

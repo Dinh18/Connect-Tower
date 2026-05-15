@@ -1,36 +1,39 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class RefillHeartPopup : MonoBehaviour, IMenu
+public class RefillHeartPopup : Popup
 {
     private UIManager uIManager;
     [SerializeField] private Button closeButton;
     [SerializeField] private Button watchVideo;
     [SerializeField] private Button refillButton;
     [SerializeField] private Text heardCountText;
-    [SerializeField] private GameObject dimImage;
-    // [SerializeField] private Text timeText;
-    private MainMenuUIManager mainMenuUIManager;
+    private MainMenuUIPanel mainMenuUIManager;
     private DataManager dataManager;
+
+    private void ClosePopup()
+    {
+        GameEventBus.Publish(new RequestClosePopupEvent());
+    }
     void OnEnable()
     {
-        closeButton.onClick.AddListener(() => GameEventBus.Publish(new RequestClosePopupEvent()));
+        closeButton.onClick.AddListener(ClosePopup);
         watchVideo.onClick.AddListener(OnclickWatchVideo);
         refillButton.onClick.AddListener(OnClickRefillHeart);
         GameEventBus.Subscribe<HeartUpdatedEvent>(UpdateHeardCountText);
     }
     void OnDisable()
     {
-        closeButton.onClick.RemoveListener(() => GameEventBus.Publish(new RequestClosePopupEvent()));
+        closeButton.onClick.RemoveListener(ClosePopup);
         watchVideo.onClick.RemoveListener(OnclickWatchVideo);
         refillButton.onClick.RemoveListener(OnClickRefillHeart);
         GameEventBus.UnSubscribe<HeartUpdatedEvent>(UpdateHeardCountText);
     }
 
-    public void Hide()
+    public override void Hide()
     {
-        this.gameObject.SetActive(false);
-        dimImage.SetActive(false);
+        // this.gameObject.SetActive(false);
+        base.Hide();
     }
 
     public void Setup(UIManager uIManager)
@@ -39,10 +42,10 @@ public class RefillHeartPopup : MonoBehaviour, IMenu
         this.dataManager = CoreServices.Get<DataManager>();
     }
 
-    public void Show()
+    public override void Show()
     {
-        this.gameObject.SetActive(true);
-        dimImage.SetActive(true);
+        // this.gameObject.SetActive(true);
+        base.Show();
         UpdateHeardCountText(new HeartUpdatedEvent { heartCount = dataManager.GetHearts() });
     }
     private void OnclickWatchVideo()
@@ -68,7 +71,7 @@ public class RefillHeartPopup : MonoBehaviour, IMenu
             mainMenuUIManager.OnClickShop();
         }
     }
-    public void ConfigMainMenu(MainMenuUIManager mainMenuUIManager)
+    public void ConfigMainMenu(MainMenuUIPanel mainMenuUIManager)
     {
         if(this.mainMenuUIManager == null)
         {
@@ -83,8 +86,4 @@ public class RefillHeartPopup : MonoBehaviour, IMenu
         heardCountText.text = heartUpdated.heartCount.ToString();
     }
 
-    public GameObject GetGameObject()
-    {
-        return this.gameObject;
-    }
 }

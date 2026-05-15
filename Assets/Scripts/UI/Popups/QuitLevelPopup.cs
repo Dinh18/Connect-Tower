@@ -2,52 +2,41 @@ using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class QuitLevelPopup : MonoBehaviour, IMenu
+public class QuitLevelPopup : Popup
 {
-    [SerializeField] private GameObject dimImage;
     [SerializeField] private Text titleText;
     [SerializeField] private Button closeButton;
     [SerializeField] private Button continueButton;
     [SerializeField] private Button homeButton;
     [SerializeField] private Button replayButton;
+    private void ClosePopup()
+    {
+        GameEventBus.Publish(new RequestClosePopupEvent());
+    }
     void OnEnable()
     {
-        closeButton.onClick.AddListener(() => GameEventBus.Publish(new RequestClosePopupEvent()));
-        continueButton.onClick.AddListener(() => GameEventBus.Publish(new RequestClosePopupEvent()));
+        closeButton.onClick.AddListener(ClosePopup);
+        continueButton.onClick.AddListener(ClosePopup);
         homeButton.onClick.AddListener(OnClickHome);
         replayButton.onClick.AddListener(OnClickReplay);
     }
     void OnDisable()
     {
-        closeButton.onClick.RemoveListener(() => GameEventBus.Publish(new RequestClosePopupEvent()));
-        continueButton.onClick.RemoveListener(() => GameEventBus.Publish(new RequestClosePopupEvent()));
+        closeButton.onClick.RemoveListener(ClosePopup);
+        continueButton.onClick.RemoveListener(ClosePopup);
         homeButton.onClick.RemoveListener(OnClickHome);
         replayButton.onClick.RemoveListener(OnClickReplay);
     }
 
-    
-    public GameObject GetGameObject()
+
+    public override void Hide()
     {
-        return this.gameObject;
+        base.Hide();
     }
 
-    public void Hide()
+    public override void Show()
     {
-        this.gameObject.SetActive(false);
-        dimImage.SetActive(false);
-    }
-
-    
-
-    public void Setup(UIManager uIManager)
-    {
-        
-    }
-
-    public void Show()
-    {
-        this.gameObject.SetActive(true);
-        dimImage.SetActive(true);
+        base.Show();
     }
 
     public void SetConfig(bool isBackHome)
@@ -73,7 +62,9 @@ public class QuitLevelPopup : MonoBehaviour, IMenu
 
     public void OnClickHome()
     {
-        CoreServices.Get<GameManager>().ChangeState(GameManager.GameState.MainMenu);
+        CoreServices.Get<UIManager>().OnClickBackHome();
         CoreServices.Get<HeartManager>().UseHeart();
     }
+
+
 }

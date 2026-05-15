@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class LoadingImage : MonoBehaviour, IMenu
+public class LoadingImage : Popup
 {
     private UIManager uIManager;
     public void Setup(UIManager uIManager)
@@ -8,18 +8,13 @@ public class LoadingImage : MonoBehaviour, IMenu
         this.uIManager = uIManager;
     }
 
-    public void Hide()
+    public override void Hide()
     {
         this.gameObject.SetActive(false);
     }
 
-    public void Show()
+    public override void Show()
     {
         this.gameObject.SetActive(true);
-    }
-
-    public GameObject GetGameObject()
-    {
-        return this.gameObject;
     }
 }

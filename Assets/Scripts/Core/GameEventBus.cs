@@ -2,23 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-public enum PanelType
-{
-    MainMenu,
-    InGame,
-    Shop,
-    ShopFromMainMenu,
-    EndGameWin,
-    EndGameLose
-}
 
-public enum PopupType
-{
-    RefillHeart,
-    Booster,
-    Setting,
-    QuitLevel
-}
 public enum BorderType
 {
     Warning,
@@ -180,4 +164,11 @@ public struct RequestExecuteBoosterEvent : IGameEvent
 public struct UndoAvailabilityChangedEvent : IGameEvent
 {
     public bool canUndo;
+}
+
+public struct RequestSaveProfile : IGameEvent
+{
+    public string playerName;
+    public string frameID;
+    public string avatarID;
 }

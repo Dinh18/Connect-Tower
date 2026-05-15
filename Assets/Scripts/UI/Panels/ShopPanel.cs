@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ShopPanel : MonoBehaviour, IMenu
+public class ShopPanel : MonoBehaviour
 {
     private UIManager uIManager;
     [SerializeField] private Button closeButton;
@@ -39,6 +39,7 @@ public class ShopPanel : MonoBehaviour, IMenu
         closeButton.gameObject.SetActive(false);
         
     }
+
 
     public GameObject GetGameObject()
     {

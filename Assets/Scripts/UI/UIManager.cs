@@ -2,27 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
-using UnityEngine.UI;
 
-public class PopupInfo
-{
-    public PopupType popupType;
-}
 
 public class UIManager : MonoBehaviour
 {
     [Header("Panels")]
-    [SerializeField] private MainMenuUIManager mainMenu;
-    [SerializeField] private InGameUIManager ingame;
-    [SerializeField] private EndGameUI endGameUI;
-    [SerializeField] private SettingPopup setting;
+    [SerializeField] private MainMenuUIPanel mainMenu;
+    [SerializeField] private InGamePanel ingame;
+    [SerializeField] private EndGamePanel endGameUI;
     [SerializeField] private ShopPanel shop;
     [SerializeField] private LoadingImage loadingImage;
-    [SerializeField] private RefillHeartPopup refillHeartPopup;
-    [SerializeField] private QuitLevelPopup quitLevelPopup;
-    [SerializeField] private Dictionary<PopupType,IMenu> allPopups;
+    [SerializeField] private List<Popup> allPopups;
     
-    private Stack<IMenu> popupStack = new Stack<IMenu>();
+    private Stack<Popup> popupStack = new Stack<Popup>();
     private GameManager gameManager;
     private DataManager dataManager;
 
@@ -35,7 +27,6 @@ public class UIManager : MonoBehaviour
 
         // Setup sub-panels
         mainMenu.Setup(this);
-        setting.Setup(this);
         shop.Setup(this);
         ingame.Setup(this);
         endGameUI.Setup(this);
@@ -58,34 +49,8 @@ public class UIManager : MonoBehaviour
         GameEventBus.UnSubscribe<RequestClosePopupEvent>(HandleClosePopupRequest);
 
     }
-
-    private void HandleOpenPanelRequest(RequestOpenPanelEvent requestOpenPanelEvent)
-    {
-        switch (requestOpenPanelEvent.targetPanel)
-        {
-            case PanelType.Shop: OpenShop(false); break;
-            case PanelType.ShopFromMainMenu: OpenShop(true); break;
-            case PanelType.EndGameWin: endGameUI.ShowLevelCompletedPanel(); break;
-            case PanelType.EndGameLose: endGameUI.ShowLevelFailedPanel(); break;
-        }
-    }
-
-    private void HandleOpenPopupRequest(RequestOpenPopupEvent requestOpenPopup)
-    {
-        switch(requestOpenPopup.targetPopup)
-        {
-            case PopupType.RefillHeart: mainMenu.OpenRefillHeart(); break;
-            case PopupType.Setting: OpenSetting(); break;
-            case PopupType.QuitLevel: OpenQuitLevelPopup(); break;
-        }
-    }
-
-    private void HandleClosePopupRequest(RequestClosePopupEvent requestClosePopup)
-    {
-        PopPopup();
-    }
-
-
+    
+    #region UI Tổng
     public void UpdateUI(GameStateChangedEvent gameStateChangedEvent)
     {
         GameManager.GameState gameState = gameStateChangedEvent.newState;
@@ -112,72 +77,53 @@ public class UIManager : MonoBehaviour
                         ClearPopupStack();
                         ingame.Show();
                         StartCoroutine(ShowLoadingImage(1f));
-                        // GameEventBus.Publish(new LoadingFinished{});
                     }
                     break;
             }
         }
     }
+    #endregion
 
+    #region Xử lý popup
 
-    public void OpenSetting()
+    public Popup GetPopup(PopupType popupType)
     {
-        PushPopupToFront(setting, setting.transform);
-        if(gameManager != null && gameManager.GetCurrState() == GameManager.GameState.Playing)
-            gameManager.ChangeState(GameManager.GameState.Pause);
+        foreach(var popup in allPopups)
+        {
+            if(popup.popupType == popupType) return popup;
+        }
+        return null;
     }
 
-    public void OpenShop(bool inMainMenu = false)
+    private void HandleOpenPopupRequest(RequestOpenPopupEvent requestOpenPopup)
     {
-        PushPopupToFront(shop, shop.transform);
-        if(inMainMenu) shop.HideCloseButton();
-        else
+        Popup popup = GetPopup(requestOpenPopup.targetPopup);
+        if(popup != null)
         {
-            shop.ShowCloseButton();
-            if(gameManager != null) gameManager.ChangeState(GameManager.GameState.Pause);
+            PushPopupToFront(popup, popup.gameObject.transform);
+            
+            if(requestOpenPopup.targetPopup == PopupType.Setting || requestOpenPopup.targetPopup == PopupType.QuitLevel)
+            {
+                if(gameManager != null && gameManager.GetCurrState() == GameManager.GameState.Playing)
+                    gameManager.ChangeState(GameManager.GameState.Pause);
+            }
         }
     }
-
-    public void OpenQuitLevelPopup()
-    {
-        PushPopupToFront(quitLevelPopup, quitLevelPopup.transform);
-        gameManager.ChangeState(GameManager.GameState.Pause);
-    }
-
-    public void CloseSetting()
+    private void HandleClosePopupRequest(RequestClosePopupEvent requestClosePopup)
     {
         PopPopup();
-        if(popupStack.Count == 0 && gameManager != null && gameManager.GetCurrState() == GameManager.GameState.Pause)
-        {
-            gameManager.ChangeState(GameManager.GameState.Playing);
-        }
     }
 
-    public void CloseShop()
+    public void OpenPopup(PopupType popupType)
     {
-        PopPopup();
-        if(gameManager == null || gameManager.GetCurrState() == GameManager.GameState.MainMenu) return;
-        if(gameManager.GetPrevState() == GameManager.GameState.Lose)
+        Popup popup = GetPopup(popupType);
+        if (popup != null)
         {
-            gameManager.ChangeState(GameManager.GameState.Lose);
-            return;
-        }
-        if(popupStack.Count == 0 && gameManager.GetCurrState() == GameManager.GameState.Pause)
-        {
-            gameManager.ChangeState(GameManager.GameState.Playing);
+            PushPopupToFront(popup, popup.gameObject.transform);
         }
     }
 
-    public void CloseAddBooster()
-    {
-        PopPopup();
-        if(popupStack.Count <= 0 && gameManager != null && gameManager.GetCurrState() == GameManager.GameState.Pause)
-        {
-            gameManager.ChangeState(GameManager.GameState.Playing);
-        }
-    }
-
-    public void PushPopupToFront(IMenu popup, Transform goPopup, bool playAnim = true)
+    public void PushPopupToFront(Popup popup, Transform goPopup, bool playAnim = true)
     {
         if(popupStack.Count > 0 && popupStack.Peek() == popup) return;
         if(popupStack.Count > 0) popupStack.Peek().Hide();
@@ -195,19 +141,29 @@ public class UIManager : MonoBehaviour
     {
         if(popupStack.Count > 0)
         {
-            IMenu popup = popupStack.Pop();
-            GameObject goPopup = popup.GetGameObject();
+            Popup popup = popupStack.Pop();
+            GameObject goPopup = popup.gameObject;
             goPopup.transform.DOScale(Vector3.zero, 0.3f).SetEase(Ease.InBack).OnComplete(() =>
             {
                 popup.Hide();
-                if(gameManager.GetCurrState() == GameManager.GameState.Pause) gameManager.ChangeState(GameManager.GameState.Playing);
+                if(popupStack.Count == 0)
+                {
+                    if(gameManager.GetCurrState() == GameManager.GameState.Pause) gameManager.ChangeState(GameManager.GameState.Playing);
+                }
+                else
+                {
+                    if(popupStack.Peek().dimImage != null)
+                    {
+                        popupStack.Peek().dimImage.SetActive(true);
+                    }
+                }
             });
             
         } 
         if(popupStack.Count > 0)
         {
-            IMenu popup = popupStack.Peek();
-            GameObject goPopup = popup.GetGameObject();
+            Popup popup = popupStack.Peek();
+            GameObject goPopup = popup.gameObject;
             goPopup.transform.localScale = Vector3.zero;
             popup.Show();
             goPopup.transform.DOScale(Vector3.one, 0.3f).SetEase(Ease.OutBack).SetUpdate(true);
@@ -221,6 +177,43 @@ public class UIManager : MonoBehaviour
             PopPopup();
         }
         popupStack.Clear();
+    }
+    #endregion
+
+    #region Xử lý Panel
+    private void HandleOpenPanelRequest(RequestOpenPanelEvent requestOpenPanelEvent)
+    {
+        switch (requestOpenPanelEvent.targetPanel)
+        {
+            case PanelType.Shop: OpenShop(!isCurrentlyInGame()); break;
+            case PanelType.EndGameWin: endGameUI.ShowLevelCompletedPanel(); break;
+            case PanelType.EndGameLose: endGameUI.ShowLevelFailedPanel(); break;
+        }
+    }
+
+    public void OpenShop(bool inMainMenu = false)
+    {
+        shop.Show();
+        if(inMainMenu) shop.HideCloseButton();
+        else
+        {
+            shop.ShowCloseButton();
+            if(gameManager != null) gameManager.ChangeState(GameManager.GameState.Pause);
+        }
+    }
+    public void CloseShop()
+    {
+        shop.Hide();
+        if(gameManager == null || gameManager.GetCurrState() == GameManager.GameState.MainMenu) return;
+        if(gameManager.GetPrevState() == GameManager.GameState.Lose)
+        {
+            gameManager.ChangeState(GameManager.GameState.Lose);
+            return;
+        }
+        if(popupStack.Count == 0 && gameManager.GetCurrState() == GameManager.GameState.Pause)
+        {
+            gameManager.ChangeState(GameManager.GameState.Playing);
+        }
     }
 
     public bool isCurrentlyInGame()
@@ -267,11 +260,5 @@ public class UIManager : MonoBehaviour
         yield return new WaitForSeconds(time);
         PopPopup();
     }
-
-    // public void OpenAddBooster(RequestOpenBoosterPopupEvent requestOpenBoosterPopupEvent)
-    // {
-    //     PushPopupToFront(addBoosterUI, addBoosterUI.transform);
-    //     if(gameManager != null && gameManager.GetCurrState() == GameManager.GameState.Playing)
-    //         gameManager.ChangeState(GameManager.GameState.Pause);
-    // }
+    #endregion
 }

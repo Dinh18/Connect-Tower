@@ -66,14 +66,17 @@ Assets/Scripts/Core/
  InputManager.cs
 Assets/Scripts/Data/
  AudioSO.cs
+ AvatarDataSO.cs
  BlockTopic.cs
  BoosterData.cs
  DataManager.cs
+ FrameDataSO.cs
  GameConfigSO.cs
  LevelDataSO.cs
  MakeLevel.cs
  MechanicData.cs
  PlayerData.cs
+ ProfileItemData.cs
 Assets/Scripts/Gameplay/Block/
  BlockController.cs
  BlocksManager.cs
@@ -126,25 +129,30 @@ Assets/Scripts/UI/
  Elements/
   BoosterButton.cs
   FloatingNotifier.cs
+  FrameItemUI.cs
   HomeButton.cs
   PlayButton.cs
+  ProfileItemUI.cs
   SettingMenu.cs
   SettingToggleButton.cs
   ShopButton.cs
  IBoosterEffect.cs
- IMenu.cs
  JuicyLoadingText.cs
  LevelUIController.cs
  LoadingImage.cs
  Panels/
-  InGameUIManager.cs
+  EndGamePanel.cs
+  InGamePanel.cs
+  LevelCompletedPanel.cs
+  LevelFailedPanel.cs
   LevelUIManager.cs
-  MainMenuUIManager.cs
+  MainMenuPanel.cs
+  Panel.cs
   ShopPanel.cs
  Popups/
-  EndGameUI.cs
-  LevelCompletedUI.cs
-  LevelFailedUI.cs
+  EditProfilePopup.cs
+  GeneralStatsPopup.cs
+  Popup.cs
   QuitLevelPopup.cs
   RefillHeartPopup.cs
   SettingPopup.cs

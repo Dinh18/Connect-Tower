@@ -5,7 +5,7 @@ public enum BoosterType
     AddMove = 0,
     Shuffle = 1,
     Hint = 2,
-    Undo,
+    Undo = 3,
 }
 
 public class Booster : MonoBehaviour

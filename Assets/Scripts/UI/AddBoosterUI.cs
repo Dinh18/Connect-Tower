@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 
-public class AddBoosterUI : MonoBehaviour, IMenu
+public class AddBoosterUI : Popup
 {
     [SerializeField] private Text headerText;
     [SerializeField] private Text tutorialText;
@@ -17,17 +17,10 @@ public class AddBoosterUI : MonoBehaviour, IMenu
     [SerializeField] private Sprite addMoveIcon;
     [SerializeField] private Sprite shuffleIcon;
     [SerializeField] private Sprite hintIcon;
-    [SerializeField] private GameObject dimImage;
     
     private RectTransform boosterTransform;
     private BoosterButton boosterButton;
     private BoosterType boosterType;
-
-    public void Setup(UIManager uIManager)
-    {
-        // closeButton.onClick.RemoveAllListeners();
-        // closeButton.onClick.AddListener(OnClickClose);
-    }
 
     void OnEnable()
     {
@@ -41,10 +34,9 @@ public class AddBoosterUI : MonoBehaviour, IMenu
         addButton.onClick.RemoveAllListeners();
     }
 
-    public void Show()
+    public override void Show()
     {
-        this.gameObject.SetActive(true);
-        dimImage.SetActive(true);
+        base.Show();
     }
 
     public void SetConfig(RequestOpenBoosterPopupEvent requestOpenBoosterPopup)
@@ -101,10 +93,9 @@ public class AddBoosterUI : MonoBehaviour, IMenu
         this.boosterButton = addBoosterEvent.boosterButton;
     }
 
-    public void Hide()
+    public override void Hide()
     {
-        this.gameObject.SetActive(false);
-        dimImage.SetActive(false);
+        base.Hide();
     }
 
     public void OnClickClose()
@@ -145,6 +136,7 @@ public class AddBoosterUI : MonoBehaviour, IMenu
         OnClickClose();
     }
 
-    public GameObject GetGameObject() => this.gameObject;
     public Button GetClaimButton() => claimButton;
+
+
 }

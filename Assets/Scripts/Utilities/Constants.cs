@@ -54,7 +54,7 @@ public static class Constants
     // Block
     public static float BLOCK_HEIGHT = 0.65f;
     // Data Level
-    public const string LEVELS_PATH = "Levels";
+    public const string LEVELS_PATH = "Data/Levels";
     // // Scene Name
     // public const string INITIALIZER_SCENE_NAME = "InitializerScene";
     // public const string MENU_SCENE_NAME = "MenuScene";
@@ -84,5 +84,7 @@ public static class Constants
     public const string HARD_PROGRESS = "Sprite/PROGRESS_BAR_HARD_SLIDER";
     public const string SUPER_HARD_PROGRESS = "Sprite/PROGRESS_BAR_SUPERHARD_SLIDER";
     // Audio
-    public const string AUDIOS_PATH = "AudioDatabase";
+    public const string AUDIOS_PATH = "Data/AudioDatabase";
+    public const string FRAMES_PATH = "Data/ProfileItems/Frames";
+    public const string AVATARS_PATH = "Data/ProfileItems/Avatars";
 }

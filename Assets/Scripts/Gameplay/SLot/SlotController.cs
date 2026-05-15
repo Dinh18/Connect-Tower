@@ -97,7 +97,6 @@ public class SlotController : MonoBehaviour
     {
         if(slotType == SlotType.Ice)
         {
-            // Tối ưu: Dùng cache thay vì Load lại mỗi lần
             if (iceMeshCache == null) iceMeshCache = Resources.Load<Mesh>(Constants.MESH_ICE_BASE_PATH);
             if (iceMaterialCache == null) iceMaterialCache = Resources.Load<Material>(Constants.MATERIAL_ICE_PATH);
 
@@ -136,7 +135,6 @@ public class SlotController : MonoBehaviour
             block.transform.DOMove(targetPosition, selectDuration).SetEase(Ease.OutQuad);
             i++;
         }
-        // AudioManager.Instance.PlaySelectSlotAudio();
         GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.SelectSlot}); 
 
         return true;
@@ -183,27 +181,12 @@ public class SlotController : MonoBehaviour
         else isSlotEmpty = true;
         
         int topicID = otherSlot.blocks.Peek().GetTopicID();
-        // int blockCount = 0;
-        // foreach(BlockController block in otherSlot.blocks)
-        // {
-        //     if(block.GetTopicID()!= topicID || !block.isRevealed) break;
-        //     blockCount++;
-        // }
         
         blocksToMove = NumsOfBlocksToMove(otherSlot);
         if(blocksToMove <= 0)
         {
-            // AudioManager.Instance.PlayMoveFailAudio();
-            // int i = 0;
-            // foreach(var block in otherSlot.blocks)
-            // {
-            //     if(i >= blockCount) break;
-            //     // block.PlayErrorShake(block.SelectedEffect);
-            //     i++;
-            // }
             return false;
         }
-
         GameEventBus.Publish(new MovedBlocksEvent{sourceSlot = otherSlot, targetSlot = this, numsBlock = blocksToMove});
         
         float startY = (blocks.Count == 0) ? stackAnchor.position.y : blocks.Peek().transform.position.y + height;
@@ -212,19 +195,6 @@ public class SlotController : MonoBehaviour
         {
             BlockController block = otherSlot.blocks.Pop();
             block.ChangeState(BlockController.BlockState.None); 
-
-            // float finalPeakX = (otherSlot.arcPeak.position.y < this.arcPeak.position.y) ? otherSlot.arcPeak.position.x : this.arcPeak.position.x;
-            // float finalPeakY = Mathf.Max(otherSlot.arcPeak.position.y, this.arcPeak.position.y);
-            // float finalPeakZ = (otherSlot.arcPeak.position.y < this.arcPeak.position.y) ? otherSlot.arcPeak.position.z : this.arcPeak.position.z;
-            // Vector3 finalPeak = new Vector3(finalPeakX, finalPeakY, finalPeakZ); 
-
-            // Vector3 finalDestination = new Vector3(this.stackAnchor.position.x, startY + height * i, this.stackAnchor.position.z);    
-            // List<Vector3> path = new List<Vector3>{
-            //     otherSlot.arcPeak.position,
-            //     finalPeak,
-            //     finalDestination
-            // };
-            // if(otherSlot.arcPeak.position.y < this.arcPeak.position.y) path.Insert(2, this.arcPeak.position);
 
             List<Vector3> path = PathToMoveBlock(otherSlot, i, startY);
             

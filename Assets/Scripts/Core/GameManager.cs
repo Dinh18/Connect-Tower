@@ -83,7 +83,10 @@ public class GameManager : MonoBehaviour
             GameEventBus.Publish(new MovesUpdatedEvent { currentMoves = this.moves });
             
             if(moves <= 0 && !slotsManager.GetLevelComleted())
+            {
                 ChangeState(GameState.Lose);
+                CoreServices.Get<DataManager>().ResetWinStreak();
+            }
         }
     }
 

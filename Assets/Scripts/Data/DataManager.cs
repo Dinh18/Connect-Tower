@@ -8,6 +8,8 @@ using System.Collections.Generic;
 public class DataManager : MonoBehaviour
 {
     public PlayerData playerData;
+    public FrameDataSO[] allFrames;
+    public AvatarDataSO[] allAvatars;
     private string saveFilePath;
 
     // Events are now handled by GameEventBus
@@ -61,6 +63,8 @@ public class DataManager : MonoBehaviour
             SaveGame();
             Debug.Log("<color=yellow>[DataManager]</color> Không tìm thấy file save cũ. Đã tạo file save MỚI tại: " + saveFilePath);
         }
+        allFrames = Resources.LoadAll<FrameDataSO>(Constants.FRAMES_PATH);
+        allAvatars = Resources.LoadAll<AvatarDataSO>(Constants.AVATARS_PATH);
     }
 
     [ContextMenu("Delete Save Data")]
@@ -109,7 +113,56 @@ public class DataManager : MonoBehaviour
         }
     }
 
+    //
+
+    void OnEnable()
+    {
+        GameEventBus.Subscribe<RequestSaveProfile>(SaveProfile);
+    }
+
+    void OnDisable()
+    {
+        GameEventBus.Subscribe<RequestSaveProfile>(SaveProfile);
+    }
+
     // --- DATA ACCESSORS ---
+    public FrameDataSO[] GetAllFrameData()
+    {
+        return allFrames;
+    }
+    public AvatarDataSO[] GetAllAvatarData()
+    {
+        return allAvatars;
+    }
+    public FrameDataSO GetFrameByID(string id)
+    {
+        foreach(var frame in allFrames)
+        {
+            if(frame.id == id) return frame;
+        }
+        return null;
+    }
+
+    public AvatarDataSO GetAvatarByID(string id)
+    {
+        foreach(var avatar in allAvatars)
+        {
+            if(avatar.id == id) return avatar;
+        }
+        return null;
+    }
+    public FrameDataSO GetCurrFrame()
+    {
+        return GetFrameByID(playerData.frameID);
+    }
+
+    public AvatarDataSO GetCurrAvatar()
+    {
+        return GetAvatarByID(playerData.avatarID);
+    }
+    public int GetCurrStreak() => playerData.currStreak;
+    public int GetMaxStreak() => playerData.maxStreak;
+    public string GetPlayerName() => playerData.playerName;
     public int GetCurrentLevel() => playerData.currentLevel;
     public int GetTotalCoins() => playerData.wallet.totalCoins;
     public int GetHearts() => playerData.wallet.heart;
@@ -147,6 +200,19 @@ public class DataManager : MonoBehaviour
         GameEventBus.Publish(new HeartUpdatedEvent { heartCount = playerData.wallet.heart });
     }
 
+    public void SaveProfile(RequestSaveProfile evt)
+    {
+        string playerName = evt.playerName;
+        string frameID = evt.frameID;
+        string avatarID = evt.avatarID;
+
+        if(playerName != playerData.playerName) playerData.playerName = playerName;
+        if(frameID != playerData.frameID) playerData.frameID = frameID;
+        if(avatarID != playerData.avatarID) playerData.avatarID = avatarID;
+
+        SaveGame();
+    }
+
     public void LevelUp(LevelLoader.GameDifficult gameDifficult, int maxLevel)
     {
         if(playerData.currentLevel < maxLevel) playerData.currentLevel++;
@@ -163,8 +229,22 @@ public class DataManager : MonoBehaviour
             if(playerData.currentLevel == b.unlockedLevel) b.isUnlocked = true;
         }
 
+        ContinueWinStreak();
+
         SaveGame();
         GameEventBus.Publish(new LevelUpdatedEvent { newLevel = playerData.currentLevel });
+    }
+
+    public void ContinueWinStreak()
+    {
+        playerData.currStreak++;
+        if(playerData.currStreak > playerData.maxStreak) playerData.maxStreak = playerData.currStreak;
+    }
+
+    public void ResetWinStreak()
+    {
+        playerData.currStreak = 0;
+        SaveGame();
     }
 
     public int GetAmountOfBoosterByID(int id)
