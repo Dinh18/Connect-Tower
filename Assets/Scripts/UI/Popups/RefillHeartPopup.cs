@@ -1,19 +1,17 @@
+
 using UnityEngine;
 using UnityEngine.UI;
 
 public class RefillHeartPopup : Popup
 {
-    private UIManager uIManager;
     [SerializeField] private Button closeButton;
     [SerializeField] private Button watchVideo;
     [SerializeField] private Button refillButton;
     [SerializeField] private Text heardCountText;
-    private MainMenuUIPanel mainMenuUIManager;
-    private DataManager dataManager;
 
     private void ClosePopup()
     {
-        GameEventBus.Publish(new RequestClosePopupEvent());
+        CoreServices.Get<UIManager>().PopUI();
     }
     void OnEnable()
     {
@@ -38,48 +36,37 @@ public class RefillHeartPopup : Popup
 
     public void Setup(UIManager uIManager)
     {
-        this.uIManager = uIManager;
-        this.dataManager = CoreServices.Get<DataManager>();
+        
     }
 
     public override void Show()
     {
         // this.gameObject.SetActive(true);
         base.Show();
-        UpdateHeardCountText(new HeartUpdatedEvent { heartCount = dataManager.GetHearts() });
+        UpdateHeardCountText(new HeartUpdatedEvent { heartCount = CoreServices.Get<DataManager>().GetHearts() });
     }
     private void OnclickWatchVideo()
     {
-        dataManager.AddHeart(1,dataManager.GetNextHeartTime());
+        CoreServices.Get<DataManager>().AddHeart(1,CoreServices.Get<DataManager>().GetNextHeartTime());
     }
     private void OnClickRefillHeart()
     {
-        if(dataManager.GetHearts() >= 5)
+        if(CoreServices.Get<DataManager>().GetHearts() >= 5)
         {
-            GameEventBus.Publish(new RequestClosePopupEvent());
+            CoreServices.Get<UIManager>().PopUI();
             return;
         }
-        if(dataManager.GetTotalCoins() > 900)
+        if(CoreServices.Get<DataManager>().GetTotalCoins() > 900)
         {
-            dataManager.AddHeart(5 - dataManager.GetHearts(),"");
-            dataManager.UseCoins(900);
-            mainMenuUIManager.UpdateCoinText();
-            GameEventBus.Publish(new RequestClosePopupEvent());
+            CoreServices.Get<DataManager>().AddHeart(5 - CoreServices.Get<DataManager>().GetHearts(),"");
+            CoreServices.Get<DataManager>().UseCoins(900);
+            CoreServices.Get<UIManager>().PopUI();
         }
         else
         {
-            mainMenuUIManager.OnClickShop();
+            // mainMenuUIManager.OnClickShop();
+            CoreServices.Get<UIManager>().OpenShop();
         }
-    }
-    public void ConfigMainMenu(MainMenuUIPanel mainMenuUIManager)
-    {
-        if(this.mainMenuUIManager == null)
-        {
-            this.mainMenuUIManager = mainMenuUIManager; 
-        }
-
-        // refillButton.onClick.RemoveAllListeners();
-        // refillButton.onClick.AddListener(OnClickRefillHeart);
     }
     private void UpdateHeardCountText(HeartUpdatedEvent heartUpdated)
     {

@@ -2,7 +2,7 @@ using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class LevelFailedPanel : MonoBehaviour
+public class LevelFailedPanel : Panel
 {
     // private UIManager uIManager; // Loại bỏ phụ thuộc
     [SerializeField] private Button tryAgainButton;
@@ -27,12 +27,7 @@ public class LevelFailedPanel : MonoBehaviour
         addMoveButton.onClick.RemoveAllListeners();
     }
 
-    public void Setup(UIManager uIManager)
-    {
-        // Vẫn giữ để tương thích
-    }
-
-    public void Show()
+    public override void Show()
     {
         gameObject.SetActive(true);
         blockLeft.localScale = Vector3.zero;
@@ -49,6 +44,6 @@ public class LevelFailedPanel : MonoBehaviour
         CoreServices.Get<GameManager>().ChangeState(GameManager.GameState.MainMenu);
     }
 
-    public void Hide() => gameObject.SetActive(false);
+    public override void Hide() => gameObject.SetActive(false);
     public GameObject GetGameObject() => this.gameObject;
 }

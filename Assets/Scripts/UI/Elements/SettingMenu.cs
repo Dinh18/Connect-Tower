@@ -1,6 +1,5 @@
 using DG.Tweening;
-using JetBrains.Annotations;
-using Unity.Android.Gradle;
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -107,7 +106,7 @@ public class SettingMenu : MonoBehaviour
         if(CoreServices.Get<GameManager>().Moved())
         {
             quitLevelPopup.SetConfig(true);
-            GameEventBus.Publish(new RequestOpenPopupEvent{targetPopup = PopupType.QuitLevel});
+             CoreServices.Get<UIManager>().ShowUI<QuitLevelPopup>();
         } 
         else CoreServices.Get<GameManager>().ChangeState(GameManager.GameState.MainMenu);
     }
@@ -118,7 +117,7 @@ public class SettingMenu : MonoBehaviour
         if(CoreServices.Get<GameManager>().Moved())
         {
             quitLevelPopup.SetConfig(false);
-            GameEventBus.Publish(new RequestOpenPopupEvent{targetPopup = PopupType.QuitLevel});
+            CoreServices.Get<UIManager>().ShowUI<QuitLevelPopup>();
         } 
         else CoreServices.Get<GameManager>().RestartLevel();
     }

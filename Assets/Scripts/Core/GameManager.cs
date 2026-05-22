@@ -85,7 +85,7 @@ public class GameManager : MonoBehaviour
             if(moves <= 0 && !slotsManager.GetLevelComleted())
             {
                 ChangeState(GameState.Lose);
-                CoreServices.Get<DataManager>().ResetWinStreak();
+                // CoreServices.Get<DataManager>().ResetWinStreak();
             }
         }
     }

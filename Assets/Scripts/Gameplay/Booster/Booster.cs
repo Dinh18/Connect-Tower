@@ -19,7 +19,7 @@ public class Booster : MonoBehaviour
     public int GetPrice() => CoreServices.Get<DataManager>().GetBooster((int)GetBoosterType()).price;
     public virtual void Excute(){}
     public void AddBooster(int amount) => CoreServices.Get<DataManager>().AddBooster((int)GetBoosterType(), amount);
-    public int GetNumsBooster() => CoreServices.Get<DataManager>().GetBooster((int)GetBoosterType()).count;
+    public int GetNumsBooster() => CoreServices.Get<DataManager>().GetNumsBooster((int)GetBoosterType());
     public int GetUnlockLevel() => CoreServices.Get<DataManager>().GetBooster((int)GetBoosterType()).unlockedLevel;
 
 }

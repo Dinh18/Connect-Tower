@@ -37,7 +37,7 @@ public class EditProfilePopup : Popup
     }
     private void ClosePopup()
     {
-        GameEventBus.Publish(new RequestClosePopupEvent{});
+        CoreServices.Get<UIManager>().PopUI();
     }
     void OnEnable()
     {
@@ -177,6 +177,6 @@ public class EditProfilePopup : Popup
         if(selectedFrame == null) selectedFrame = CoreServices.Get<DataManager>().GetCurrFrame();
         if(selectedAvatar == null) selectedAvatar = CoreServices.Get<DataManager>().GetCurrAvatar();
         GameEventBus.Publish(new RequestSaveProfile{playerName = editNameText.text, frameID = selectedFrame.id, avatarID = selectedAvatar.id});
-        GameEventBus.Publish(new RequestClosePopupEvent());
+        CoreServices.Get<UIManager>().PopUI();
     }
 }

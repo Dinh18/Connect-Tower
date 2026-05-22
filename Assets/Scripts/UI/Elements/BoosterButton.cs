@@ -1,4 +1,4 @@
-using Unity.Android.Gradle.Manifest;
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,7 +7,6 @@ public class BoosterButton : MonoBehaviour
     private Button boosterButton;
     private Booster booster;
     private IBoosterEffect boosterEffect;
-    private DataManager dataManager;
     // private UIManager uIManager; // Đã loại bỏ
     [SerializeField] Text countText;
     [SerializeField] GameObject addImage;
@@ -37,27 +36,22 @@ public class BoosterButton : MonoBehaviour
 
     public Booster GetBooster() => booster;
 
-    public void Setup(UIManager uIManager)
-    {
-        // addBoosterUI.Setup(uIManager);
-        dataManager = CoreServices.Get<DataManager>(); 
-    }
 
     public void Show()
     {
         int id = (int)booster.GetBoosterType();
-        bool isUnlocked = dataManager.IsUnLockedBooster(id);
+        bool isUnlocked = CoreServices.Get<DataManager>().IsUnLockedBooster(id);
         
         lockElements.SetActive(!isUnlocked);
         unlockElements.SetActive(isUnlocked);
 
-        if(dataManager.GetCurrentLevel() == dataManager.GetUnclockedLevel(id) && dataManager.IsFirstTimeUserBooster(id))
+        if(CoreServices.Get<DataManager>().IsFirstTimeUserBooster(id))
         {
             // addBoosterUI.SetupButton(this);
             GameEventBus.Publish(new RequestOpenBoosterPopupEvent { type = booster.GetBoosterType(), boosterTransform = this.GetComponent<RectTransform>()});
         }
 
-        UpdateCountText(new BoosterCountUpdatedEvent { boosterId = id, count = dataManager.GetAmountOfBoosterByID(id) });
+        UpdateCountText(new BoosterCountUpdatedEvent { boosterId = id, count = CoreServices.Get<DataManager>().GetAmountOfBoosterByID(id) });
     }
 
     public void UpdateCountText(BoosterCountUpdatedEvent boosterCountUpdated)

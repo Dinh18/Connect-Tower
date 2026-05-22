@@ -63,6 +63,8 @@ public class BlockController : MonoBehaviour
 
     public int GetTopicID() => topic.topicID;
     public string GetTopicName() => topic.name;
+    public BlockTopic GetBlockTopic() => topic;
+    public Sprite GetItemImage() => itemImage;
 
     public ColorBlock GetColorBlock() => colorBlock;
     public void SetTypeBlock(ColorBlock colorBlock) => this.colorBlock = colorBlock;

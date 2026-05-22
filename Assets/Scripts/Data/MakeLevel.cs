@@ -11,6 +11,7 @@ public class MakeLevel : MonoBehaviour
     [Header("Level data")]
     public int Level = 0;
     public int moves = 10;
+    public int difficulty = 0; // 0: Easy, 1: Hard, 2: VeryHard
     [HideInInspector] public int row1;
     [HideInInspector] public int row2;
     [HideInInspector] public int totalTopics;
@@ -197,13 +198,14 @@ public class MakeLevel : MonoBehaviour
         {
             if(amountBlockOfTopic[i] < 4)
             {
-                Debug.Log("Topic " + topics[i].topicID + " has less than 4 blocks. Please fix it before saving.");
+                Debug.LogWarning("Topic " + topics[i].topicID + " has less than 4 blocks. Please fix it before saving.");
                 return;
             }
         }
         LevelDataSO newLevelData = ScriptableObject.CreateInstance<LevelDataSO>();
         newLevelData.level = Level;
         newLevelData.moves = moves;
+        newLevelData.difficult = difficulty;
         newLevelData.row1 = row1;
         newLevelData.row2 = row2;
         newLevelData.numsTopic = topics.Count;
@@ -226,7 +228,7 @@ public class MakeLevel : MonoBehaviour
             newLevelData.slots.Add(slotData);
         }
         // Save the LevelDataSO to a file or asset
-        string assetPath = $"Assets/Resources/Levels/Level_{Level}.asset";
+        string assetPath = $"Assets/Resources/Data/Levels/Level_{Level:D2}.asset";
         
         #if UNITY_EDITOR
         AssetDatabase.CreateAsset(newLevelData, assetPath);

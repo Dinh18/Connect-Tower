@@ -87,20 +87,6 @@ public struct MovedBlocksEvent : IGameEvent
     public int numsBlock;
 }
 
-public struct RequestOpenPanelEvent : IGameEvent
-{
-    public PanelType targetPanel;
-}
-
-public struct RequestOpenPopupEvent : IGameEvent
-{
-    public PopupType targetPopup;
-}
-
-public struct RequestClosePopupEvent : IGameEvent
-{
-    
-}
 
 public struct RequestOpenBoosterPopupEvent : IGameEvent
 {
@@ -171,4 +157,14 @@ public struct RequestSaveProfile : IGameEvent
     public string playerName;
     public string frameID;
     public string avatarID;
+}
+
+public struct RequestPlayAnimationAddCoins :IGameEvent
+{
+    public int coinsReward;
+}
+
+public struct RequestChangeAnimationNPC : IGameEvent
+{
+    public NPCState newState;
 }

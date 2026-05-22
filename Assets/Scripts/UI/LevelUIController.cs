@@ -28,7 +28,7 @@ public class LevelUIController : MonoBehaviour
     public void ShowLevel(int levelOffset)
     {
         if (levelLoader == null) levelLoader = CoreServices.Get<LevelLoader>();
-        
+        // Debug.Log("Curr Level: " + CoreServices.Get<DataManager>().GetCurrentLevel());
         int level = CoreServices.Get<DataManager>().playerData.currentLevel + levelOffset;
         LevelLoader.GameDifficult gameDifficult;
         levelText.text = (level + 1).ToString();

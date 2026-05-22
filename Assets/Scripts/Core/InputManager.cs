@@ -13,6 +13,13 @@ public class InputManager : MonoBehaviour
     void Awake()
     {
         CoreServices.Register<InputManager>(this);
+
+        // #if UNITY_EDITOR || UNITY_STANDALONE
+        // if (GetComponent<PlaytestMouseInput>() == null)
+        // {
+        //     gameObject.AddComponent<PlaytestMouseInput>();
+        // }
+        // #endif
     }
 
     // Update is called once per frame
@@ -20,12 +27,20 @@ public class InputManager : MonoBehaviour
     {
         DetectInput();
     }
-    private bool isInputBlocked = false;
+    public bool isInputBlocked = false;
 
     public void SetInputBlocked(bool blocked)
     {
         isInputBlocked = blocked;
     }
+
+    // public void TriggerSlotClick(SlotController slot)
+    // {
+    //     if (slot != null)
+    //     {
+    //         OnSlotClicked?.Invoke(slot);
+    //     }
+    // }
 
     public void DetectInput()
     {

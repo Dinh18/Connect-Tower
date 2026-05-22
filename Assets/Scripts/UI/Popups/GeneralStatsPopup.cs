@@ -15,8 +15,10 @@ public class GeneralStatsPopup : Popup
     {
         currStreakText.text = CoreServices.Get<DataManager>().GetCurrStreak().ToString();
         maxStreakText.text = CoreServices.Get<DataManager>().GetMaxStreak().ToString();
+
         closeButton.onClick.AddListener(ClosePopup);
         editProfile.onClick.AddListener(OpenEditProfile);
+
         GameEventBus.UnSubscribe<RequestSaveProfile>(ChangeProfile);
         GameEventBus.Subscribe<RequestSaveProfile>(ChangeProfile);
     }
@@ -33,11 +35,12 @@ public class GeneralStatsPopup : Popup
     }
     private void ClosePopup()
     {
-        GameEventBus.Publish(new RequestClosePopupEvent{});
+        Debug.Log("Clicked close");
+        CoreServices.Get<UIManager>().PopUI();
     }
     private void OpenEditProfile()
     {
-        GameEventBus.Publish(new RequestOpenPopupEvent{targetPopup = PopupType.EditProfile});
+        CoreServices.Get<UIManager>().ShowUI<EditProfilePopup>();
     }
 
     private void ChangeProfile(RequestSaveProfile evt)

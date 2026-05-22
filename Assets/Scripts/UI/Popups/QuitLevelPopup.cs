@@ -1,4 +1,4 @@
-using UnityEditor.Rendering;
+
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,7 +11,7 @@ public class QuitLevelPopup : Popup
     [SerializeField] private Button replayButton;
     private void ClosePopup()
     {
-        GameEventBus.Publish(new RequestClosePopupEvent());
+        CoreServices.Get<UIManager>().PopUI();
     }
     void OnEnable()
     {

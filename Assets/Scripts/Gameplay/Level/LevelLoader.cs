@@ -15,6 +15,9 @@ public class LevelLoader : MonoBehaviour
     public GameDifficult gameDifficult;
     private int numsTopic;
 
+    public static bool isPlaytestingTempLevel = false;
+    public static LevelDataSO playtestLevelData = null;
+
     public void Init(SlotsManager slotsM, BlocksManager blocksM, GameManager gameM, DataManager dataM)
     {
         this.slotsManager = slotsM;
@@ -42,7 +45,7 @@ public class LevelLoader : MonoBehaviour
 
     public void LoadLevel()
     {
-        LevelDataSO levelData = levelDatas[dataManager.GetCurrentLevel()];
+        LevelDataSO levelData = isPlaytestingTempLevel && playtestLevelData != null ? playtestLevelData : levelDatas[dataManager.GetCurrentLevel()];
         numsTopic = levelData.numsTopic;
         gameDifficult = (GameDifficult)levelData.difficult;
 
@@ -53,7 +56,7 @@ public class LevelLoader : MonoBehaviour
         
         foreach(SlotController slot in slots) slot.SetupIceSlot();
         
-        GameEventBus.Publish(new LevelLoadedEvent { levelIndex = dataManager.GetCurrentLevel() });
+        GameEventBus.Publish(new LevelLoadedEvent { levelIndex = isPlaytestingTempLevel ? -1 : dataManager.GetCurrentLevel() });
     }
 
     public int GetCurrentLevelReward()

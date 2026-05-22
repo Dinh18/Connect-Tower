@@ -14,7 +14,7 @@ public class SettingPopup : Popup
     [SerializeField] private Button hapticButton;
     private void ClosePopup()
     {
-        GameEventBus.Publish(new RequestClosePopupEvent());
+        CoreServices.Get<UIManager>().PopUI();
     }
     void OnEnable()
     {

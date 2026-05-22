@@ -1,15 +1,5 @@
 using UnityEngine;
-
-public enum PanelType
+public class Panel : UIView
 {
-    MainMenu,
-    InGame,
-    Shop,
-    EndGameWin,
-    EndGameLose
-}
-
-public class Panel : MonoBehaviour
-{
-    
+    public virtual void Setup(Menu menu){}
 }

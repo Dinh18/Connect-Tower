@@ -21,14 +21,14 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: ShadowTest_2
-  m_Shader: {fileID: 4800000, guid: f83b5f451499289488b07dc977c6df9f, type: 3}
+  m_Shader: {fileID: 4800000, guid: 933532a4fcc9baf4fa0491de14d08ed7, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
-  m_InvalidKeywords:
+  m_ValidKeywords:
   - _ALPHAPREMULTIPLY_ON
   - _SPECULAR_SETUP
   - _SURFACE_TYPE_TRANSPARENT
+  m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -217,6 +217,7 @@ Material:
     - _VertexOffsetY: 0.5
     - _VertexOffsetZ: 0.5
     - _WorkflowMode: 0
+    - _XRMotionVectorsPass: 1
     - _ZWrite: 0
     - __dirty: 1
     m_Colors:

@@ -41,7 +41,7 @@ public class AppBootstrapper : MonoBehaviour
         gameManager.Init(slotsManager, heartManager, cameraController, levelLoader);
         
         // 5. UI (Giao diện hiển thị)
-        uiManager.Init(gameManager, dataManager);
+        uiManager.Init(gameManager);
 
         audioManager.Init();
         

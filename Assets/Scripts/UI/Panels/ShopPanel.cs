@@ -1,48 +1,63 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ShopPanel : MonoBehaviour
+public class ShopPanel : Panel
 {
-    private UIManager uIManager;
     [SerializeField] private Button closeButton;
     [SerializeField] private Text coinCountText;
+    private MainMenu mainMenu;
     void OnEnable()
     {
-        closeButton.onClick.AddListener(uIManager.CloseShop);
+        closeButton.onClick.AddListener(OnClickClose);
+        GameEventBus.Subscribe<CoinsUpdatedEvent>(UpdateCoinText);
     }
     void OnDisable()
     {
-        closeButton.onClick.RemoveListener(uIManager.CloseShop);
+        closeButton.onClick.RemoveListener(OnClickClose);
+        GameEventBus.UnSubscribe<CoinsUpdatedEvent>(UpdateCoinText);
     }
-    public void Hide()
+    public override void Setup(Menu menu)
     {
+        this.mainMenu = menu as MainMenu;
+        ShowCloseButton(mainMenu == null);
+
+        // Tự động tắt LayoutElement nếu là popup standalone để tránh ảnh hưởng kích thước
+        var layoutElement = GetComponent<LayoutElement>();
+        if (layoutElement != null)
+        {
+            layoutElement.enabled = (mainMenu != null);
+        }
+    }
+    public override void Hide()
+    {
+        base.Hide();
         this.gameObject.SetActive(false);
     }
 
-    public void Setup(UIManager uIManager)
+    public override void Show()
     {
-        this.uIManager = uIManager;
-    }
-
-    public void Show()
-    {
+        base.Show();
         this.gameObject.SetActive(true);    
         coinCountText.text = CoreServices.Get<DataManager>().GetTotalCoins().ToString();
     }
 
-    public void ShowCloseButton()
+    public void ShowCloseButton(bool show)
     {
-        closeButton.gameObject.SetActive(true);
+        closeButton.gameObject.SetActive(show);
     }
-    public void HideCloseButton()
+    public void UpdateCoinText(CoinsUpdatedEvent evt)
     {
-        closeButton.gameObject.SetActive(false);
-        
+        coinCountText.text = evt.totalCoins.ToString();
     }
-
-
-    public GameObject GetGameObject()
+    public void OnClickClose()
     {
-        return this.gameObject;
+        if (mainMenu != null)
+        {
+            mainMenu.OnHomeButtonClicked();
+        }
+        else
+        {
+            CoreServices.Get<UIManager>().CloseShop();
+        }
     }
 }

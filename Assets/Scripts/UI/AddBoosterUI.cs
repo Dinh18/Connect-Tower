@@ -100,7 +100,7 @@ public class AddBoosterUI : Popup
 
     public void OnClickClose()
     {
-        GameEventBus.Publish(new RequestClosePopupEvent());
+        CoreServices.Get<UIManager>().PopUI();
         Debug.Log("Gửi event đóng add booster popup");
     }
 
@@ -110,7 +110,7 @@ public class AddBoosterUI : Popup
     {
         if(boosterButton.GetBooster().GetPrice() > CoreServices.Get<DataManager>().GetTotalCoins())
         {
-            GameEventBus.Publish(new RequestOpenPanelEvent{targetPanel = PanelType.Shop});
+            CoreServices.Get<UIManager>().OpenShop();
         }
         else
         {
@@ -130,9 +130,8 @@ public class AddBoosterUI : Popup
         int id = (int)boosterType;
         DataManager dataManager = CoreServices.Get<DataManager>();
         
-        dataManager.AddFreeBooster(id, 1);
-        dataManager.UsedBooster(id);
-
+        dataManager.AddBooster(id, 1, true);
+        // dataManager.UsedBooster(id);
         OnClickClose();
     }
 

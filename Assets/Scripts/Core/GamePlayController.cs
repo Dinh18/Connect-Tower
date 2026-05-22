@@ -12,8 +12,7 @@ public class MoveStep
     {
         this.sourceSlot = sourceSlot;
         this.targetSlot = targetSlot;
-        this.numsBlock = numsBlock;
-        // Debug.Log("Add MoveInfo from " + sourceSlot.gameObject.name + " to " + targetSlot.gameObject.name+": "+numsBlock);
+        this.numsBlock = numsBlock; 
     }
 }
 
