@@ -358,6 +358,7 @@ public class DataManager : MonoBehaviour
 
     public void UseBooster(int id)
     {
+        if (LevelLoader.isPlaytestingTempLevel) return;
         if(!playerData.inventory.boosters.ContainsKey(id.ToString())) return;
 
         playerData.inventory.boosters[id.ToString()]--;

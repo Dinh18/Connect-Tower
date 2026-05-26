@@ -54,7 +54,15 @@ public class InputManager : MonoBehaviour
             {
                 ProgressInput(touch.position, touch.fingerId);
             }
+            return; // Ignore mouse if touch is active
         }
+        
+#if UNITY_EDITOR || UNITY_STANDALONE
+        if (Input.GetMouseButtonDown(0))
+        {
+            ProgressInput(Input.mousePosition, -1);
+        }
+#endif
     }
 
     private void ProgressInput(Vector3 screenPosition, int pointerId)

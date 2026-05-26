@@ -73,6 +73,9 @@ public class GameManager : MonoBehaviour
         cameraController.FitCamera(slotsManager.row1, slotsManager.row2);
     }
 
+    private Coroutine noMovesCoroutine;
+    private bool isWaitingForNoMoves = false;
+
     public void Move(bool isMoving)
     {
         if(isInfiniteMovesActive) return;
@@ -87,7 +90,38 @@ public class GameManager : MonoBehaviour
                 ChangeState(GameState.Lose);
                 // CoreServices.Get<DataManager>().ResetWinStreak();
             }
+            else if (!slotsManager.GetLevelComleted())
+            {
+                // Nếu đang chờ 5s, bỏ qua việc kiểm tra board
+                if (isWaitingForNoMoves) return;
+
+                if (!slotsManager.HasAvailableMoves())
+                {
+                    Debug.Log("Không còn nước đi hợp lệ nào! Bắt đầu đếm ngược 5s.");
+                    isWaitingForNoMoves = true;
+                    noMovesCoroutine = StartCoroutine(WaitAndTriggerNoMoves());
+                }
+            }
         }
+    }
+
+    private System.Collections.IEnumerator WaitAndTriggerNoMoves()
+    {
+        yield return new WaitForSeconds(5f);
+
+        // Sau 5s, kiểm tra xem game còn đang chơi không và chưa qua màn
+        if (currState == GameState.Playing && !slotsManager.GetLevelComleted())
+        {
+            // Kiểm tra lại lần nữa phòng trường hợp người chơi dùng booster làm thay đổi board
+            if (!slotsManager.HasAvailableMoves())
+            {
+                Debug.Log("Hết 5s, vẫn không có nước đi! Bắn sự kiện.");
+                GameEventBus.Publish(new NoMovesAvailableEvent());
+                // ChangeState(GameState.Lose);
+            }
+        }
+        
+        isWaitingForNoMoves = false;
     }
 
     private void StartInfiniteMovesBooster(StartBorderFlashEvent startBorderFlash)
@@ -127,7 +161,33 @@ public class GameManager : MonoBehaviour
     public void ChangeState(GameState newState)
     {
         if(currState == newState) return;
+
+        if (noMovesCoroutine != null)
+        {
+            StopCoroutine(noMovesCoroutine);
+            noMovesCoroutine = null;
+        }
+        isWaitingForNoMoves = false;
         
+        // Bỏ qua việc xét Thắng/Thua nếu đang dùng cọ vẽ trong Level Editor
+        if (RuntimeLevelEditorManager.Instance != null && RuntimeLevelEditorManager.Instance.isEditMode)
+        {
+            if (newState == GameState.Win || newState == GameState.Lose)
+            {
+                return;
+            }
+        }
+
+        // Tự động quay lại Editor khi chơi thử hoàn thành (không hiện bảng Win/Lose)
+        if (LevelLoader.isPlaytestingTempLevel && (newState == GameState.Win || newState == GameState.Lose))
+        {
+            if (RuntimeLevelEditorManager.Instance != null)
+            {
+                RuntimeLevelEditorManager.Instance.RestoreFromPlaytest();
+            }
+            return;
+        }
+
         prevState = currState;
         currState = newState;
 

@@ -115,7 +115,7 @@ public class UIManager : MonoBehaviour
                     {
                         ClearUIStack();
                         // ingame.Show();
-                        ShowMenu<InGamePanel>();
+                        ShowMenu<InGameMenu>();
                         StartCoroutine(ShowLoadingImage(1f,null));
                     }
                     break;

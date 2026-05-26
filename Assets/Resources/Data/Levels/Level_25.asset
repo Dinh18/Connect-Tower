@@ -14,12 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LevelDataSO
   level: 25
   numsTopic: 7
-  difficult: 1
+  difficult: 2
   moves: 30
   row1: 4
   row2: 5
   slots:
   - slotType: 0
+    position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0
@@ -35,6 +36,7 @@ MonoBehaviour:
       blockTopic: {fileID: 11400000, guid: 9e8ae13ff65bed240bbae74170cf7c77, type: 2}
       indexSprite: 0
   - slotType: 0
+    position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0
@@ -50,15 +52,18 @@ MonoBehaviour:
       blockTopic: {fileID: 11400000, guid: 7be9b15994bd2484db3fd395112e1b0e, type: 2}
       indexSprite: 1
   - slotType: 2
+    position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
     blocks: []
   - slotType: 0
+    position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 56e0bfa4818982747bdff14c74d8ca96, type: 2}
       indexSprite: 0
   - slotType: 0
+    position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0
@@ -71,6 +76,7 @@ MonoBehaviour:
       blockTopic: {fileID: 11400000, guid: 774c5d3c3fc772d41b97f82006fee0ef, type: 2}
       indexSprite: 1
   - slotType: 0
+    position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0
@@ -86,6 +92,7 @@ MonoBehaviour:
       blockTopic: {fileID: 11400000, guid: 7be9b15994bd2484db3fd395112e1b0e, type: 2}
       indexSprite: 3
   - slotType: 0
+    position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0
@@ -101,6 +108,7 @@ MonoBehaviour:
       blockTopic: {fileID: 11400000, guid: 56e0bfa4818982747bdff14c74d8ca96, type: 2}
       indexSprite: 1
   - slotType: 0
+    position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0
@@ -116,6 +124,7 @@ MonoBehaviour:
       blockTopic: {fileID: 11400000, guid: 56e0bfa4818982747bdff14c74d8ca96, type: 2}
       indexSprite: 2
   - slotType: 0
+    position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0

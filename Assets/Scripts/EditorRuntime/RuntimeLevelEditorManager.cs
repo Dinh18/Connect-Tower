@@ -17,6 +17,9 @@ public class RuntimeLevelEditorManager : MonoBehaviour
     public int row1 = 3;
     public int row2 = 3;
 
+    public SlotController.SlotType currentSlotMechanic = SlotController.SlotType.Normal;
+    public BlockController.BlockType currentBlockMechanic = BlockController.BlockType.Normal;
+
     public List<BlockTopic> topics = new List<BlockTopic>();
     public List<int> amountBlockOfTopic = new List<int>();
     public List<SlotSetupData> slots = new List<SlotSetupData>();
@@ -73,8 +76,8 @@ public class RuntimeLevelEditorManager : MonoBehaviour
                     return; 
                 }
 
-                // Bỏ qua nếu click vào vùng của bảng OnGUI bên trái (Width = 350 * scale 1.5 = 525 pixel)
-                if (showGUI && Input.mousePosition.x < 550f)
+                // Bỏ qua nếu click vào vùng của bảng OnGUI bên trái (Width = 300 * scale 1.15)
+                if (showGUI && Input.mousePosition.x < 360f)
                 {
                     return;
                 }
@@ -146,6 +149,21 @@ public class RuntimeLevelEditorManager : MonoBehaviour
         RenderGrid();
     }
 
+    public void ResetAll()
+    {
+        SaveUndoState();
+        topics.Clear();
+        amountBlockOfTopic.Clear();
+        currentPaintbrushTopic = null;
+        currentPaintbrushIndex = -1;
+        currentSlotMechanic = SlotController.SlotType.Normal;
+        currentBlockMechanic = BlockController.BlockType.Normal;
+        row1 = 3;
+        row2 = 3;
+        moves = 0;
+        GenerateGrid();
+    }
+
     public void RenderGrid()
     {
         InitManagers();
@@ -162,9 +180,18 @@ public class RuntimeLevelEditorManager : MonoBehaviour
         int slotIndex = levelLoader.slots.IndexOf(slotController);
         if (slotIndex == -1) return;
 
+        SaveUndoState();
+
+        slots[slotIndex].slotType = currentSlotMechanic;
+        if (currentSlotMechanic == SlotController.SlotType.Hide)
+        {
+            if (currentPaintbrushTopic != null) slots[slotIndex].questionTopic = currentPaintbrushTopic;
+            else if (slots[slotIndex].questionTopic == null && topics.Count > 0) slots[slotIndex].questionTopic = topics[0];
+        }
+
         if (currentPaintbrushTopic != null)
         {
-            AddBlockToSlot(slotIndex, currentPaintbrushTopic, 0);
+            AddBlockToSlot(slotIndex, currentPaintbrushTopic, (int)currentBlockMechanic);
             RenderGrid();
         }
         else
@@ -172,6 +199,51 @@ public class RuntimeLevelEditorManager : MonoBehaviour
             RemoveBlockFromSlot(slotIndex);
             RenderGrid();
         }
+    }
+
+    private Stack<string> undoStack = new Stack<string>();
+
+    private void SaveUndoState()
+    {
+        string json = JsonUtility.ToJson(GenerateLevelDataSO());
+        undoStack.Push(json);
+    }
+
+    public void Undo()
+    {
+        if (undoStack.Count > 0)
+        {
+            string json = undoStack.Pop();
+            LevelDataSO tempSO = ScriptableObject.CreateInstance<LevelDataSO>();
+            JsonUtility.FromJsonOverwrite(json, tempSO);
+            
+            levelIndex = tempSO.level;
+            moves = tempSO.moves;
+            difficulty = tempSO.difficult;
+            row1 = tempSO.row1;
+            row2 = tempSO.row2;
+            slots = tempSO.slots;
+
+            amountBlockOfTopic.Clear();
+            for (int i=0; i<topics.Count; i++) amountBlockOfTopic.Add(0);
+            foreach(var s in slots)
+            {
+                foreach(var b in s.blocks)
+                {
+                    int tIdx = topics.FindIndex(t => t.topicID == b.blockTopic.topicID);
+                    if (tIdx >= 0) amountBlockOfTopic[tIdx]++;
+                }
+            }
+
+            RenderGrid();
+        }
+    }
+
+    public void RestoreFromPlaytest()
+    {
+        levelLoader.LoadLevel(); 
+        showGUI = true;
+        EnterEditMode();
     }
 
     public void AddBlockToSlot(int slotIndex, BlockTopic blockTopic, int typeBlock)
@@ -219,18 +291,16 @@ public class RuntimeLevelEditorManager : MonoBehaviour
         slot.blocks.RemoveAt(0);
     }
 
-    public void Playtest()
+    private LevelDataSO GenerateLevelDataSO()
     {
-        InitManagers();
-        
-        LevelDataSO playtestSO = ScriptableObject.CreateInstance<LevelDataSO>();
-        playtestSO.level = levelIndex;
-        playtestSO.moves = moves;
-        playtestSO.difficult = difficulty;
-        playtestSO.row1 = row1;
-        playtestSO.row2 = row2;
-        playtestSO.numsTopic = topics.Count;
-        playtestSO.slots = new List<SlotSetupData>();
+        LevelDataSO so = ScriptableObject.CreateInstance<LevelDataSO>();
+        so.level = levelIndex;
+        so.moves = moves;
+        so.difficult = difficulty;
+        so.row1 = row1;
+        so.row2 = row2;
+        so.numsTopic = topics.Count;
+        so.slots = new List<SlotSetupData>();
 
         foreach (var s in slots)
         {
@@ -246,10 +316,16 @@ public class RuntimeLevelEditorManager : MonoBehaviour
                 bData.indexSprite = b.indexSprite;
                 sData.blocks.Add(bData);
             }
-            playtestSO.slots.Add(sData);
+            so.slots.Add(sData);
         }
+        return so;
+    }
 
-        LevelLoader.playtestLevelData = playtestSO;
+    public void Playtest()
+    {
+        InitManagers();
+        
+        LevelLoader.playtestLevelData = GenerateLevelDataSO();
         LevelLoader.isPlaytestingTempLevel = true;
         
         ExitEditMode();
@@ -261,31 +337,7 @@ public class RuntimeLevelEditorManager : MonoBehaviour
 
     public void SaveLevel()
     {
-        LevelDataSO newLevelData = ScriptableObject.CreateInstance<LevelDataSO>();
-        newLevelData.level = levelIndex;
-        newLevelData.moves = moves;
-        newLevelData.difficult = difficulty;
-        newLevelData.row1 = row1;
-        newLevelData.row2 = row2;
-        newLevelData.numsTopic = topics.Count;
-        newLevelData.slots = new List<SlotSetupData>();
-
-        foreach (var slot in slots)
-        {
-            SlotSetupData sData = new SlotSetupData();
-            sData.slotType = slot.slotType;
-            sData.questionTopic = slot.questionTopic;
-            sData.blocks = new List<BlockSetupData>();
-            foreach (var block in slot.blocks)
-            {
-                BlockSetupData bData = new BlockSetupData();
-                bData.blockTopic = block.blockTopic;
-                bData.typeBlock = block.typeBlock;
-                bData.indexSprite = block.indexSprite;
-                sData.blocks.Add(bData);
-            }
-            newLevelData.slots.Add(sData);
-        }
+        LevelDataSO newLevelData = GenerateLevelDataSO();
 
 #if UNITY_EDITOR
         string dir = "Assets/Resources/Data/Levels";
@@ -307,8 +359,8 @@ public class RuntimeLevelEditorManager : MonoBehaviour
 
     private void OnGUI()
     {
-        // Giảm scale xuống 1.5 để phù hợp màn hình PC (Free Aspect)
-        float scale = 1.5f;
+        // Thu nhỏ UI một chút theo yêu cầu
+        float scale = 1.15f;
         GUI.matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(scale, scale, 1.0f));
 
         if (!showGUI)
@@ -337,8 +389,8 @@ public class RuntimeLevelEditorManager : MonoBehaviour
             return;
         }
         
-        // Dock window sát lề trái, độ rộng 350 để chừa phần bên phải xếp block
-        windowRect = new Rect(0, 0, 350, Screen.height / scale);
+        // Dock window sát lề trái, thu hẹp lại 300
+        windowRect = new Rect(0, 0, 300, Screen.height / scale);
 
         if (solidBg == null) 
         {
@@ -369,15 +421,13 @@ public class RuntimeLevelEditorManager : MonoBehaviour
         GUILayout.EndHorizontal();
 
         GUILayout.BeginHorizontal();
-        GUILayout.Label("Row1:");
-        string row1Str = GUILayout.TextField(row1.ToString());
-        if (int.TryParse(row1Str, out int r1)) row1 = r1;
+        GUILayout.Label($"Row1: {row1}", GUILayout.Width(80));
+        row1 = (int)GUILayout.HorizontalSlider(row1, 0, 5);
         GUILayout.EndHorizontal();
 
         GUILayout.BeginHorizontal();
-        GUILayout.Label("Row2:");
-        string row2Str = GUILayout.TextField(row2.ToString());
-        if (int.TryParse(row2Str, out int r2)) row2 = r2;
+        GUILayout.Label($"Row2: {row2}", GUILayout.Width(80));
+        row2 = (int)GUILayout.HorizontalSlider(row2, 0, 5);
         GUILayout.EndHorizontal();
 
         if (GUILayout.Button("1. Dựng Lưới (Generate Grid)", GUILayout.Height(40)))
@@ -432,8 +482,38 @@ public class RuntimeLevelEditorManager : MonoBehaviour
         }
 
         GUILayout.Space(10);
-        GUILayout.Label("--- Hành Động ---", GUI.skin.box);
-        if (GUILayout.Button("2. Playtest (Chơi thử)", GUILayout.Height(40)))
+        GUILayout.Label("--- CƠ CHẾ (Mechanics) ---", GUI.skin.box);
+        
+        GUILayout.Label("Loại Cột (Slot):");
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Toggle(currentSlotMechanic == SlotController.SlotType.Normal, "Bình Thường (Hủy)", "Button")) currentSlotMechanic = SlotController.SlotType.Normal;
+        if (GUILayout.Toggle(currentSlotMechanic == SlotController.SlotType.Hide, "Ẩn (Hide)", "Button")) currentSlotMechanic = SlotController.SlotType.Hide;
+        if (GUILayout.Toggle(currentSlotMechanic == SlotController.SlotType.Ice, "Băng (Ice)", "Button")) currentSlotMechanic = SlotController.SlotType.Ice;
+        GUILayout.EndHorizontal();
+
+        GUILayout.Label("Loại Block:");
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Toggle(currentBlockMechanic == BlockController.BlockType.Normal, "Bình Thường (Hủy)", "Button")) currentBlockMechanic = BlockController.BlockType.Normal;
+        if (GUILayout.Toggle(currentBlockMechanic == BlockController.BlockType.Hide, "Ẩn (Hide)", "Button")) currentBlockMechanic = BlockController.BlockType.Hide;
+        GUILayout.EndHorizontal();
+
+        GUILayout.Space(10);
+        GUILayout.Label("--- Hành Động ---");
+        GUILayout.Space(10);
+        
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("Hoàn Tác (Undo)", GUILayout.Height(30)))
+        {
+            Undo();
+        }
+        if (GUILayout.Button("Reset Toàn Bộ", GUILayout.Height(30)))
+        {
+            ResetAll();
+        }
+        GUILayout.EndHorizontal();
+
+        GUILayout.Space(10);
+        if (GUILayout.Button("2. Playtest (Thử Nghiệm)", GUILayout.Height(40)))
         {
             Playtest();
         }

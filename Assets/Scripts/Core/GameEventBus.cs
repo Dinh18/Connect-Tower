@@ -168,3 +168,17 @@ public struct RequestChangeAnimationNPC : IGameEvent
 {
     public NPCState newState;
 }
+
+public struct LoadingFinished : IGameEvent
+{
+    
+}
+public struct NoMovesAvailableEvent : IGameEvent
+{
+    
+}
+
+public struct BoardStateChangedEvent : IGameEvent
+{
+    
+}

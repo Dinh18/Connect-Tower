@@ -135,5 +135,217 @@ public class SlotsManager : MonoBehaviour
     }
 
     public bool GetLevelComleted() => levelCompleted;
+
+    private struct SimState : IEquatable<SimState>
+    {
+        public uint[] slots;
+
+        public bool Equals(SimState other)
+        {
+            if (slots == null || other.slots == null || slots.Length != other.slots.Length) return false;
+            for (int i = 0; i < slots.Length; i++)
+            {
+                if (slots[i] != other.slots[i]) return false;
+            }
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            if (slots == null) return 0;
+            unchecked
+            {
+                int hash = 17;
+                for (int i = 0; i < slots.Length; i++)
+                {
+                    hash = hash * 31 + (int)slots[i];
+                }
+                return hash;
+            }
+        }
+    }
+
+    private uint EncodeSlot(SlotController slot)
+    {
+        uint encoded = 0;
+        BlockController[] arr = slot.blocks.ToArray();
+        Array.Reverse(arr); // Stack enum order is top to bottom, we want bottom to top (index 0 is bottom)
+
+        for (int j = 0; j < arr.Length; j++)
+        {
+            byte b;
+            if (!arr[j].isRevealed) b = 255;
+            else b = (byte)(arr[j].GetTopicID() + 1);
+            encoded |= ((uint)b << (j * 8));
+        }
+        return encoded;
+    }
+
+    private int GetBlockCount(uint slot)
+    {
+        if ((slot & 0xFF000000) != 0) return 4;
+        if ((slot & 0x00FF0000) != 0) return 3;
+        if ((slot & 0x0000FF00) != 0) return 2;
+        if ((slot & 0x000000FF) != 0) return 1;
+        return 0;
+    }
+
+    private byte GetTopBlock(uint slot, int count)
+    {
+        if (count == 0) return 0;
+        return (byte)((slot >> ((count - 1) * 8)) & 0xFF);
+    }
+
+    private byte GetBlockAt(uint slot, int index)
+    {
+        return (byte)((slot >> (index * 8)) & 0xFF);
+    }
+
+    private uint RemoveTopBlock(uint slot, int count)
+    {
+        uint mask = ~(255u << ((count - 1) * 8));
+        return slot & mask;
+    }
+
+    private uint AddTopBlock(uint slot, int currentCount, byte block)
+    {
+        return slot | ((uint)block << (currentCount * 8));
+    }
+
+    public bool HasAvailableMoves()
+    {
+        List<SlotController> activeSlots = new List<SlotController>();
+        foreach (var slot in levelLoader.slots)
+        {
+            if (!slot.isFinished && slot.isRevealed)
+            {
+                activeSlots.Add(slot);
+            }
+        }
+
+        int numSlots = activeSlots.Count;
+        if (numSlots == 0) return false;
+
+        uint[] initialState = new uint[numSlots];
+        bool[] isIceSlot = new bool[numSlots];
+        for (int i = 0; i < numSlots; i++)
+        {
+            initialState[i] = EncodeSlot(activeSlots[i]);
+            isIceSlot[i] = (activeSlots[i].slotType == SlotController.SlotType.Ice);
+        }
+
+        HashSet<SimState> visited = new HashSet<SimState>();
+        Queue<SimState> queue = new Queue<SimState>();
+
+        SimState startState = new SimState { slots = initialState };
+        visited.Add(startState);
+        queue.Enqueue(startState);
+
+        int maxSearch = 2000;
+        int searchCount = 0;
+
+        while (queue.Count > 0)
+        {
+            SimState curr = queue.Dequeue();
+            searchCount++;
+
+            if (searchCount > maxSearch)
+            {
+                // Quá phức tạp, tạm coi là còn chơi được để tránh treo máy
+                return true;
+            }
+
+            for (int src = 0; src < numSlots; src++)
+            {
+                if (isIceSlot[src]) continue; // Không thể lấy block từ Ice slot
+
+                uint srcSlot = curr.slots[src];
+                if (srcSlot == 0) continue; // slot rỗng
+
+                int srcCount = GetBlockCount(srcSlot);
+                byte srcTop = GetTopBlock(srcSlot, srcCount);
+
+                if (srcTop == 255) continue; // block ẩn không thể bị di chuyển
+
+                // Đếm số lượng block giống nhau liên tiếp ở trên cùng
+                int sameColorCount = 1;
+                for (int i = srcCount - 2; i >= 0; i--)
+                {
+                    if (GetBlockAt(srcSlot, i) == srcTop) sameColorCount++;
+                    else break;
+                }
+
+                for (int dst = 0; dst < numSlots; dst++)
+                {
+                    if (src == dst) continue;
+
+                    uint dstSlot = curr.slots[dst];
+                    int dstCount = GetBlockCount(dstSlot);
+
+                    if (dstCount == 4) continue; // slot đích đã đầy
+
+                    byte dstTop = dstCount > 0 ? GetTopBlock(dstSlot, dstCount) : (byte)0;
+
+                    // Có thể chuyển nếu slot đích rỗng hoặc block trên cùng giống nhau
+                    if (dstCount == 0 || dstTop == srcTop)
+                    {
+                        int moveCount = Math.Min(4 - dstCount, sameColorCount);
+                        
+                        // Kiểm tra xem nước đi này có tạo ra "Bước tiến" (Progress) không?
+                        // 1. Slot đích có được lấp đầy (4 block cùng loại) không?
+                        bool isAllSame = true;
+                        for (int i = 0; i < dstCount; i++)
+                        {
+                            if (GetBlockAt(dstSlot, i) != srcTop)
+                            {
+                                isAllSame = false;
+                                break;
+                            }
+                        }
+
+                        if (isAllSame && (dstCount + moveCount == 4))
+                        {
+                            return true; // Progress: Hoàn thành 1 slot!
+                        }
+
+                        // 2. Slot nguồn có để lộ ra một block đang bị ẩn không?
+                        int newSrcCount = srcCount - moveCount;
+                        if (newSrcCount > 0)
+                        {
+                            byte newSrcTop = GetTopBlock(srcSlot, newSrcCount);
+                            if (newSrcTop == 255)
+                            {
+                                return true; // Progress: Mở khóa block ẩn!
+                            }
+                        }
+
+                        // Nếu không tạo ra progress, thực hiện nước đi và thêm vào hàng đợi
+                        uint newSrc = srcSlot;
+                        uint newDst = dstSlot;
+
+                        for (int m = 0; m < moveCount; m++)
+                        {
+                            newSrc = RemoveTopBlock(newSrc, srcCount - m);
+                            newDst = AddTopBlock(newDst, dstCount + m, srcTop);
+                        }
+
+                        uint[] nextSlots = new uint[numSlots];
+                        Array.Copy(curr.slots, nextSlots, numSlots);
+                        nextSlots[src] = newSrc;
+                        nextSlots[dst] = newDst;
+
+                        SimState nextState = new SimState { slots = nextSlots };
+                        if (visited.Add(nextState))
+                        {
+                            queue.Enqueue(nextState);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Đã thử hết mọi nước đi khả thi nhưng không tạo ra được progress nào => Deadlock
+        return false;
+    }
 }
 

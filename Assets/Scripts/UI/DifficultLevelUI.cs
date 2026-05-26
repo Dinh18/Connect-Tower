@@ -1,50 +1,104 @@
 using System.Collections;
 using DG.Tweening;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class DifficultLevel : MonoBehaviour
 {
-    [SerializeField] private Image[] skullGameObject;
-    [SerializeField] private GameObject dimImage;
+    // Mở comment dimImage để làm tối background nhé
+    [SerializeField] private Image dimImage; 
+    [SerializeField] private Transform hard_NPC_Image;
+    [SerializeField] private Transform textHolder;
+    [SerializeField] private Image bgTextImage;
+    [SerializeField] private TextMeshProUGUI difficultLevelText;
+    [SerializeField] private TextMeshProUGUI shadowText;
+    [Header("Hard Level Setting")]
+    [SerializeField] private Color hardBgColor;
+    [SerializeField] private Color hardbgTextColor;
+    [Header("Super Hard Level Setting")]
+    [SerializeField] private Color spHardBgColor;
+    [SerializeField] private Color spHardBgTextColor;
 
-    public void ShowDifficultLevel()
+    // Biến để lưu vị trí Y ban đầu của NPC
+    private float npcOriginalPosY;
+
+    private void Awake()
     {
-        dimImage.SetActive(true);
-        for(int i = 0; i < skullGameObject.Length; i++)
-        {
-            int index = i;
-            skullGameObject[index].DOKill();
-            Vector3 orginPos = skullGameObject[index].GetComponent<RectTransform>().position;
-            Color color = skullGameObject[index].color;
-            color.a = 0f;
-            skullGameObject[index].color = color;
-            skullGameObject[index].gameObject.SetActive(true);
-            Sequence sequence = DOTween.Sequence();
-            // sequence.Append(skullGameObject[index].DOFade(0, 0.5f));
-            sequence.Append(skullGameObject[index].DOFade(1, 3f));
-            sequence.Join(skullGameObject[index].GetComponent<RectTransform>().DOAnchorPosY(100, 3f).SetEase(Ease.OutQuad));
-            sequence.OnComplete(() =>
-            {
-                skullGameObject[index].GetComponent<RectTransform>().position = orginPos;
-            });
-        }
-        StartCoroutine(HideDifficultLevel());
+        // Lưu lại vị trí chuẩn trên Scene để khi nảy lên sẽ dùng tọa độ này
+        npcOriginalPosY = hard_NPC_Image.localPosition.y;
     }
 
-    public IEnumerator HideDifficultLevel()
+    public void ShowDifficultLevel(LevelLoader.GameDifficult difficultLevel)
     {
-        yield return new WaitForSeconds(3);
-        dimImage.SetActive(false);
-        for(int i = 0; i < skullGameObject.Length; i++)
+        if(difficultLevel == LevelLoader.GameDifficult.Hard)
         {
-            skullGameObject[i].DOKill();
-            skullGameObject[i].gameObject.SetActive(false);
-        }
-    }
+            dimImage.color = hardBgColor;
+            bgTextImage.color = hardbgTextColor;
+            difficultLevelText.text = "HARD LEVEL";
+            shadowText.text = "HARD LEVEL";
 
-    private void SkullAnimation(Image skull, float duration)
-    {
+        }
+        else if(difficultLevel == LevelLoader.GameDifficult.VeryHard)
+        {
+            dimImage.color = spHardBgColor;
+            bgTextImage.color = spHardBgTextColor;
+            difficultLevelText.text = "SUPER HARD";
+            shadowText.text = "SUPER HARD";
+        }
+        this.gameObject.SetActive(true);
+
+        // 1. Cài đặt trạng thái ban đầu trước khi chạy Animation
+        textHolder.localScale = Vector3.zero;
+        hard_NPC_Image.localScale = Vector3.zero;
         
+        // Kéo NPC tụt xuống một đoạn để lát nữa làm hiệu ứng nhảy lên
+        hard_NPC_Image.localPosition = new Vector3(hard_NPC_Image.localPosition.x, npcOriginalPosY - 150f, 0); 
+
+        if (dimImage != null)
+        {
+            dimImage.gameObject.SetActive(true);
+            Color dimColor = dimImage.color;
+            dimColor.a = 0f; // Bắt đầu với alpha = 0 (trong suốt)
+            dimImage.color = dimColor; // Trong suốt
+        }
+
+        Sequence sequence = DOTween.Sequence();
+
+        // 2. Kịch bản Animation
+        
+        // Tối màn hình dần dần
+        if (dimImage != null)
+            sequence.Append(dimImage.DOFade(0.7f, 0.3f));
+
+        // Banner đập ra và rung nhẹ tạo cảm giác chấn động
+        sequence.Append(textHolder.DOScale(Vector3.one, 0.4f).SetEase(Ease.OutBack));
+        sequence.Join(textHolder.DOPunchRotation(new Vector3(0, 0, -3f), 0.4f, 5, 0.5f)); 
+
+        // NPC phóng to và nảy từ dưới chui lên trên banner
+        sequence.Insert(0.2f, hard_NPC_Image.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutBack));
+        sequence.Insert(0.2f, hard_NPC_Image.DOLocalMoveY(npcOriginalPosY, 0.5f).SetEase(Ease.OutBack));
+
+        // 3. Đợi 1.5s rồi tự động ẩn đi (Thay cho Coroutine)
+        DOVirtual.DelayedCall(1.5f, HideDifficultLevel);
+    }
+
+    // Đổi thành void vì không dùng IEnumerator nữa
+    public void HideDifficultLevel() 
+    {
+        Sequence sequence = DOTween.Sequence();
+
+        // Cho NPC thụt vòi xuống trước
+        sequence.Append(hard_NPC_Image.DOScale(Vector3.zero, 0.3f).SetEase(Ease.InBack));
+        sequence.Join(hard_NPC_Image.DOLocalMoveY(npcOriginalPosY - 100f, 0.3f).SetEase(Ease.InBack));
+
+        // Sau đó thu nhỏ banner
+        sequence.Append(textHolder.DOScale(Vector3.zero, 0.3f).SetEase(Ease.InBack));
+
+        // Cuối cùng nhả sáng màn hình và tắt gameobject
+        if (dimImage != null)
+            sequence.Join(dimImage.DOFade(0f, 0.3f));
+
+        sequence.OnComplete(() => this.gameObject.SetActive(false));
     }
 }

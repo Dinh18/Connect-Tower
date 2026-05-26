@@ -8,6 +8,8 @@ public class HomePanel : Panel
 {
     [SerializeField] private Button playButton;
     [SerializeField] private Text playText;
+    [SerializeField] private Transform playHolder;
+    [SerializeField] private ParticleSystem finishParticle; 
     [Header("Profile References")]
     [SerializeField] private Button generalStatsButton;
     [SerializeField] private Image avatarImage;
@@ -22,8 +24,11 @@ public class HomePanel : Panel
     [SerializeField] private Text heartCountText;
     [SerializeField] private Image heartIcon;
     [SerializeField] private Button addHeartButton;
-    [Header("LevelUI References")]
-    // [SerializeField] private LevelUIManager levelUIManager;
+    [Header("Button Play Background")]
+    [SerializeField] private Sprite greenPlayButton;
+    [SerializeField] private Sprite redPlayButton;
+    [SerializeField] private Sprite purplePlayButton;
+
     private MainMenu mainMenu;
 
     private bool enableAddHeartButton;
@@ -66,14 +71,79 @@ public class HomePanel : Panel
         coinText.text = CoreServices.Get<DataManager>().GetTotalCoins().ToString();
         if(CoreServices.Get<DataManager>().GetHearts() < 5) enableAddHeartButton = true;
         else enableAddHeartButton = false;
-        StartCoroutine(DelayShowTextLevel());
+        if(CoreServices.Get<GameManager>().GetPrevState() != GameManager.GameState.Win) StartCoroutine(DelayShowLevelButton());
+        else
+        {
+            PlayAnimationPlayButton();
+        }
         StartCoroutine(DelayPlaySadAnim());
     }
 
-    private IEnumerator DelayShowTextLevel()
+    private IEnumerator DelayShowLevelButton()
     {
         yield return new WaitUntil(() => CoreServices.Get<DataManager>().dataReady);
+        SetupButton();
+        
+    }
+
+    private void SetupButton()
+    {
+        LevelLoader.GameDifficult difficultLevel = (LevelLoader.GameDifficult)CoreServices.Get<LevelLoader>()
+                                                .GetDifficultLevel(CoreServices.Get<DataManager>().GetCurrentLevel());
+        if(difficultLevel == LevelLoader.GameDifficult.Easy)
+        {
+            playButton.gameObject.GetComponent<Image>().sprite = greenPlayButton;
+        }
+        else if(difficultLevel == LevelLoader.GameDifficult.Hard)
+        {
+            playButton.gameObject.GetComponent<Image>().sprite = purplePlayButton;
+        }
+        else
+        {
+            playButton.gameObject.GetComponent<Image>().sprite = redPlayButton;
+        }
         playText.text = "Level "+(CoreServices.Get<DataManager>().GetCurrentLevel() + 1).ToString();
+    }
+
+    private void PlayAnimationPlayButton()
+    {
+        Sequence sequence = DOTween.Sequence();
+
+        // 1. NHẤC LÊN CAO (Lấy đà): Phóng to và di chuyển lên trên một chút (OutQuad tạo cảm giác mượt)
+        float liftHeight = 50f; // Khoảng cách nhấc lên (bạn có thể tuỳ chỉnh theo UI của mình)
+        sequence.Append(playHolder.DOScale(1.2f, 0.4f).SetEase(Ease.OutQuad));
+        sequence.Join(playHolder.DOLocalMoveY(liftHeight, 0.4f).SetRelative(true).SetEase(Ease.OutQuad));
+
+        // 1.5. LẮC LẮC: Lắc nhẹ hai bên khi đang ở trên cao
+        sequence.Append(playHolder.DOShakeRotation(0.25f, new Vector3(0, 0, 20f), 10, 90f, false));
+
+        // 2. ĐẬP MẠNH XUỐNG: Rơi xuống rất nhanh (InExpo) và thu về size gốc
+        sequence.Append(playHolder.DOLocalMoveY(-liftHeight, 0.15f).SetRelative(true).SetEase(Ease.InExpo));
+        sequence.Join(playHolder.DOScale(1f, 0.15f).SetEase(Ease.InExpo));
+
+        // 3. HIỆU ỨNG VA CHẠM (Squash & Stretch): Bẹp theo trục Y và phình trục X khi chạm đất, sau đó nảy về lại
+        sequence.Append(playHolder.DOPunchScale(new Vector3(0.2f, -0.2f, 0), 0.3f, 2, 0.5f));
+
+        // 4. HOÀN THÀNH
+        sequence.OnComplete(() =>
+        {
+                // finishParticle.Play();
+                // playText.text = "Level " + (CoreServices.Get<DataManager>().GetCurrentLevel() + 1).ToString();
+                ChangeLevelWithParticle();
+        });
+    }
+
+    private void ChangeLevelWithParticle()
+    {
+        // 1. Bắn khói
+        finishParticle.Play();
+
+        // 2. Canh thời gian để đổi chữ. 
+        // Giả sử Particle mất 0.15s để phình to che kín chữ. Ta dùng DOVirtual.DelayedCall để đợi.
+        DOVirtual.DelayedCall(0f, () => 
+        {
+            SetupButton();
+        });
     }
 
     private IEnumerator DelayPlaySadAnim()

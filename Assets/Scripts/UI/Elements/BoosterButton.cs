@@ -40,18 +40,19 @@ public class BoosterButton : MonoBehaviour
     public void Show()
     {
         int id = (int)booster.GetBoosterType();
-        bool isUnlocked = CoreServices.Get<DataManager>().IsUnLockedBooster(id);
+        bool isUnlocked = CoreServices.Get<DataManager>().IsUnLockedBooster(id) || LevelLoader.isPlaytestingTempLevel;
         
         lockElements.SetActive(!isUnlocked);
         unlockElements.SetActive(isUnlocked);
 
-        if(CoreServices.Get<DataManager>().IsFirstTimeUserBooster(id))
+        if(!LevelLoader.isPlaytestingTempLevel && CoreServices.Get<DataManager>().IsFirstTimeUserBooster(id))
         {
             // addBoosterUI.SetupButton(this);
             GameEventBus.Publish(new RequestOpenBoosterPopupEvent { type = booster.GetBoosterType(), boosterTransform = this.GetComponent<RectTransform>()});
         }
 
-        UpdateCountText(new BoosterCountUpdatedEvent { boosterId = id, count = CoreServices.Get<DataManager>().GetAmountOfBoosterByID(id) });
+        int count = LevelLoader.isPlaytestingTempLevel ? 99 : CoreServices.Get<DataManager>().GetAmountOfBoosterByID(id);
+        UpdateCountText(new BoosterCountUpdatedEvent { boosterId = id, count = count });
     }
 
     public void UpdateCountText(BoosterCountUpdatedEvent boosterCountUpdated)
@@ -72,7 +73,7 @@ public class BoosterButton : MonoBehaviour
 
     public void OnButtonClicked()
     {
-        if (booster.GetNumsBooster() <= 0)
+        if (!LevelLoader.isPlaytestingTempLevel && booster.GetNumsBooster() <= 0)
         {
             GameEventBus.Publish(new RequestOpenBoosterPopupEvent { type = booster.GetBoosterType() , boosterTransform = this.GetComponent<RectTransform>()});
             return;
@@ -82,6 +83,10 @@ public class BoosterButton : MonoBehaviour
 
         boosterButton.interactable = false;
         if(boosterEffect != null) boosterEffect.PlayEffect(booster.Excute);
+        if(booster.GetBoosterType() == BoosterType.Shuffle || booster.GetBoosterType() == BoosterType.Undo)
+        {
+            GameEventBus.Publish(new BoardStateChangedEvent());
+        }
         boosterButton.interactable = true;
     }
 

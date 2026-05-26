@@ -18,12 +18,20 @@ public class HeartManager : MonoBehaviour
     void Start()
     {
         dataManager = CoreServices.Get<DataManager>();
+        StartCoroutine(WaitAndLoadHeart());
+    }
+
+    private System.Collections.IEnumerator WaitAndLoadHeart()
+    {
+        yield return new WaitUntil(() => dataManager.dataReady);
         LoadHeart();
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (dataManager == null || !dataManager.dataReady) return;
+
         if(dataManager.GetHearts() < 5)
         {
             UpdateTimer();
