@@ -9,11 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a1b3a67fd63c0142918cb47c013f8ef, type: 3}
-  m_Name: Hint
-  m_EditorClassIdentifier: Assembly-CSharp::BoosterDataSO
+  m_Script: {fileID: 11500000, guid: 6c19b1a175e27134d8cd38bc8afb2a44, type: 3}
+  m_Name: IceSlot
+  m_EditorClassIdentifier: Assembly-CSharp::MechanicData
   id: 2
-  nameBooster: Hint
-  description: Use it to see hidden blocks!
-  price: 800
-  unlockedLevel: 3
+  nameMechanic: Ice Slot
+  instruction: Match blocks of the same category to break the ice!
+  levelUnclock: 24

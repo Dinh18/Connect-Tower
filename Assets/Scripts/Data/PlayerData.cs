@@ -17,7 +17,7 @@ public class PlayerData
     // Nested data groups
     [FirestoreProperty] public WalletData wallet {get; set;} = new WalletData();
     [FirestoreProperty] public InventoryData inventory {get; set;} = new InventoryData();
-    [FirestoreProperty] public ProgressData progress {get; set;} = new ProgressData();
+    // [FirestoreProperty] public ProgressData progress {get; set;} = new ProgressData();
 }
 [FirestoreData]
 [System.Serializable]
@@ -38,13 +38,13 @@ public class InventoryData
         {"3",3}
     };
 }
-[FirestoreData]
-[System.Serializable]
-public class ProgressData
-{
-    [FirestoreProperty] public List<MechanicData> mechanics{get;set;} = new List<MechanicData>{
-        new MechanicData(0, "Block Hide", 6, true),
-        new MechanicData(1, "Slot Hide", 17, true),
-        new MechanicData(2, "Ice Slot", 20, true)
-    };
-}
+// [FirestoreData]
+// [System.Serializable]
+// public class ProgressData
+// {
+//     [FirestoreProperty] public List<MechanicData> mechanics{get;set;} = new List<MechanicData>{
+//         new MechanicData(0, "Block Hide", 6, true),
+//         new MechanicData(1, "Slot Hide", 17, true),
+//         new MechanicData(2, "Ice Slot", 20, true)
+//     };
+// }

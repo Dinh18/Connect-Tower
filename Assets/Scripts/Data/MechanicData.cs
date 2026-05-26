@@ -1,21 +1,23 @@
-using Firebase.Firestore;
 
-[FirestoreData]
-[System.Serializable]
-public class MechanicData
+
+// [FirestoreData]
+// [System.Serializable]
+using UnityEngine;
+[CreateAssetMenu(fileName = "NewMechanic", menuName = "Scriptable Objects/Mechanic Data")]
+public class MechanicData : ScriptableObject
 {
     public int id;
-    public string name;
+    public string nameMechanic;
+    public string instruction;
     public int levelUnclock;
-    public bool isFirstTimePlay;
+    // public bool isFirstTimePlay;
+    // public MechanicData(){}
 
-    public MechanicData(){}
-
-    public MechanicData(int id, string name, int levelUnclock, bool firstTimePlay)
-    {
-        this.id = id;
-        this.name = name;
-        this.levelUnclock = levelUnclock;
-        this.isFirstTimePlay = firstTimePlay;
-    }
+    // public MechanicData(int id, string name, int levelUnclock, bool firstTimePlay)
+    // {
+    //     this.id = id;
+    //     this.nameMechanic = nameMechanic;
+    //     this.levelUnclock = levelUnclock;
+    //     this.isFirstTimePlay = firstTimePlay;
+    // }
 }

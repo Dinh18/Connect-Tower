@@ -6,6 +6,7 @@ using System.Text;
 using System.Collections.Generic;
 using Firebase.Firestore;
 using Firebase.Extensions;
+using System.Linq;
 
 
 public class DataManager : MonoBehaviour
@@ -14,6 +15,7 @@ public class DataManager : MonoBehaviour
     public FrameDataSO[] allFrames;
     public AvatarDataSO[] allAvatars;
     public BoosterDataSO[] allBoosters; 
+    public MechanicData[] allMechanics;
     private FirebaseFirestore db;
     private string userId;
     private string saveFilePath;
@@ -71,7 +73,7 @@ public class DataManager : MonoBehaviour
         allFrames = Resources.LoadAll<FrameDataSO>(Constants.FRAMES_PATH);
         allAvatars = Resources.LoadAll<AvatarDataSO>(Constants.AVATARS_PATH);
         allBoosters = Resources.LoadAll<BoosterDataSO>(Constants.BOOSTERDATA_PATH);
-
+        allMechanics = Resources.LoadAll<MechanicData>(Constants.MECHANICDATA_PATH);
         if(string.IsNullOrEmpty(userId)) return;
 
         DocumentReference docRef = db.Collection("Users").Document(userId);
@@ -190,6 +192,10 @@ public class DataManager : MonoBehaviour
     {
         return allAvatars;
     }
+    public MechanicData[] GetAllMechanics()
+    {
+        return allMechanics;
+    }
     public FrameDataSO GetFrameByID(string id)
     {
         foreach(var frame in allFrames)
@@ -223,7 +229,7 @@ public class DataManager : MonoBehaviour
     public int GetTotalCoins() => playerData.wallet.totalCoins;
     public int GetHearts() => playerData.wallet.heart;
     public string GetNextHeartTime() => playerData.wallet.nextHeartTime;
-    public List<MechanicData> GetMechanics() => playerData.progress.mechanics;
+    // public List<MechanicData> GetMechanics() => playerData.progress.mechanics;
     public BoosterDataSO GetBooster(int id)
     {
         foreach(BoosterDataSO boosterData in allBoosters)
@@ -268,7 +274,7 @@ public class DataManager : MonoBehaviour
         Debug.LogWarning("Booster khong ton tai");
         return false;
     }
-    public MechanicData GetMechanic(int id) => playerData.progress.mechanics.Find(m => m.id == id);
+    public MechanicData GetMechanic(int id) => allMechanics.FirstOrDefault(m => m.id == id);
 
     public void AddCoins(int amount)
     {
@@ -415,13 +421,7 @@ public class DataManager : MonoBehaviour
     public bool IsFirstTimePlayMechanic(int id)
     {
         var m = GetMechanic(id);
-        return m != null && playerData.currentLevel == m.levelUnclock && m.isFirstTimePlay;
-    }
-
-    public void PlayedMechanic(int id)
-    {
-        var m = GetMechanic(id);
-        if (m != null) m.isFirstTimePlay = false;
+        return m != null && playerData.currentLevel == m.levelUnclock;
     }
 
     private void OnApplicationPause(bool pauseStatus) { if (pauseStatus) SaveGame(); }

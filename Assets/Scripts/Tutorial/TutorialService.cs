@@ -33,13 +33,12 @@ public class TutorialService : MonoBehaviour
         }
 
         // Trigger Mechanic Tutorials
-        foreach (var mechanic in dataManager.GetMechanics())
+        foreach (var mechanic in dataManager.GetAllMechanics())
         {
             if (dataManager.IsFirstTimePlayMechanic(mechanic.id))
             {
-                dataManager.PlayedMechanic(mechanic.id);
                 StartMechanicTutorial(mechanic.id);
-                break; // Chỉ hiện 1 mechanic mỗi lần load level
+                break; 
             }
         }
     }
@@ -56,11 +55,7 @@ public class TutorialService : MonoBehaviour
     private void StartMechanicTutorial(int mechanicId)
     {
         var sequence = new TutorialSequence();
-        string instruction = "";
-        if (mechanicId == 0) instruction = "Move blocks to reveal the mystery!";
-        else if (mechanicId == 1) instruction = "Complete a category to unveil the curtain!";
-        else instruction = "Match blocks of the same category to break the ice!";
-
+        string instruction = CoreServices.Get<DataManager>().GetMechanic(mechanicId)?.instruction ?? "Learn this new mechanic!";
         sequence.AddStep(new ShowMechanicStep(mechanicId, instruction));
         StartSequence(sequence);
     }

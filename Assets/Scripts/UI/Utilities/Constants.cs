@@ -88,4 +88,5 @@ public static class Constants
     public const string FRAMES_PATH = "Data/ProfileItems/Frames";
     public const string AVATARS_PATH = "Data/ProfileItems/Avatars";
     public const string BOOSTERDATA_PATH = "Data/Boosters";
+    public const string MECHANICDATA_PATH = "Data/Mechanics";
 }
