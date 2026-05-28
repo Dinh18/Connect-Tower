@@ -70,10 +70,10 @@ public class ClickSlotStep : TutorialStep
 
 public class ShowMechanicStep : TutorialStep
 {
-    private int mechanicId;
+    private string mechanicId;
     private string instruction;
 
-    public ShowMechanicStep(int mechanicId, string instruction)
+    public ShowMechanicStep(string mechanicId, string instruction)
     {
         this.mechanicId = mechanicId;
         this.instruction = instruction;

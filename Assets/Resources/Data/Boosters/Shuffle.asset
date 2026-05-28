@@ -16,4 +16,4 @@ MonoBehaviour:
   nameBooster: Shuffle
   description: Use it to shuffle the board!
   price: 800
-  unlockedLevel: 4
+  unlockedLevel: 20

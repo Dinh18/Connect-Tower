@@ -6,7 +6,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewMechanic", menuName = "Scriptable Objects/Mechanic Data")]
 public class MechanicData : ScriptableObject
 {
-    public int id;
+    public string id;
     public string nameMechanic;
     public string instruction;
     public int levelUnclock;

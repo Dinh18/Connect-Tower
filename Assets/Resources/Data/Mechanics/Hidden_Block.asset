@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c19b1a175e27134d8cd38bc8afb2a44, type: 3}
   m_Name: Hidden_Block
   m_EditorClassIdentifier: Assembly-CSharp::MechanicData
-  id: 0
+  id: 
   nameMechanic: Hidden Block
   instruction: Move blocks to reveal the mystery!
-  levelUnclock: -1
+  levelUnclock: 4

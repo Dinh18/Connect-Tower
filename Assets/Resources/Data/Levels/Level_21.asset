@@ -20,24 +20,27 @@ MonoBehaviour:
   row2: 5
   slots:
   - slotType: 2
-    questionTopic: {fileID: 0}
-    blocks: []
-  - slotType: 0
+    position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 27d30a38d595de94591d1f11cbc32f07, type: 2}
-      indexSprite: 0
-    - typeBlock: 0
-      blockTopic: {fileID: 11400000, guid: 27d30a38d595de94591d1f11cbc32f07, type: 2}
-      indexSprite: 1
+      indexSprite: 3
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 27d30a38d595de94591d1f11cbc32f07, type: 2}
       indexSprite: 2
     - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 27d30a38d595de94591d1f11cbc32f07, type: 2}
+      indexSprite: 1
+  - slotType: 0
+    position: {x: 0, y: 0, z: 0}
+    questionTopic: {fileID: 0}
+    blocks:
+    - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 6d25b8a301d4f9e449a604f093872108, type: 2}
       indexSprite: 0
   - slotType: 0
+    position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0
@@ -53,6 +56,7 @@ MonoBehaviour:
       blockTopic: {fileID: 11400000, guid: 99c10d44f3d9e2d4c80d89888e042ece, type: 2}
       indexSprite: 0
   - slotType: 0
+    position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0
@@ -65,6 +69,7 @@ MonoBehaviour:
       blockTopic: {fileID: 11400000, guid: aac374d96cfea4e41b08d964d992cae9, type: 2}
       indexSprite: 1
   - slotType: 2
+    position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0
@@ -74,6 +79,7 @@ MonoBehaviour:
       blockTopic: {fileID: 11400000, guid: a6ae0a6f94c880d478b3d354abe1e4af, type: 2}
       indexSprite: 1
   - slotType: 0
+    position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0
@@ -83,6 +89,7 @@ MonoBehaviour:
       blockTopic: {fileID: 11400000, guid: 99c10d44f3d9e2d4c80d89888e042ece, type: 2}
       indexSprite: 1
   - slotType: 0
+    position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0
@@ -98,6 +105,7 @@ MonoBehaviour:
       blockTopic: {fileID: 11400000, guid: 99c10d44f3d9e2d4c80d89888e042ece, type: 2}
       indexSprite: 2
   - slotType: 0
+    position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0
@@ -113,6 +121,7 @@ MonoBehaviour:
       blockTopic: {fileID: 11400000, guid: aac374d96cfea4e41b08d964d992cae9, type: 2}
       indexSprite: 2
   - slotType: 0
+    position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0

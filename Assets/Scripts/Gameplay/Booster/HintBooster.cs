@@ -20,7 +20,7 @@ public class HintBooster : Booster
                 } 
                 else 
                 {
-                    floatingNotifier.ShowWarning();
+                    floatingNotifier.ShowWarning("All blocks have been revealed!");
                 }
             }
         });

@@ -12,9 +12,6 @@ public class LevelFailedPanel : Panel
 
     void OnEnable()
     {
-        // backMainMenuButton.onClick.AddListener(() => GameEventBus.OnRequestBackHome?.Invoke());
-        // tryAgainButton.onClick.AddListener(() => GameEventBus.OnRequestTryAgain?.Invoke());
-        // addMoveButton.onClick.AddListener(() => GameEventBus.OnRequestAddMoveToContinue?.Invoke());
         backMainMenuButton.onClick.AddListener(OnClickBackHome);
         tryAgainButton.onClick.AddListener(() => CoreServices.Get<GameManager>().RestartLevel());
         addMoveButton.onClick.AddListener(() => CoreServices.Get<GameManager>().AddMoveToContinue(5));

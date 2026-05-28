@@ -13,17 +13,20 @@ public class BoosterButton : MonoBehaviour
     // [SerializeField] AddBoosterUI addBoosterUI;
     [SerializeField] GameObject lockElements;
     [SerializeField] GameObject unlockElements;
+    [SerializeField] FloatingNotifier floatingNotifier;
 
     void OnEnable()
     {
         boosterButton.onClick.AddListener(OnButtonClicked);
         GameEventBus.Subscribe<BoosterCountUpdatedEvent>(UpdateCountText);
+        GameEventBus.Subscribe<RequestUnlockBoosterEvent>(UnClockBooster);
     }
 
     void OnDisable()
     {
         boosterButton.onClick.RemoveListener(OnButtonClicked);
         GameEventBus.UnSubscribe<BoosterCountUpdatedEvent>(UpdateCountText);
+        GameEventBus.UnSubscribe<RequestUnlockBoosterEvent>(UnClockBooster);
     }
 
     void Awake()
@@ -47,8 +50,8 @@ public class BoosterButton : MonoBehaviour
 
         if(!LevelLoader.isPlaytestingTempLevel && CoreServices.Get<DataManager>().IsFirstTimeUserBooster(id))
         {
-            // addBoosterUI.SetupButton(this);
-            GameEventBus.Publish(new RequestOpenBoosterPopupEvent { type = booster.GetBoosterType(), boosterTransform = this.GetComponent<RectTransform>()});
+            // Không tự động trigger tutorial ở đây nữa, BottomPanel sẽ trigger theo ngữ cảnh
+            // GameEventBus.Publish(new RequestOpenBoosterPopupEvent { type = booster.GetBoosterType(), boosterTransform = this.GetComponent<RectTransform>()});
         }
 
         int count = LevelLoader.isPlaytestingTempLevel ? 99 : CoreServices.Get<DataManager>().GetAmountOfBoosterByID(id);
@@ -73,11 +76,18 @@ public class BoosterButton : MonoBehaviour
 
     public void OnButtonClicked()
     {
+        if(!CoreServices.Get<DataManager>().IsUnLockedBooster((int)booster.GetBoosterType()))
+        {
+            floatingNotifier.ShowWarning("Unlock at level " + (CoreServices.Get<DataManager>().GetBooster((int)booster.GetBoosterType()).unlockedLevel + 1));
+            return;
+        }
         if (!LevelLoader.isPlaytestingTempLevel && booster.GetNumsBooster() <= 0)
         {
             GameEventBus.Publish(new RequestOpenBoosterPopupEvent { type = booster.GetBoosterType() , boosterTransform = this.GetComponent<RectTransform>()});
             return;
         }
+
+        
 
         if(CoreServices.Get<GameManager>().GetCurrState() == GameManager.GameState.Pause) return;
 
@@ -90,15 +100,19 @@ public class BoosterButton : MonoBehaviour
         boosterButton.interactable = true;
     }
 
+    private void UnClockBooster(RequestUnlockBoosterEvent evt)
+    {
+        if(evt.boosterType == booster.GetBoosterType())
+        {
+            lockElements.SetActive(false);
+            unlockElements.SetActive(true);
+        }
+    }
+
 
     public void OnClickAddBoosterButton()
     {
         // Bắn tín hiệu qua EventBus
         GameEventBus.Publish(new AddBoosterEvent{ boosterButton = this });
     }
-
-    // public void PlayAddEffect()
-    // {
-    //     StartCoroutine(addBoosterUI.AddBoosterEffect(this.gameObject.GetComponent<RectTransform>()));
-    // }
 }

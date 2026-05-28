@@ -15,40 +15,43 @@ MonoBehaviour:
   level: 2
   numsTopic: 2
   difficult: 0
-  moves: 22
+  moves: 10
   row1: 3
   row2: 0
   slots:
   - slotType: 0
+    position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
     blocks:
-    - typeBlock: 0
-      blockTopic: {fileID: 11400000, guid: 3f06e7ec7a170e548a83a8354c8ea214, type: 2}
-      indexSprite: 0
-    - typeBlock: 0
-      blockTopic: {fileID: 11400000, guid: aac374d96cfea4e41b08d964d992cae9, type: 2}
-      indexSprite: 0
-    - typeBlock: 0
-      blockTopic: {fileID: 11400000, guid: aac374d96cfea4e41b08d964d992cae9, type: 2}
-      indexSprite: 1
-    - typeBlock: 0
-      blockTopic: {fileID: 11400000, guid: aac374d96cfea4e41b08d964d992cae9, type: 2}
-      indexSprite: 2
-  - slotType: 0
-    questionTopic: {fileID: 0}
-    blocks:
-    - typeBlock: 0
-      blockTopic: {fileID: 11400000, guid: 3f06e7ec7a170e548a83a8354c8ea214, type: 2}
-      indexSprite: 1
-    - typeBlock: 0
-      blockTopic: {fileID: 11400000, guid: aac374d96cfea4e41b08d964d992cae9, type: 2}
-      indexSprite: 3
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 3f06e7ec7a170e548a83a8354c8ea214, type: 2}
       indexSprite: 2
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 3f06e7ec7a170e548a83a8354c8ea214, type: 2}
+      indexSprite: 1
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 3f06e7ec7a170e548a83a8354c8ea214, type: 2}
+      indexSprite: 0
+  - slotType: 0
+    position: {x: 0, y: 0, z: 0}
+    questionTopic: {fileID: 0}
+    blocks:
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: aac374d96cfea4e41b08d964d992cae9, type: 2}
+      indexSprite: 3
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: aac374d96cfea4e41b08d964d992cae9, type: 2}
+      indexSprite: 2
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: aac374d96cfea4e41b08d964d992cae9, type: 2}
+      indexSprite: 1
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 3f06e7ec7a170e548a83a8354c8ea214, type: 2}
       indexSprite: 3
   - slotType: 0
+    position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
-    blocks: []
+    blocks:
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: aac374d96cfea4e41b08d964d992cae9, type: 2}
+      indexSprite: 3

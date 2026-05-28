@@ -12,7 +12,7 @@ public class AddBoosterUI : Popup
     [SerializeField] private Text coinsText;
     [SerializeField] private Image boosterIconImage;
     [SerializeField] private Button addButton;
-    [SerializeField] private Button claimButton;
+    // [SerializeField] private Button claimButton;
     [SerializeField] private Button closeButton;
     [SerializeField] private Sprite addMoveIcon;
     [SerializeField] private Sprite shuffleIcon;
@@ -49,18 +49,18 @@ public class AddBoosterUI : Popup
         boosterType = requestOpenBoosterPopup.type;
         boosterTransform = requestOpenBoosterPopup.boosterTransform;
 
-        if(isFirstTime)
-        {
-            claimButton.gameObject.SetActive(true);
-            addButton.gameObject.SetActive(false);
-            closeButton.gameObject.SetActive(false);
-        }
-        else
-        {
-            claimButton.gameObject.SetActive(false);
+        // if(isFirstTime)
+        // {
+        //     claimButton.gameObject.SetActive(true);
+        //     addButton.gameObject.SetActive(false);
+        //     closeButton.gameObject.SetActive(false);
+        // }
+        // else
+        // {
+            // claimButton.gameObject.SetActive(false);
             addButton.gameObject.SetActive(true);
             closeButton.gameObject.SetActive(true);
-        }
+        // }
 
         headerText.text = header;
         coinsText.text = coins.ToString();
@@ -68,8 +68,8 @@ public class AddBoosterUI : Popup
         // addButton.onClick.RemoveAllListeners();
         // addButton.onClick.AddListener(boosterButton.OnClickAddBoosterButton);
         
-        claimButton.onClick.RemoveAllListeners();
-        claimButton.onClick.AddListener(OnClickClaim);
+        // claimButton.onClick.RemoveAllListeners();
+        // claimButton.onClick.AddListener(OnClickClaim);
         
         if(boosterType == BoosterType.AddMove)
         {
@@ -135,7 +135,7 @@ public class AddBoosterUI : Popup
         OnClickClose();
     }
 
-    public Button GetClaimButton() => claimButton;
+    // public Button GetClaimButton() => claimButton;
 
 
 }

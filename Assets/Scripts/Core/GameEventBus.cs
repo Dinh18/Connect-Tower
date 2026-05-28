@@ -178,7 +178,17 @@ public struct NoMovesAvailableEvent : IGameEvent
     
 }
 
+public struct LowMovesEvent : IGameEvent
+{
+    
+}
+
 public struct BoardStateChangedEvent : IGameEvent
 {
     
+}
+
+public struct RequestUnlockBoosterEvent  : IGameEvent
+{
+    public BoosterType boosterType;
 }

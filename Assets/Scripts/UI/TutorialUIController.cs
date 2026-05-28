@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using DG.Tweening;
 
 public class TutorialUIController : MonoBehaviour
 {
@@ -63,15 +64,34 @@ public class TutorialUIController : MonoBehaviour
         tutorialCanvas.SetActive(true);
         mechanicImage.gameObject.SetActive(false);
         closeText.gameObject.SetActive(false);
-        
         if (handImage != null) handImage.SetActive(true);
 
         RectTransform targetRect = target.GetComponent<RectTransform>();
+        RectTransform dimRect = dimImage.GetComponent<RectTransform>();
         if(targetRect != null)
         {
             if (handImage != null) handImage.GetComponent<RectTransform>().position = targetRect.position;
             dimImage.SetActive(true);
-            ElevateTarget(target);
+
+            dimImage.SetActive(true);
+        
+        // 1. FADE TẤM NỀN ĐEN (Không cần tính Pivot, không cần Scale)
+        // Cần gắn component CanvasGroup vào dimImage
+        CanvasGroup dimGroup = dimImage.GetComponent<CanvasGroup>();
+        if (dimGroup != null)
+        {
+            dimGroup.alpha = 0f;
+            dimGroup.DOFade(1f, 0.3f); // Tối dần toàn màn hình trong 0.3s
+        }
+
+        // 2. NHẤC TARGET LÊN TRÊN CÙNG
+        // Hàm này cấp Canvas + Raycaster + Sorting Order cao cho Target
+        ElevateTarget(target);
+
+        // 3. TẠO ĐIỂM NHẤN CHO TARGET (Thay vì scale nền đen, ta scale chính Target)
+        // RectTransform targetRect = target.GetComponent<RectTransform>();
+        targetRect.localScale = Vector3.zero;
+        targetRect.DOScale(1f, 0.5f).SetEase(Ease.OutBack);
         }
         else
         {
@@ -81,7 +101,7 @@ public class TutorialUIController : MonoBehaviour
         if (tutorialText != null) tutorialText.text = instruction;
     }
 
-    public void StartMechanicTutorial(int mechanicId)
+    public void StartMechanicTutorial(string mechanicId)
     {
         tutorialCanvas.SetActive(true);
         if (handImage != null) handImage.SetActive(false);
@@ -89,16 +109,16 @@ public class TutorialUIController : MonoBehaviour
         
         closeText.gameObject.SetActive(true);
         mechanicImage.gameObject.SetActive(true);
-        if (mechanicSprites != null && mechanicId >= 0 && mechanicId < mechanicSprites.Count)
+        if (mechanicSprites != null && int.TryParse(mechanicId, out int mechanicIndex) && mechanicIndex >= 0 && mechanicIndex < mechanicSprites.Count)
         {
-            mechanicImage.sprite = mechanicSprites[mechanicId];
+            mechanicImage.sprite = mechanicSprites[mechanicIndex];
         }
         
         // Hardcode instruction for now since it was moved to step
         // Or we can add instruction to StartMechanicTutorial signature if needed.
     }
 
-    public void StartMechanicTutorial(int mechanicId, string instruction)
+    public void StartMechanicTutorial(string mechanicId, string instruction)
     {
         StartMechanicTutorial(mechanicId);
         if (tutorialText != null) tutorialText.text = instruction;

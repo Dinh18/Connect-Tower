@@ -52,7 +52,7 @@ public class TutorialService : MonoBehaviour
         StartSequence(sequence);
     }
 
-    private void StartMechanicTutorial(int mechanicId)
+    private void StartMechanicTutorial(string mechanicId)
     {
         var sequence = new TutorialSequence();
         string instruction = CoreServices.Get<DataManager>().GetMechanic(mechanicId)?.instruction ?? "Learn this new mechanic!";
@@ -60,11 +60,10 @@ public class TutorialService : MonoBehaviour
         StartSequence(sequence);
     }
 
-    public void StartBoosterTutorial(UnityEngine.UI.Button claimButton, UnityEngine.UI.Button boosterButton, string claimText, string useText)
+    public void StartBoosterTutorial(UnityEngine.UI.Button boosterButton, BoosterDataSO boosterData)
     {
         var sequence = new TutorialSequence();
-        sequence.AddStep(new ClickButtonStep(claimButton, claimText));
-        sequence.AddStep(new ClickButtonStep(boosterButton, useText));
+        sequence.AddStep(new ClickButtonStep(boosterButton, boosterData.description));
         StartSequence(sequence);
     }
 

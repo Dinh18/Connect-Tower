@@ -15,4 +15,4 @@ MonoBehaviour:
   id: 2
   nameMechanic: Ice Slot
   instruction: Match blocks of the same category to break the ice!
-  levelUnclock: 24
+  levelUnclock: 20

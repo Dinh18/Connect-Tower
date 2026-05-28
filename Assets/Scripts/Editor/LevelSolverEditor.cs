@@ -152,20 +152,18 @@ public class LevelSolverEditor : EditorWindow
             return;
         }
 
-        var openList = new List<Node>();
+        var openList = new Queue<Node>();
         var closedSet = new HashSet<GameState>();
 
         var startNode = new Node { state = initial, parent = null, moveDesc = "Start", g = 0, h = Heuristic(initial) };
-        openList.Add(startNode);
+        openList.Enqueue(startNode);
         closedSet.Add(initial);
 
         int expanded = 0;
 
         while (openList.Count > 0 && expanded < maxSearchNodes)
         {
-            openList.Sort((a, b) => a.f.CompareTo(b.f));
-            Node curr = openList[0];
-            openList.RemoveAt(0);
+            Node curr = openList.Dequeue();
             expanded++;
 
             if (curr.state.IsWin())
@@ -179,7 +177,7 @@ public class LevelSolverEditor : EditorWindow
                 if (!closedSet.Contains(succ.state))
                 {
                     closedSet.Add(succ.state);
-                    openList.Add(succ);
+                    openList.Enqueue(succ);
                 }
             }
         }
@@ -189,19 +187,10 @@ public class LevelSolverEditor : EditorWindow
 
     private int Heuristic(GameState state)
     {
-        int h = 0;
-        for (int i = 0; i < state.slots.Length; i++)
-        {
-            if (state.slots[i].count > 0 && !state.slots[i].IsCompleted())
-            {
-                h++;
-                // Penalty for hidden blocks
-                for(int j=0; j<state.slots[i].count; j++) {
-                    if (state.slots[i].hiddens[j]) h++;
-                }
-            }
-        }
-        return h;
+        // Để tìm số bước ĐI NHỎ NHẤT (shortest path), hàm Heuristic phải là Admissible.
+        // Trả về 0 sẽ biến thuật toán A* thành thuật toán tìm kiếm theo chiều rộng (BFS), 
+        // đảm bảo 100% đường đi tìm được là ngắn nhất.
+        return 0;
     }
 
     private List<Node> GenerateSuccessors(Node node)
@@ -241,6 +230,8 @@ public class LevelSolverEditor : EditorWindow
 
                 GameState nextState = CloneState(state);
                 
+                bool wasCompleted = state.slots[j].IsCompleted();
+
                 // Do move
                 for (int m = 0; m < amountToMove; m++)
                 {
@@ -256,8 +247,19 @@ public class LevelSolverEditor : EditorWindow
                     nextState.slots[i].hiddens[nextState.slots[i].count - 1] = false;
                 }
 
-                // Check triggers for Hide slots
-                CheckReveals(ref nextState);
+                // Check trigger for Hide slots (Gameplay Mechanism: only trigger once per completion)
+                if (!wasCompleted && nextState.slots[j].IsCompleted())
+                {
+                    int reqTopic = nextState.slots[j].topics[0];
+                    for (int k = 0; k < nextState.slots.Length; k++)
+                    {
+                        if (nextState.slots[k].type == 1 && !nextState.slots[k].isRevealed && nextState.slots[k].questionTopicID == reqTopic)
+                        {
+                            nextState.slots[k].isRevealed = true;
+                            break; // Chỉ reveal 1 slot cho 1 lần hoàn thành
+                        }
+                    }
+                }
 
                 list.Add(new Node
                 {
@@ -273,25 +275,7 @@ public class LevelSolverEditor : EditorWindow
         return list;
     }
 
-    private void CheckReveals(ref GameState state)
-    {
-        for (int i = 0; i < state.slots.Length; i++)
-        {
-            if (state.slots[i].type == 1 && !state.slots[i].isRevealed) // Hide slot
-            {
-                int reqTopic = state.slots[i].questionTopicID;
-                // Check if any slot is completed with this topic
-                for (int j = 0; j < state.slots.Length; j++)
-                {
-                    if (state.slots[j].IsCompleted() && state.slots[j].topics[0] == reqTopic)
-                    {
-                        state.slots[i].isRevealed = true;
-                        break;
-                    }
-                }
-            }
-        }
-    }
+    // Logic Hide slots đã được chuyển vào trong GenerateSuccessors
 
     private GameState CloneState(GameState s)
     {
@@ -314,6 +298,7 @@ public class LevelSolverEditor : EditorWindow
         }
         path.Reverse();
 
+        Debug.Log($"<color=cyan><b>MỨC ĐỘ TỐI ƯU NHẤT: {path.Count - 1} BƯỚC ĐI (MINIMUM STEPS)</b></color>");
         Debug.Log($"<color=green>Solution found in {path.Count - 1} steps! Nodes expanded: {expanded}</color>");
         for (int i = 1; i < path.Count; i++)
         {

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -75,6 +76,7 @@ public class GameManager : MonoBehaviour
 
     private Coroutine noMovesCoroutine;
     private bool isWaitingForNoMoves = false;
+    private bool isWaitingForLowMoves = false;
 
     public void Move(bool isMoving)
     {
@@ -93,20 +95,59 @@ public class GameManager : MonoBehaviour
             else if (!slotsManager.GetLevelComleted())
             {
                 // Nếu đang chờ 5s, bỏ qua việc kiểm tra board
-                if (isWaitingForNoMoves) return;
-
-                if (!slotsManager.HasAvailableMoves())
+                if (!slotsManager.HasAvailableMoves() && !isWaitingForNoMoves)
                 {
                     Debug.Log("Không còn nước đi hợp lệ nào! Bắt đầu đếm ngược 5s.");
                     isWaitingForNoMoves = true;
                     noMovesCoroutine = StartCoroutine(WaitAndTriggerNoMoves());
                 }
+
+                if(moves <= 2 && !isWaitingForLowMoves)
+                {
+                    Debug.Log("Sắp hết lượt di chuyển! Bắt đầu đếm ngược 5s.");
+                    isWaitingForLowMoves = true;
+                    StartCoroutine(WaitAndTriggerLowMoves());
+                }
             }
         }
     }
 
-    private System.Collections.IEnumerator WaitAndTriggerNoMoves()
+    private IEnumerator WaitAndTriggerLowMoves()
     {
+        if(CoreServices.Get<DataManager>().IsFirstTimeUserBooster((int)BoosterType.AddMove))
+        {
+            yield return new WaitForSeconds(0.5f); // Đợi 0.5s trước khi bắn sự kiện để đảm bảo mọi thứ đã ổn định sau nước đi cuối cùng
+            GameEventBus.Publish(new LowMovesEvent());
+            GameEventBus.Publish(new RequestUnlockBoosterEvent { boosterType = BoosterType.AddMove });
+            CoreServices.Get<DataManager>().UnlockBooster((int)BoosterType.AddMove);
+            isWaitingForLowMoves = false;
+            yield break; // Không cần đợi nếu người chơi chưa từng dùng booster Extra Moves
+        }
+        yield return new WaitForSeconds(2f); // Đợi 2s để tránh spam sự kiện khi người chơi nhanh tay
+        GameEventBus.Publish(new LowMovesEvent());
+        isWaitingForLowMoves = false;
+        
+    }
+
+    private IEnumerator WaitAndTriggerNoMoves()
+    {
+        if(CoreServices.Get<DataManager>().IsFirstTimeUserBooster((int)BoosterType.Shuffle) || CoreServices.Get<DataManager>().IsFirstTimeUserBooster((int)BoosterType.Undo))
+        {
+            yield return new WaitForSeconds(1.5f); // Đợi 1s trước khi bắn sự kiện để đảm bảo mọi thứ đã ổn định sau nước đi cuối cùng
+            GameEventBus.Publish(new NoMovesAvailableEvent());
+            if(CoreServices.Get<DataManager>().IsFirstTimeUserBooster((int)BoosterType.Undo))
+            {
+                GameEventBus.Publish(new RequestUnlockBoosterEvent { boosterType = BoosterType.Undo });
+                CoreServices.Get<DataManager>().UnlockBooster((int)BoosterType.Undo);
+            }
+            else if(CoreServices.Get<DataManager>().IsFirstTimeUserBooster((int)BoosterType.Shuffle))
+            {
+                GameEventBus.Publish(new RequestUnlockBoosterEvent { boosterType = BoosterType.Shuffle });
+                CoreServices.Get<DataManager>().UnlockBooster((int)BoosterType.Shuffle);
+            }
+            isWaitingForNoMoves = false;
+            yield break; // Không cần đợi nếu người chơi chưa từng dùng booster Shuffle hoặc Undo
+        }
         yield return new WaitForSeconds(5f);
 
         // Sau 5s, kiểm tra xem game còn đang chơi không và chưa qua màn

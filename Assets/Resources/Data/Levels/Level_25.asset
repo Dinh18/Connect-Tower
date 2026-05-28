@@ -15,7 +15,7 @@ MonoBehaviour:
   level: 25
   numsTopic: 7
   difficult: 2
-  moves: 30
+  moves: 25
   row1: 4
   row2: 5
   slots:

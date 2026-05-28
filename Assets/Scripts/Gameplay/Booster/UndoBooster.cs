@@ -51,7 +51,7 @@ public class UndoBooster : Booster
                 else
                 {
                     // Nếu thất bại (hết bước), hiện thông báo
-                    if (floatingNotifier != null) floatingNotifier.ShowWarning();
+                    if (floatingNotifier != null) floatingNotifier.ShowWarning("No last move found!");
                 }
             }
         });

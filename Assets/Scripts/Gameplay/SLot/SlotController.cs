@@ -81,16 +81,31 @@ public class SlotController : MonoBehaviour
         this.slotType = slotType;
         isFinished = false;
         iceVFX.SetActive(false);
+        if(iceRod != null) iceRod.SetActive(false);
+        
         if(blockTopic != null) this.blockTopic = blockTopic;
         if(header != null) header.Setup(this);
         if(slotVFX != null) slotVFX.Setup();
+        
+        if (slotType != SlotType.Ice)
+        {
+            if (baseMeshCache == null) baseMeshCache = Resources.Load<Mesh>(Constants.MESH_BASE_PATH);
+            if (baseMaterialCache == null) baseMaterialCache = Resources.Load<Material>(Constants.MATERIAL_BASE_PATH);
+            if (baseMeshFilter != null && baseMeshCache != null) baseMeshFilter.mesh = baseMeshCache;
+            if (baseMeshRenderer != null && baseMaterialCache != null) baseMeshRenderer.material = baseMaterialCache;
+        }
+
         if(slotType == SlotType.Hide)
         {
             isRevealed = false;
-            hideSlotHolder.SetActive(true);
-            itemImage.sprite = blockTopic.blocksSprite[0];
+            if (hideSlotHolder != null) hideSlotHolder.SetActive(true);
+            if (itemImage != null && blockTopic != null && blockTopic.blocksSprite.Count > 0) itemImage.sprite = blockTopic.blocksSprite[0];
         } 
-        else isRevealed = true;
+        else 
+        {
+            isRevealed = true;
+            if (hideSlotHolder != null) hideSlotHolder.SetActive(false);
+        }
     }
 
     public void SetupIceSlot()

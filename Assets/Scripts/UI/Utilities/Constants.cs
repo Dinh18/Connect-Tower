@@ -17,7 +17,7 @@ public static class Constants
     public const string MATERIAL_COLOR_9_PATH = "Material/Type_9";
     public const string MATERIAL_COLOR_W_PATH = "Material/Type_W";
     public const string MATERIAL_COLOR_HIDE_PATH = "Material/Ground";
-    public const string MATERIAL_BASE_PATH = "Material/Pole_Texture";
+    public const string MATERIAL_BASE_PATH = "Material/New_Pole_Mat";
     public const string MATERIAL_ICE_PATH = "Material/Ice_Obstacle_MAT";
     public const string MATERIAL_ICE_BLOCK = "Material/Ice_Block_Material";
     // Mesh

@@ -20,12 +20,18 @@ public class BottomPanel : MonoBehaviour
     {
         GameEventBus.Subscribe<RequestOpenBoosterPopupEvent>(OnOpenAddBoosterPopup);
         GameEventBus.Subscribe<RequestAddBoosterEffectEvent>(OnPlayAddBoosterEffect);
+        GameEventBus.Subscribe<RequestUnlockBoosterEvent >(TryTriggerTutorialForBooster);
+        // GameEventBus.Subscribe<NoMovesAvailableEvent>(OnNoMovesAvailable);
+        // GameEventBus.Subscribe<MovesUpdatedEvent>(OnMovesUpdated);
     }
 
     void OnDisable()
     {
         GameEventBus.UnSubscribe<RequestOpenBoosterPopupEvent>(OnOpenAddBoosterPopup);
         GameEventBus.UnSubscribe<RequestAddBoosterEffectEvent>(OnPlayAddBoosterEffect);
+        GameEventBus.UnSubscribe<RequestUnlockBoosterEvent>(TryTriggerTutorialForBooster);
+        // GameEventBus.UnSubscribe<NoMovesAvailableEvent>(OnNoMovesAvailable);
+        // GameEventBus.UnSubscribe<MovesUpdatedEvent>(OnMovesUpdated);
     }
 
     public void Show()
@@ -58,12 +64,73 @@ public class BottomPanel : MonoBehaviour
         });
     }
 
+    // Dùng biến static để theo dõi trong 1 phiên chơi, dễ dàng test lại khi tắt bật Play Mode
+    // private static HashSet<int> shownBoosterTutorials = new HashSet<int>();
+
+    // private void OnNoMovesAvailable(NoMovesAvailableEvent evt)
+    // {
+    //     TryTriggerTutorialForBooster(BoosterType.Undo);
+    //     TryTriggerTutorialForBooster(BoosterType.Shuffle);
+    // }
+
+    // private void OnMovesUpdated(MovesUpdatedEvent evt)
+    // {
+    //     if (evt.currentMoves <= 5)
+    //     {
+    //         TryTriggerTutorialForBooster(BoosterType.AddMove);
+            
+    //         if (CheckForHiddenBlocks())
+    //         {
+    //             TryTriggerTutorialForBooster(BoosterType.Hint);
+    //         }
+    //     }
+    // }
+
+    private bool CheckForHiddenBlocks()
+    {
+        SlotsManager slotsManager = CoreServices.Get<SlotsManager>();
+        if (slotsManager == null) return false;
+        
+        foreach (SlotController slot in slotsManager.GetAllSlots())
+        {
+            foreach (BlockController block in slot.blocks)
+            {
+                if (!block.isRevealed) return true;
+            }
+        }
+        return false;
+    }
+
+    private void TryTriggerTutorialForBooster(RequestUnlockBoosterEvent evt)
+    {
+        BoosterType type = evt.boosterType;
+        DataManager dataManager = CoreServices.Get<DataManager>();
+        int boosterID = (int)type;
+        BoosterDataSO boosterData = dataManager.GetBooster(boosterID);
+        
+        if (dataManager.IsFirstTimeUserBooster(boosterID))
+        {
+            BoosterButton matchingBoosterButton = null;
+            if (boosterButtons != null)
+            {
+                foreach (var bb in boosterButtons)
+                {
+                    if (bb.GetBooster().GetBoosterType() == type)
+                    {
+                        matchingBoosterButton = bb;
+                        break;
+                    }
+                }
+            }
+
+            var tutorialService = CoreServices.Get<TutorialService>();
+            tutorialService.StartBoosterTutorial(matchingBoosterButton.GetComponent<Button>(), boosterData );
+        }
+    }
+
     private void OnOpenAddBoosterPopup(RequestOpenBoosterPopupEvent requestOpenBoosterPopup)
     {
         if (addBoosterUI == null) return;
-        
-        addBoosterUI.SetConfig(requestOpenBoosterPopup);
-        CoreServices.Get<UIManager>().ShowUI<AddBoosterUI>();
         
         BoosterButton matchingBoosterButton = null;
         if (boosterButtons != null)
@@ -78,28 +145,12 @@ public class BottomPanel : MonoBehaviour
             }
         }
 
+        addBoosterUI.SetConfig(requestOpenBoosterPopup);
+        CoreServices.Get<UIManager>().ShowUI<AddBoosterUI>();
+        
         if (matchingBoosterButton != null)
         {
             addBoosterUI.SetupButton(matchingBoosterButton);
-
-            DataManager dataManager = CoreServices.Get<DataManager>();
-            int boosterID = (int)requestOpenBoosterPopup.type;
-            if (dataManager.IsFirstTimeUserBooster(boosterID))
-            {
-                var tutorialService = CoreServices.Get<TutorialService>();
-                if (tutorialService != null)
-                {
-                    string useInstruction = "";
-                    if (requestOpenBoosterPopup.type == BoosterType.AddMove)
-                        useInstruction = "Use the Extra Move to get extra moves!";
-                    else if (requestOpenBoosterPopup.type == BoosterType.Shuffle)
-                        useInstruction = "Use it to shuffle the board!";
-                    else
-                        useInstruction = "Use it to reveal a correct placement";
-
-                    tutorialService.StartBoosterTutorial(addBoosterUI.GetClaimButton(), matchingBoosterButton.GetComponent<Button>(), "Claim your free booster!", useInstruction);
-                }
-            }
         }
     }
 

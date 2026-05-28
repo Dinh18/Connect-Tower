@@ -4,6 +4,7 @@ using UnityEngine;
 public class OutLineBoosterButton : MonoBehaviour
 {
     [SerializeField] private GameObject outLine;
+    [SerializeField] private BoosterButton boosterButton;
     void OnEnable()
     {
         GameEventBus.Subscribe<NoMovesAvailableEvent>(ShowOutline);
@@ -19,6 +20,7 @@ public class OutLineBoosterButton : MonoBehaviour
     
     public void ShowOutline(NoMovesAvailableEvent evt)
     {
+        if(!CoreServices.Get<DataManager>().IsUnLockedBooster((int)boosterButton.GetBooster().GetBoosterType())) return;
         if (outLine.activeSelf) return;
 
         outLine.SetActive(true);

@@ -106,7 +106,7 @@ public class SettingMenu : MonoBehaviour
         if(CoreServices.Get<GameManager>().Moved())
         {
             quitLevelPopup.SetConfig(true);
-             CoreServices.Get<UIManager>().ShowUI<QuitLevelPopup>();
+            CoreServices.Get<UIManager>().ShowUI<QuitLevelPopup>();
         } 
         else CoreServices.Get<GameManager>().ChangeState(GameManager.GameState.MainMenu);
     }

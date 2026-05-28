@@ -1,10 +1,12 @@
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class FloatingNotifier : MonoBehaviour
 {
     [SerializeField] private CanvasGroup warningCanvasGroup;
     [SerializeField] private RectTransform warningRect;
+    [SerializeField] private Text warningText;
     private float floatDistance = 150f; // Khoảng cách bay lên
     private float animationTime = 1.5f; // Thời gian bay và mờ đi (1.5 giây)
     private Vector2 originalPos;
@@ -15,8 +17,9 @@ public class FloatingNotifier : MonoBehaviour
         Debug.Log(originalPos);
     }
 
-    public void ShowWarning()
+    public void ShowWarning(string warningMesh)
     {
+        warningText.text = warningMesh;
         warningCanvasGroup.DOKill();
         warningRect.DOKill();
 

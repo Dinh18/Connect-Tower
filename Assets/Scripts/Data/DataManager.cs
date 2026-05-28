@@ -254,12 +254,18 @@ public class DataManager : MonoBehaviour
         {
             if(id.ToString() == boosterData.id)
             {
-                if(playerData.currentLevel >= GetBooster(id).unlockedLevel) return true;
-                else return false;
+                return playerData.progress.unlockedBoosters[id.ToString()];
             }
         }
         Debug.LogWarning("Booster khong ton tai");
         return false;
+    }
+
+    public void UnlockBooster(int id)
+    {
+        var b = GetBooster(id);
+        if (b != null) playerData.progress.unlockedBoosters[id.ToString()] = true;
+        SaveGame();
     }
     public bool IsFirstTimeUserBooster(int id)
     {
@@ -267,14 +273,14 @@ public class DataManager : MonoBehaviour
         {
             if(id.ToString() == boosterData.id)
             {
-                if(playerData.currentLevel == GetBooster(id).unlockedLevel) return true;
+                if(playerData.currentLevel == GetBooster(id).unlockedLevel && !playerData.progress.unlockedBoosters[id.ToString()]) return true;
                 else return false;
             }
         }
         Debug.LogWarning("Booster khong ton tai");
         return false;
     }
-    public MechanicData GetMechanic(int id) => allMechanics.FirstOrDefault(m => m.id == id);
+    public MechanicData GetMechanic(string id) => allMechanics.FirstOrDefault(m => m.id == id);
 
     public void AddCoins(int amount)
     {
@@ -412,13 +418,13 @@ public class DataManager : MonoBehaviour
     //     return b != null ? b.unlockedLevel : 0;
     // }
 
-    public int GetLevelUnlockMechanic(int id)
+    public int GetLevelUnlockMechanic(string id)
     {
         var m = GetMechanic(id);
         return m != null ? m.levelUnclock : 0;
     }
 
-    public bool IsFirstTimePlayMechanic(int id)
+    public bool IsFirstTimePlayMechanic(string id)
     {
         var m = GetMechanic(id);
         return m != null && playerData.currentLevel == m.levelUnclock;

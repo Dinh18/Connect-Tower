@@ -873,6 +873,7 @@ GameObject:
   m_Component:
   - component: {fileID: 484}
   - component: {fileID: 656}
+  - component: {fileID: 661}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -1627,13 +1628,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 239}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.11791078, y: -0.3785795, z: 0.9169978, w: 0.04347194}
+  m_LocalRotation: {x: 0.38741887, y: -0.3481299, z: 0.8394608, w: 0.15497702}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 345}
-  m_LocalEulerAnglesHint: {x: -44.93776, y: 14.427987, z: 179.43501}
+  m_LocalEulerAnglesHint: {x: 44.794, y: 49.865, z: 180.771}
 --- !u!4 &510
 Transform:
   m_ObjectHideFlags: 0
@@ -2026,6 +2027,35 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!114 &661
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 239}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!222 &784
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3804,6 +3834,7 @@ MonoBehaviour:
   addImage: {fileID: 1064494109}
   lockElements: {fileID: 301232194}
   unlockElements: {fileID: 154}
+  floatingNotifier: {fileID: 0}
 --- !u!114 &1011
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4165,26 +4196,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05feb8bd86398b146bf1e54e59949770, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GamePanel
-  movesText: {fileID: 18679659}
-  coinsText: {fileID: 1005}
-  coinsButton: {fileID: 974}
-  levelText: {fileID: 970}
-  finishedSlotsSlider: {fileID: 963}
-  progressText: {fileID: 809356797}
-  levelDifficultImgae: {fileID: 953}
-  levelDifficultProgressImage: {fileID: 154797222}
-  levelDifficultLevelText: {fileID: 997}
-  normalColor: {r: 1, g: 1, b: 1, a: 1}
-  warningColor: {r: 1, g: 0, b: 0, a: 1}
-  flashSpeed: 0.5
-  scaleMultiplier: 1.2
-  countdownImage: {fileID: 645083643}
-  difficultLevel: {fileID: 1293842694}
-  addBoosterUI: {fileID: 1551569803}
-  boosterIcon:
-  - {fileID: 550232631}
-  - {fileID: 1529169345}
-  - {fileID: 1633401085}
+  headerPanel: {fileID: 0}
+  bottomPanel: {fileID: 0}
+  borderPanel: {fileID: 0}
+  difficultLevelUI: {fileID: 0}
 --- !u!114 &1038
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4433,6 +4448,7 @@ MonoBehaviour:
   addImage: {fileID: 51059814}
   lockElements: {fileID: 1498899274}
   unlockElements: {fileID: 81}
+  floatingNotifier: {fileID: 0}
 --- !u!224 &1050
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6225,6 +6241,7 @@ MonoBehaviour:
   allFrames: []
   allAvatars: []
   allBoosters: []
+  allMechanics: []
   dataReady: 0
 --- !u!1 &63042271
 GameObject:
@@ -37650,6 +37667,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HomePanel
   playButton: {fileID: 1894871696}
   playText: {fileID: 178798555}
+  playHolder: {fileID: 0}
+  finishParticle: {fileID: 0}
   generalStatsButton: {fileID: 831902944}
   avatarImage: {fileID: 2043371496}
   frameImage: {fileID: 382458492}
@@ -37659,6 +37678,9 @@ MonoBehaviour:
   heartCountText: {fileID: 392220652}
   heartIcon: {fileID: 1283302773}
   addHeartButton: {fileID: 264518134}
+  greenPlayButton: {fileID: 0}
+  redPlayButton: {fileID: 0}
+  purplePlayButton: {fileID: 0}
 --- !u!114 &852682335
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -40256,6 +40278,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FloatingNotifier
   warningCanvasGroup: {fileID: 1021960273}
   warningRect: {fileID: 1021960272}
+  warningText: {fileID: 0}
 --- !u!114 &1021960275
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -40918,6 +40941,7 @@ MonoBehaviour:
   addImage: {fileID: 1559824627}
   lockElements: {fileID: 128556210}
   unlockElements: {fileID: 532660995}
+  floatingNotifier: {fileID: 0}
 --- !u!114 &1072843445
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -41707,6 +41731,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FloatingNotifier
   warningCanvasGroup: {fileID: 1115297285}
   warningRect: {fileID: 1115297284}
+  warningText: {fileID: 0}
 --- !u!114 &1115297287
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -43993,11 +44018,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 268ddc0f7700dfd4c83a22cf5bd60ab0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DifficultLevel
-  skullGameObject:
-  - {fileID: 823015040}
-  - {fileID: 2041471866}
-  - {fileID: 1082914984}
   dimImage: {fileID: 381792246}
+  hard_NPC_Image: {fileID: 0}
+  textHolder: {fileID: 0}
+  bgTextImage: {fileID: 0}
+  difficultLevelText: {fileID: 0}
+  shadowText: {fileID: 0}
+  hardBgColor: {r: 0, g: 0, b: 0, a: 0}
+  hardbgTextColor: {r: 0, g: 0, b: 0, a: 0}
+  spHardBgColor: {r: 0, g: 0, b: 0, a: 0}
+  spHardBgTextColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!1 &1294717285
 GameObject:
   m_ObjectHideFlags: 0
@@ -57795,7 +57825,6 @@ MonoBehaviour:
   coinsText: {fileID: 1875151076}
   boosterIconImage: {fileID: 1992211004}
   addButton: {fileID: 581362412}
-  claimButton: {fileID: 1161769932}
   closeButton: {fileID: 1884355393}
   addMoveIcon: {fileID: 21300000, guid: 836bdec54b73a104280ba9c5ea521006, type: 3}
   shuffleIcon: {fileID: 21300000, guid: bd246a336271174428d5902535da052d, type: 3}
@@ -58157,6 +58186,7 @@ MonoBehaviour:
   addImage: {fileID: 1212358164}
   lockElements: {fileID: 1611227359}
   unlockElements: {fileID: 337}
+  floatingNotifier: {fileID: 0}
 --- !u!114 &1559185052
 MonoBehaviour:
   m_ObjectHideFlags: 0
