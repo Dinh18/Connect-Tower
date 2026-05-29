@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
+using UnityEngine.U2D.Animation;
 using UnityEngine.UI;
 
 public class SlotController : MonoBehaviour
@@ -32,7 +33,10 @@ public class SlotController : MonoBehaviour
     [SerializeField] private SlotVFX slotVFX;
     
     [Header("Hide Slot Settings")]
-    [SerializeField] GameObject hideSlotHolder;
+    // [SerializeField] GameObject hideSlotHolder;
+    [SerializeField] private Animator hiddenSlotAnimator;
+    [SerializeField] private string[] animationStates = {"CLOTH_04" };
+    private int[] animationHashes;
     [SerializeField] private Image itemImage;
     public bool isRevealed;
     public BlockTopic blockTopic = null;
@@ -67,6 +71,12 @@ public class SlotController : MonoBehaviour
             baseMeshFilter = BaseSlot.GetComponent<MeshFilter>();
             baseMeshRenderer = BaseSlot.GetComponent<MeshRenderer>();
         }
+        // Chuyển đổi toàn bộ tên string sang dạng Hash ID (số nguyên) khi bắt đầu
+        animationHashes = new int[animationStates.Length];
+        for (int i = 0; i < animationStates.Length; i++)
+        {
+            animationHashes[i] = Animator.StringToHash(animationStates[i]);
+        }
     }
 
     void Start()
@@ -81,8 +91,13 @@ public class SlotController : MonoBehaviour
         this.slotType = slotType;
         isFinished = false;
         iceVFX.SetActive(false);
-        if(iceRod != null) iceRod.SetActive(false);
+        if(iceRod != null) 
+        {
+            iceRod.transform.DOKill();
+            iceRod.SetActive(false);
+        }
         
+
         if(blockTopic != null) this.blockTopic = blockTopic;
         if(header != null) header.Setup(this);
         if(slotVFX != null) slotVFX.Setup();
@@ -98,13 +113,20 @@ public class SlotController : MonoBehaviour
         if(slotType == SlotType.Hide)
         {
             isRevealed = false;
-            if (hideSlotHolder != null) hideSlotHolder.SetActive(true);
+            hiddenSlotAnimator.gameObject.SetActive(true);
+            if (hiddenSlotAnimator != null)
+            {
+                hiddenSlotAnimator.Rebind();
+                hiddenSlotAnimator.Play(animationHashes[0], -1, 0f);
+                hiddenSlotAnimator.Update(0f);
+            }
+            hiddenSlotAnimator.GetComponent<SpriteSkin>().rootBone.localPosition = Vector3.zero; // Reset vị trí rootBone để tránh bị lệch
             if (itemImage != null && blockTopic != null && blockTopic.blocksSprite.Count > 0) itemImage.sprite = blockTopic.blocksSprite[0];
         } 
         else 
         {
             isRevealed = true;
-            if (hideSlotHolder != null) hideSlotHolder.SetActive(false);
+            if (hiddenSlotAnimator != null) hiddenSlotAnimator.gameObject.SetActive(false);
         }
     }
 
@@ -350,7 +372,7 @@ public class SlotController : MonoBehaviour
                 int i = 0;
                 foreach(BlockController block in blocks)
                 {
-                    if(block.GetTopicID() != topicID) break;
+                    if(block.GetTopicID() != topicID || !block.isRevealed) break;
                     block.ChangeState(BlockController.BlockState.Collde);
                     block.FallEffect(i);
                     i++;
@@ -420,21 +442,31 @@ public class SlotController : MonoBehaviour
     public void Reveal()
     {
         isRevealed = true;
-        Vector3 originPos = hideSlotHolder.transform.position;
-        Quaternion originRot = hideSlotHolder.transform.rotation;
-
-        Sequence sequence = DOTween.Sequence();
-        // AudioManager.Instance.PlayClothAudio();
-        GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.Cloth});
-        sequence.Append(hideSlotHolder.transform.DOMoveY(originPos.y + 10f, 1f));
-        sequence.Join(hideSlotHolder.transform.DORotate(new Vector3(0, 0, 15f), 0.5f));
-
-        sequence.OnComplete(() =>
+        
+        if (hiddenSlotAnimator != null) 
         {
-            hideSlotHolder.SetActive(false);
-            hideSlotHolder.transform.position = originPos;
-            hideSlotHolder.transform.rotation = originRot;
-        });
+            hiddenSlotAnimator.Play("CLOTH_04");
+            StartCoroutine(WaitAndDisableAnimator());
+        }
+
+        GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.Cloth});
+    }
+
+    private IEnumerator WaitAndDisableAnimator()
+    {
+        yield return null; // Đợi 1 frame để Animator cập nhật sang state mới
+        
+        float animLength = hiddenSlotAnimator.GetCurrentAnimatorStateInfo(0).length;
+        yield return new WaitForSeconds(animLength);
+        
+        if (hiddenSlotAnimator != null)
+        {
+            hiddenSlotAnimator.Rebind();
+            hiddenSlotAnimator.Play("CLOTH_04", -1, 0f);
+            hiddenSlotAnimator.Update(0f); // Ép cập nhật frame ngay lập tức để xương về lại vị trí ban đầu
+            hiddenSlotAnimator.GetComponent<SpriteSkin>().rootBone.localPosition = Vector3.zero; // Reset vị trí rootBone để tránh bị lệch
+            hiddenSlotAnimator.gameObject.SetActive(false);
+        }
     }
 
     public List<BlockController> MoveToShuffle(List<BlockController> diffcultBlocks, Dictionary<int, List<BlockController>> sameBlocks)

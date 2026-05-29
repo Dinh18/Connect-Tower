@@ -21,8 +21,6 @@ public class BottomPanel : MonoBehaviour
         GameEventBus.Subscribe<RequestOpenBoosterPopupEvent>(OnOpenAddBoosterPopup);
         GameEventBus.Subscribe<RequestAddBoosterEffectEvent>(OnPlayAddBoosterEffect);
         GameEventBus.Subscribe<RequestUnlockBoosterEvent >(TryTriggerTutorialForBooster);
-        // GameEventBus.Subscribe<NoMovesAvailableEvent>(OnNoMovesAvailable);
-        // GameEventBus.Subscribe<MovesUpdatedEvent>(OnMovesUpdated);
     }
 
     void OnDisable()
@@ -30,8 +28,6 @@ public class BottomPanel : MonoBehaviour
         GameEventBus.UnSubscribe<RequestOpenBoosterPopupEvent>(OnOpenAddBoosterPopup);
         GameEventBus.UnSubscribe<RequestAddBoosterEffectEvent>(OnPlayAddBoosterEffect);
         GameEventBus.UnSubscribe<RequestUnlockBoosterEvent>(TryTriggerTutorialForBooster);
-        // GameEventBus.UnSubscribe<NoMovesAvailableEvent>(OnNoMovesAvailable);
-        // GameEventBus.UnSubscribe<MovesUpdatedEvent>(OnMovesUpdated);
     }
 
     public void Show()
@@ -41,8 +37,11 @@ public class BottomPanel : MonoBehaviour
         RectTransform rect = GetComponent<RectTransform>();
         rect.DOKill();
         rect.anchoredPosition = new Vector2(originPos.x, originPos.y - 500f);
-        rect.DOAnchorPosY(originPos.y, 0.5f).SetEase(Ease.OutBack);
+        rect.DOAnchorPosY(originPos.y, 0.5f).SetEase(Ease.OutBack);   
+    }
 
+    public void Setup()
+    {
         if(boosterButtons == null) Debug.Log("Chua co booster button nao");
         if (boosterButtons != null)
         {
@@ -63,28 +62,6 @@ public class BottomPanel : MonoBehaviour
             rect.anchoredPosition = originPos;
         });
     }
-
-    // Dùng biến static để theo dõi trong 1 phiên chơi, dễ dàng test lại khi tắt bật Play Mode
-    // private static HashSet<int> shownBoosterTutorials = new HashSet<int>();
-
-    // private void OnNoMovesAvailable(NoMovesAvailableEvent evt)
-    // {
-    //     TryTriggerTutorialForBooster(BoosterType.Undo);
-    //     TryTriggerTutorialForBooster(BoosterType.Shuffle);
-    // }
-
-    // private void OnMovesUpdated(MovesUpdatedEvent evt)
-    // {
-    //     if (evt.currentMoves <= 5)
-    //     {
-    //         TryTriggerTutorialForBooster(BoosterType.AddMove);
-            
-    //         if (CheckForHiddenBlocks())
-    //         {
-    //             TryTriggerTutorialForBooster(BoosterType.Hint);
-    //         }
-    //     }
-    // }
 
     private bool CheckForHiddenBlocks()
     {

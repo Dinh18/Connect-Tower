@@ -94,4 +94,12 @@ public class TutorialService : MonoBehaviour
         }
         return false;
     }
+
+    public void CancelTutorial()
+    {
+        if (currentSequence != null && currentSequence.IsActive)
+        {
+            currentSequence.Cancel();
+        }
+    }
 }

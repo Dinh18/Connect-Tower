@@ -101,7 +101,6 @@ public class ShowMechanicStep : TutorialStep
         if (tutorialUI != null)
         {
             tutorialUI.EndTutorial(); // Dùng tạm EndTutorial() để tắt UI
-            tutorialUI.OnBackgroundClicked();
         }
     }
 }

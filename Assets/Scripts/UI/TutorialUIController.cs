@@ -14,6 +14,8 @@ public class TutorialUIController : MonoBehaviour
     [SerializeField] private List<Sprite> mechanicSprites;
 
     private GameObject currentElevatedTarget;
+    private bool canCloseTutorial = true;
+    private Tween delayTween;
 
     void Awake()
     {
@@ -61,6 +63,11 @@ public class TutorialUIController : MonoBehaviour
 
     public void StartTutorial(GameObject target, string instruction)
     {
+        // Prevent closing tutorial for 1.5 seconds
+        canCloseTutorial = false;
+        delayTween?.Kill();
+        delayTween = DOVirtual.DelayedCall(1.5f, () => canCloseTutorial = true);
+
         tutorialCanvas.SetActive(true);
         mechanicImage.gameObject.SetActive(false);
         closeText.gameObject.SetActive(false);
@@ -75,13 +82,50 @@ public class TutorialUIController : MonoBehaviour
 
             dimImage.SetActive(true);
         
-        // 1. FADE TẤM NỀN ĐEN (Không cần tính Pivot, không cần Scale)
-        // Cần gắn component CanvasGroup vào dimImage
-        CanvasGroup dimGroup = dimImage.GetComponent<CanvasGroup>();
-        if (dimGroup != null)
+        // 1. TẠO HIỆU ỨNG LỖ HỔNG (Hole thu nhỏ dần vào target)
+        Image dimImg = dimImage.GetComponent<Image>();
+        if (dimImg != null && dimImg.material != null)
         {
-            dimGroup.alpha = 0f;
-            dimGroup.DOFade(1f, 0.3f); // Tối dần toàn màn hình trong 0.3s
+            // Đảm bảo chỉ tạo bản sao material 1 lần để tránh rò rỉ bộ nhớ
+            if (!dimImg.material.name.EndsWith("(Instance)"))
+            {
+                Material mat = new Material(dimImg.material);
+                mat.name += " (Instance)";
+                dimImg.material = mat;
+            }
+            Material matInst = dimImg.material;
+
+            // Đảm bảo CanvasGroup hiển thị 100% (nếu có)
+            CanvasGroup dimGroup = dimImage.GetComponent<CanvasGroup>();
+            if (dimGroup != null) dimGroup.alpha = 1f;
+
+            // Tìm vị trí tương đối của target bên trong dimRect
+            Vector3 localPoint = dimRect.InverseTransformPoint(targetRect.position);
+            
+            // Chuyển tọa độ sang dạng UV (0.0 đến 1.0)
+            Vector2 uvCenter = new Vector2(
+                (localPoint.x - dimRect.rect.xMin) / dimRect.rect.width,
+                (localPoint.y - dimRect.rect.yMin) / dimRect.rect.height
+            );
+
+            matInst.SetVector("_HoleCenter", new Vector4(uvCenter.x, uvCenter.y, 0, 0));
+            matInst.SetFloat("_AspectRatio", dimRect.rect.width / dimRect.rect.height);
+
+            // Bắt đầu với lỗ hổng rất to (bao phủ toàn màn hình)
+            matInst.SetFloat("_HoleRadius", 1.5f);
+            
+            // Thu nhỏ lỗ hổng về 0 để tạo hiệu ứng focus vào target
+            DOTween.To(() => matInst.GetFloat("_HoleRadius"), x => matInst.SetFloat("_HoleRadius", x), 0f, 0.5f).SetEase(Ease.OutQuad);
+        }
+        else
+        {
+            // Fallback nếu không có Image/Material
+            CanvasGroup dimGroup = dimImage.GetComponent<CanvasGroup>();
+            if (dimGroup != null)
+            {
+                dimGroup.alpha = 0f;
+                dimGroup.DOFade(1f, 0.3f);
+            }
         }
 
         // 2. NHẤC TARGET LÊN TRÊN CÙNG
@@ -89,9 +133,8 @@ public class TutorialUIController : MonoBehaviour
         ElevateTarget(target);
 
         // 3. TẠO ĐIỂM NHẤN CHO TARGET (Thay vì scale nền đen, ta scale chính Target)
-        // RectTransform targetRect = target.GetComponent<RectTransform>();
-        targetRect.localScale = Vector3.zero;
-        targetRect.DOScale(1f, 0.5f).SetEase(Ease.OutBack);
+        // targetRect.localScale = Vector3.zero;
+        // targetRect.DOScale(1f, 0.5f).SetEase(Ease.OutBack);
         }
         else
         {
@@ -103,6 +146,11 @@ public class TutorialUIController : MonoBehaviour
 
     public void StartMechanicTutorial(string mechanicId)
     {
+        // Prevent closing tutorial for 1.5 seconds
+        canCloseTutorial = false;
+        delayTween?.Kill();
+        delayTween = DOVirtual.DelayedCall(1.5f, () => canCloseTutorial = true);
+
         tutorialCanvas.SetActive(true);
         if (handImage != null) handImage.SetActive(false);
         dimImage.SetActive(true);
@@ -126,6 +174,9 @@ public class TutorialUIController : MonoBehaviour
 
     public void EndTutorial()
     {
+        delayTween?.Kill();
+        canCloseTutorial = true;
+        
         tutorialCanvas.SetActive(false);
         if (handImage != null) handImage.SetActive(true);
         RestoreTarget();
@@ -152,6 +203,13 @@ public class TutorialUIController : MonoBehaviour
 
     public void OnBackgroundClicked()
     {
+        if (!canCloseTutorial) return;
+
         tutorialCanvas.SetActive(false);
+        var tutorialService = CoreServices.Get<TutorialService>();
+        if (tutorialService != null)
+        {
+            tutorialService.CancelTutorial();
+        }
     }
 }

@@ -13,8 +13,8 @@ public class LevelFailedPanel : Panel
     void OnEnable()
     {
         backMainMenuButton.onClick.AddListener(OnClickBackHome);
-        tryAgainButton.onClick.AddListener(() => CoreServices.Get<GameManager>().RestartLevel());
-        addMoveButton.onClick.AddListener(() => CoreServices.Get<GameManager>().AddMoveToContinue(5));
+        tryAgainButton.onClick.AddListener(OnClickTryAgain);
+        addMoveButton.onClick.AddListener(OnClickAddMove);
     }
 
     void OnDisable()
@@ -40,7 +40,15 @@ public class LevelFailedPanel : Panel
         CoreServices.Get<GameManager>().UseHeart();
         CoreServices.Get<GameManager>().ChangeState(GameManager.GameState.MainMenu);
     }
-
+    private void OnClickTryAgain()
+    {
+        CoreServices.Get<GameManager>().RestartLevel();
+    }
+    
+    private void OnClickAddMove()
+    {
+        CoreServices.Get<GameManager>().AddMoveToContinue(5);
+    }
     public override void Hide() => gameObject.SetActive(false);
     public GameObject GetGameObject() => this.gameObject;
 }

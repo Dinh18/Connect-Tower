@@ -500,6 +500,93 @@ public class RuntimeLevelEditorManager : MonoBehaviour
 #endif
     }
 
+    public void InsertLevel()
+    {
+#if UNITY_EDITOR
+        if (!EditorUtility.DisplayDialog("Xác nhận Chèn Level", 
+            $"Bạn sắp chèn một level mới vào ID {levelIndex}. Tất cả các level từ {levelIndex} trở đi sẽ bị đẩy lên 1 ID (ví dụ Level_{levelIndex:D2} thành Level_{levelIndex+1:D2}).\nBạn có chắc chắn muốn thực hiện không?", 
+            "Có, Chèn", "Hủy"))
+        {
+            return;
+        }
+#endif
+
+        LevelDataSO newLevelData = GenerateLevelDataSO();
+
+#if UNITY_EDITOR
+        string dir = "Assets/Resources/Data/Levels";
+        if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+
+        // Tìm Max Level
+        int maxLevel = -1;
+        string[] guids = AssetDatabase.FindAssets("t:LevelDataSO", new[] { dir });
+        foreach(string guid in guids)
+        {
+            string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+            LevelDataSO so = AssetDatabase.LoadAssetAtPath<LevelDataSO>(assetPath);
+            if (so != null && so.level > maxLevel) 
+            {
+                maxLevel = so.level;
+            }
+        }
+
+        // Shift levels từ maxLevel lùi về levelIndex
+        for (int i = maxLevel; i >= levelIndex; i--)
+        {
+            string oldPath = $"{dir}/Level_{i:D2}.asset";
+            string newName = $"Level_{i + 1:D2}";
+            
+            LevelDataSO so = AssetDatabase.LoadAssetAtPath<LevelDataSO>(oldPath);
+            if (so != null)
+            {
+                so.level = i + 1;
+                EditorUtility.SetDirty(so);
+                AssetDatabase.RenameAsset(oldPath, newName);
+            }
+        }
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+
+        // Lưu level hiện tại vào chỗ vừa trống
+        string newPath = $"{dir}/Level_{levelIndex:D2}.asset";
+        AssetDatabase.CreateAsset(newLevelData, newPath);
+        AssetDatabase.Refresh();
+        Debug.Log($"<color=green>Đã chèn level mới thành công tại {newPath}. Các level cũ đã được dịch chuyển.</color>");
+#else
+        string dir = Application.persistentDataPath;
+        int maxLevel = -1;
+        string[] files = Directory.GetFiles(dir, "Level_*.json");
+        foreach(string file in files)
+        {
+            string fileName = Path.GetFileNameWithoutExtension(file);
+            if (fileName.StartsWith("Level_") && int.TryParse(fileName.Substring(6), out int l))
+            {
+                if (l > maxLevel) maxLevel = l;
+            }
+        }
+
+        for (int i = maxLevel; i >= levelIndex; i--)
+        {
+            string oldPath = Path.Combine(dir, $"Level_{i:D2}.json");
+            string newPath = Path.Combine(dir, $"Level_{i + 1:D2}.json");
+            if (File.Exists(oldPath))
+            {
+                string oldJson = File.ReadAllText(oldPath);
+                LevelDataSO tempSO = ScriptableObject.CreateInstance<LevelDataSO>();
+                JsonUtility.FromJsonOverwrite(oldJson, tempSO);
+                tempSO.level = i + 1;
+                File.WriteAllText(newPath, JsonUtility.ToJson(tempSO, true));
+                File.Delete(oldPath);
+            }
+        }
+
+        string newJson = JsonUtility.ToJson(newLevelData, true);
+        string newFilePath = Path.Combine(dir, $"Level_{levelIndex:D2}.json");
+        File.WriteAllText(newFilePath, newJson);
+        Debug.Log($"<color=green>Đã chèn level mới JSON thành công tại {newFilePath}.</color>");
+#endif
+    }
+
     private Texture2D solidBg;
 
     // --- AUTO PLAY SOLVER ---
@@ -892,6 +979,358 @@ public class RuntimeLevelEditorManager : MonoBehaviour
         windowRect = GUILayout.Window(999, windowRect, DrawEditorWindow, "Runtime Level Editor");
     }
 
+    public void RandomGenerateBlocks()
+    {
+        SaveUndoState();
+        InitManagers();
+
+        int numSlots = row1 + row2;
+        int numTopics = numSlots - 2;
+        if (numTopics <= 0) return;
+
+        // Reset grid
+        GenerateGrid();
+        topics.Clear();
+        amountBlockOfTopic.Clear();
+        currentPaintbrushTopic = null;
+        currentPaintbrushIndex = -1;
+
+        if (availableTopics == null || availableTopics.Length == 0) return;
+
+        List<BlockTopic> poolTopics = new List<BlockTopic>(availableTopics);
+        for (int i = 0; i < poolTopics.Count; i++)
+        {
+            BlockTopic temp = poolTopics[i];
+            int randomIndex = Random.Range(i, poolTopics.Count);
+            poolTopics[i] = poolTopics[randomIndex];
+            poolTopics[randomIndex] = temp;
+        }
+
+        for (int i = 0; i < Mathf.Min(numTopics, poolTopics.Count); i++)
+        {
+            topics.Add(poolTopics[i]);
+            amountBlockOfTopic.Add(4);
+        }
+
+        int maxRetries = 50; // Tăng lên để có nhiều cơ hội tìm thấy level Foolproof hơn
+        bool foundSolvable = false;
+
+        for (int retry = 0; retry < maxRetries; retry++)
+        {
+            List<BlockSetupData> blockPool = new List<BlockSetupData>();
+            for (int i = 0; i < topics.Count; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    BlockSetupData b = new BlockSetupData();
+                    b.blockTopic = topics[i];
+                    b.typeBlock = BlockController.BlockType.Normal;
+                    b.indexSprite = j;
+                    blockPool.Add(b);
+                }
+            }
+
+            // Shuffle pool
+            for (int i = 0; i < blockPool.Count; i++)
+            {
+                BlockSetupData temp = blockPool[i];
+                int randomIndex = Random.Range(i, blockPool.Count);
+                blockPool[i] = blockPool[randomIndex];
+                blockPool[randomIndex] = temp;
+            }
+
+            if (difficulty == 0) // Dễ
+            {
+                blockPool.Sort((a, b) => 
+                {
+                    if (Random.value < 0.7f) return a.blockTopic.topicID.CompareTo(b.blockTopic.topicID);
+                    return Random.Range(-1, 2);
+                });
+            }
+            else if (difficulty == 2) // Siêu khó
+            {
+                for (int i = 0; i < blockPool.Count - 1; i++)
+                {
+                    if (blockPool[i].blockTopic.topicID == blockPool[i+1].blockTopic.topicID)
+                    {
+                        for (int j = i + 2; j < blockPool.Count; j++)
+                        {
+                            if (blockPool[j].blockTopic.topicID != blockPool[i].blockTopic.topicID)
+                            {
+                                BlockSetupData temp = blockPool[i+1];
+                                blockPool[i+1] = blockPool[j];
+                                blockPool[j] = temp;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Phân bổ sao cho KHÔNG có slot rỗng (Mỗi slot nhận 1 block trước)
+            for (int i = 0; i < numSlots; i++)
+            {
+                slots[i].blocks.Clear();
+                if (blockPool.Count > 0)
+                {
+                    slots[i].blocks.Add(blockPool[0]);
+                    blockPool.RemoveAt(0);
+                }
+            }
+
+            // Phân bổ ngẫu nhiên phần còn lại (tối đa 4 block mỗi slot)
+            while (blockPool.Count > 0)
+            {
+                int rSlot = Random.Range(0, numSlots);
+                if (slots[rSlot].blocks.Count < 4)
+                {
+                    slots[rSlot].blocks.Insert(0, blockPool[0]);
+                    blockPool.RemoveAt(0);
+                }
+            }
+
+            // Kiểm tra khả năng giải và tính Foolproof
+            if (IsLevelFoolproof(CreateInitialState()))
+            {
+                foundSolvable = true;
+                Debug.Log($"<color=green>Đã tạo level HOÀN HẢO (Foolproof) thành công sau {retry + 1} lần thử nghiệm.</color>");
+                break;
+            }
+        }
+
+        if (!foundSolvable)
+        {
+            Debug.LogWarning("Không tìm được cấu hình HOÀN HẢO sau 50 lần thử! Có thể level quá khó hoặc ít cột rỗng. Sẽ giữ cấu hình ngẫu nhiên cuối cùng.");
+        }
+
+        RenderGrid();
+    }
+
+    private bool CheckSolvable(GameState initial)
+    {
+        if (initial.IsWin()) return true;
+
+        var openList = new Stack<GameState>();
+        var closedSet = new HashSet<GameState>();
+
+        openList.Push(initial);
+        closedSet.Add(initial);
+
+        int expanded = 0;
+        int maxSearchNodes = 10000;
+
+        while (openList.Count > 0 && expanded < maxSearchNodes)
+        {
+            GameState curr = openList.Pop();
+            expanded++;
+
+            if (curr.IsWin()) return true;
+
+            int numSlots = curr.slots.Length;
+            for (int i = 0; i < numSlots; i++)
+            {
+                if (!curr.slots[i].isRevealed || curr.slots[i].type == 2 || curr.slots[i].IsCompleted()) continue;
+                int moveCount = curr.slots[i].GetMoveCount();
+                if (moveCount == 0) continue;
+                int moveTopic = curr.slots[i].GetTopTopic();
+
+                for (int j = 0; j < numSlots; j++)
+                {
+                    if (i == j || !curr.slots[j].isRevealed || curr.slots[j].count == 4) continue;
+                    if (curr.slots[j].count > 0 && curr.slots[j].GetTopTopic() != moveTopic) continue;
+                    if (curr.slots[j].count == 0 && moveCount == curr.slots[i].count && !curr.slots[i].hiddens[0]) continue;
+
+                    int amountToMove = Mathf.Min(4 - curr.slots[j].count, moveCount);
+                    if (amountToMove <= 0) continue;
+
+                    GameState nextState = CloneState(curr);
+                    for (int m = 0; m < amountToMove; m++)
+                    {
+                        nextState.slots[j].topics[nextState.slots[j].count] = nextState.slots[i].topics[nextState.slots[i].count - 1];
+                        nextState.slots[j].hiddens[nextState.slots[j].count] = false;
+                        nextState.slots[j].count++;
+                        nextState.slots[i].count--;
+                    }
+                    if (nextState.slots[i].count > 0) nextState.slots[i].hiddens[nextState.slots[i].count - 1] = false;
+
+                    if (!closedSet.Contains(nextState))
+                    {
+                        if (nextState.IsWin()) return true;
+                        closedSet.Add(nextState);
+                        openList.Push(nextState);
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private bool IsLevelFoolproof(GameState initial)
+    {
+        var reachable = new HashSet<GameState>();
+        var queue = new Queue<GameState>();
+        var adj = new Dictionary<GameState, List<GameState>>();
+        
+        reachable.Add(initial);
+        queue.Enqueue(initial);
+        
+        int expanded = 0;
+        int maxSearchNodes = 10000; // Giới hạn 10000 để Random không bị đứng máy quá lâu
+        
+        while (queue.Count > 0 && expanded < maxSearchNodes)
+        {
+            GameState curr = queue.Dequeue();
+            expanded++;
+            
+            var dummy = new Node { state = curr, g = 0, h = 0 };
+            var succNodes = GenerateSuccessors(dummy);
+            
+            List<GameState> nextStates = new List<GameState>();
+            foreach (var node in succNodes) nextStates.Add(node.state);
+
+            adj[curr] = nextStates;
+            
+            foreach (var n in nextStates)
+            {
+                if (!reachable.Contains(n))
+                {
+                    reachable.Add(n);
+                    queue.Enqueue(n);
+                }
+            }
+        }
+
+        // Nếu level quá phức tạp để check nhanh, ta có thể bỏ qua (hoặc bạn có thể cho return false để khắt khe hơn)
+        if (expanded >= maxSearchNodes) return false; 
+
+        var canReachWin = new HashSet<GameState>();
+        var revQueue = new Queue<GameState>();
+        var revAdj = new Dictionary<GameState, List<GameState>>();
+        
+        foreach (var s in reachable) revAdj[s] = new List<GameState>();
+        foreach (var kvp in adj)
+        {
+            foreach (var n in kvp.Value) revAdj[n].Add(kvp.Key);
+        }
+
+        foreach (var s in reachable)
+        {
+            if (s.IsWin())
+            {
+                canReachWin.Add(s);
+                revQueue.Enqueue(s);
+            }
+        }
+
+        while (revQueue.Count > 0)
+        {
+            GameState curr = revQueue.Dequeue();
+            foreach (var prev in revAdj[curr])
+            {
+                if (!canReachWin.Contains(prev))
+                {
+                    canReachWin.Add(prev);
+                    revQueue.Enqueue(prev);
+                }
+            }
+        }
+
+        return reachable.Count == canReachWin.Count;
+    }
+
+    public void CheckFoolproof()
+    {
+        Debug.Log("Đang phân tích toàn bộ các nước đi có thể (Foolproof Check)...");
+        GameState initial = CreateInitialState();
+        
+        var reachable = new HashSet<GameState>();
+        var queue = new Queue<GameState>();
+        var adj = new Dictionary<GameState, List<GameState>>();
+        
+        reachable.Add(initial);
+        queue.Enqueue(initial);
+        
+        int expanded = 0;
+        int maxSearchNodes = 50000;
+        
+        while (queue.Count > 0 && expanded < maxSearchNodes)
+        {
+            GameState curr = queue.Dequeue();
+            expanded++;
+            
+            var dummy = new Node { state = curr, g = 0, h = 0 };
+            var succNodes = GenerateSuccessors(dummy);
+            
+            List<GameState> nextStates = new List<GameState>();
+            foreach (var node in succNodes)
+            {
+                nextStates.Add(node.state);
+            }
+
+            adj[curr] = nextStates;
+            
+            foreach (var n in nextStates)
+            {
+                if (!reachable.Contains(n))
+                {
+                    reachable.Add(n);
+                    queue.Enqueue(n);
+                }
+            }
+        }
+
+        if (expanded >= maxSearchNodes)
+        {
+            Debug.LogWarning($"<color=orange>Cảnh báo: Không gian trạng thái quá lớn (>{maxSearchNodes}). Chỉ kiểm tra được 1 phần.</color>");
+        }
+
+        var canReachWin = new HashSet<GameState>();
+        var revQueue = new Queue<GameState>();
+
+        var revAdj = new Dictionary<GameState, List<GameState>>();
+        foreach (var s in reachable) revAdj[s] = new List<GameState>();
+
+        foreach (var kvp in adj)
+        {
+            foreach (var n in kvp.Value)
+            {
+                revAdj[n].Add(kvp.Key);
+            }
+        }
+
+        foreach (var s in reachable)
+        {
+            if (s.IsWin())
+            {
+                canReachWin.Add(s);
+                revQueue.Enqueue(s);
+            }
+        }
+
+        while (revQueue.Count > 0)
+        {
+            GameState curr = revQueue.Dequeue();
+            foreach (var prev in revAdj[curr])
+            {
+                if (!canReachWin.Contains(prev))
+                {
+                    canReachWin.Add(prev);
+                    revQueue.Enqueue(prev);
+                }
+            }
+        }
+
+        int stuckCount = reachable.Count - canReachWin.Count;
+        if (stuckCount == 0)
+        {
+            Debug.Log($"<color=cyan>HOÀN HẢO! Đã duyệt {reachable.Count} trạng thái. Dù đi như thế nào cũng CÓ THỂ giải được (Foolproof)!</color>");
+        }
+        else
+        {
+            Debug.LogError($"<color=red>CẢNH BÁO! Có {stuckCount} trạng thái mà người chơi sẽ BỊ KẸT (không thể thắng) nếu đi sai!</color>");
+        }
+    }
+
     private void DrawEditorWindow(int windowID)
     {
         scrollPos = GUILayout.BeginScrollView(scrollPos);
@@ -1056,15 +1495,27 @@ public class RuntimeLevelEditorManager : MonoBehaviour
         GUILayout.EndHorizontal();
 
         GUILayout.Space(10);
+        if (GUILayout.Button("Random Level (Ngẫu nhiên)", GUILayout.Height(40)))
+        {
+            RandomGenerateBlocks();
+        }
+
+        GUILayout.Space(10);
         if (GUILayout.Button("2. Playtest (Thử Nghiệm)", GUILayout.Height(40)))
         {
             Playtest();
         }
 
-        if (GUILayout.Button("3. Save Level Data", GUILayout.Height(40)))
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("3. Lưu Đè (Save)", GUILayout.Height(40)))
         {
             SaveLevel();
         }
+        if (GUILayout.Button("Chèn (Insert)", GUILayout.Height(40)))
+        {
+            InsertLevel();
+        }
+        GUILayout.EndHorizontal();
         
         if (GUILayout.Button("4. Load Level Data", GUILayout.Height(40)))
         {
@@ -1074,6 +1525,11 @@ public class RuntimeLevelEditorManager : MonoBehaviour
         if (GUILayout.Button("5. Auto Play (Tự giải)", GUILayout.Height(40)))
         {
             StartAutoPlay();
+        }
+
+        if (GUILayout.Button("6. Kiểm tra Bị Kẹt (Foolproof)", GUILayout.Height(40)))
+        {
+            CheckFoolproof();
         }
 
         GUILayout.EndScrollView();

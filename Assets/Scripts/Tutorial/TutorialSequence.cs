@@ -42,5 +42,17 @@ public class TutorialSequence
         return currentStep?.Execute(data) ?? false;
     }
 
+    public void Cancel()
+    {
+        if (currentStep != null)
+        {
+            currentStep.Exit();
+            currentStep.OnStepComplete -= NextStep;
+            currentStep = null;
+        }
+        steps.Clear();
+        OnSequenceComplete?.Invoke();
+    }
+
     public bool IsActive => currentStep != null;
 }

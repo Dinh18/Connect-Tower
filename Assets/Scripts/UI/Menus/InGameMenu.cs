@@ -63,4 +63,10 @@ public class InGameMenu : Menu
         if (headerPanel != null) headerPanel.Show();
         if (bottomPanel != null) bottomPanel.Show();
     }
+
+    public void Setup()
+    {
+        if (headerPanel != null) headerPanel.Setup();
+        if (bottomPanel != null) bottomPanel.Setup();
+    }
 }

@@ -15,4 +15,4 @@ MonoBehaviour:
   id: 
   nameMechanic: Hidden Block
   instruction: Move blocks to reveal the mystery!
-  levelUnclock: 4
+  levelUnclock: 5

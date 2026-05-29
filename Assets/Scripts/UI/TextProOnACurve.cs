@@ -1,4 +1,4 @@
-﻿//MIT License
+//MIT License
 
 //Copyright(c) 2019 Antony Vitillo(a.k.a. "Skarredghost")
 
@@ -85,8 +85,22 @@ namespace ntw.CurvedTextMeshPro
         /// </summary>
         protected void Update()
         {
+            var modifiers = GetComponents<ITMPVertexModifier>();
+            bool modifiersNeedUpdate = false;
+            if (modifiers != null)
+            {
+                foreach (var mod in modifiers)
+                {
+                    if (mod.NeedsUpdate())
+                    {
+                        modifiersNeedUpdate = true;
+                        break;
+                    }
+                }
+            }
+
             //if the text and the parameters are the same of the old frame, don't waste time in re-computing everything
-            if (!m_forceUpdate && !m_TextComponent.havePropertiesChanged && !ParametersHaveChanged())
+            if (!m_forceUpdate && !m_TextComponent.havePropertiesChanged && !ParametersHaveChanged() && !modifiersNeedUpdate)
             {
                 return;
             }
@@ -150,6 +164,15 @@ namespace ntw.CurvedTextMeshPro
                 vertices[vertexIndex + 1] = matrix.MultiplyPoint3x4(vertices[vertexIndex + 1]);
                 vertices[vertexIndex + 2] = matrix.MultiplyPoint3x4(vertices[vertexIndex + 2]);
                 vertices[vertexIndex + 3] = matrix.MultiplyPoint3x4(vertices[vertexIndex + 3]);
+            }
+
+            // Gọi các modifiers (như Wavy Text) để thêm hiệu ứng lên mesh đã được uốn cong
+            if (modifiers != null)
+            {
+                foreach (var mod in modifiers)
+                {
+                    mod.ModifyVertices(textInfo);
+                }
             }
 
             //Upload the mesh with the revised information

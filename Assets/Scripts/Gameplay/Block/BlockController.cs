@@ -88,6 +88,7 @@ public class BlockController : MonoBehaviour
         difVFX.Stop();
         ResetOutLint();
         maskHole.SetActive(false);
+        transform.DOKill();
         ChangeState(BlockState.None);
         
         if(slot.slotType == SlotController.SlotType.Ice)

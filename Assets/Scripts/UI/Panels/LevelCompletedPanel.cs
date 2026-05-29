@@ -39,22 +39,42 @@ public class LevelCompletedPanel : Panel
         coinImage.DOKill();
         coinImage.localScale = Vector3.zero;
         coinImage.DOScale(1, 0.5f).SetEase(Ease.OutBack);
+
+        // Hiệu ứng "Trải ra" cho Banner (làm chậm lại thành 1.5 giây)
+        var bannerEffect = GetComponentInChildren<UIBannerWaveEffect>();
+        if (bannerEffect != null)
+        {
+            bannerEffect.unfoldProgress = 0f;
+            DOTween.To(() => bannerEffect.unfoldProgress, x => bannerEffect.unfoldProgress = x, 1f, 1.5f).SetEase(Ease.OutBack);
+        }
+
+        // Kích hoạt hiệu ứng gợn sóng từng chữ (làm chậm lại thành 2 giây)
         foreach(Transform child in header)
         {
             child.DOKill();
-            child.localScale = Vector3.zero;
+            
+            var wavyText = child.GetComponent<TMPWavyText>();
+            if (wavyText != null)
+            {
+                child.localScale = Vector3.one; // Khôi phục scale tổng vì ta scale từng chữ
+                wavyText.showProgress = 0f;
+                // Animate showProgress từ 0 lên 1 trong 2 giây
+                DOTween.To(() => wavyText.showProgress, x => wavyText.showProgress = x, 1f, 2f).SetEase(Ease.Linear);
+            }
+            else
+            {
+                // Fallback nếu không dùng Wavy Text
+                child.localScale = Vector3.zero;
+                child.DOScale(1, 0.5f).SetEase(Ease.OutBack);
+            }
         }
 
-        foreach(Transform child in header)
-        {
-            child.DOScale(1, 0.5f).SetEase(Ease.OutBack);
-            yield return new WaitForSeconds(0.1f);
-        }  
+        yield return new WaitForSeconds(2f); // Đợi animation hoàn thành
     }
 
     private void OnContinueClicked()
     {
-        continueButton.interactable = false;
+        continueButton.image.raycastTarget = false;
         int winAmount = CoreServices.Get<LevelLoader>().GetCurrentLevelReward();
         StartCoroutine(SpawnWinCoinsRoutine(winAmount));
     }
@@ -91,7 +111,7 @@ public class LevelCompletedPanel : Panel
 
         yield return new WaitForSeconds(0.8f);
         
-        continueButton.interactable = true;
+        continueButton.image.raycastTarget = true;
         CoreServices.Get<GameManager>().ChangeState(GameManager.GameState.MainMenu);
     }
 

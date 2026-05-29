@@ -15,4 +15,4 @@ MonoBehaviour:
   id: 1
   nameMechanic: Hidden Slot
   instruction: Complete a category to unveil the curtain!
-  levelUnclock: -1
+  levelUnclock: 11

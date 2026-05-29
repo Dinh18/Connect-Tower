@@ -32,8 +32,6 @@ public class HeaderPanel : MonoBehaviour
     [SerializeField] private float scaleMultiplier = 1.2f;
     private bool isFlashing = false;
 
-    private GameManager gameManager;
-    private LevelLoader levelLoader;
     
 
     private Sprite GetLevelSprite(LevelLoader.GameDifficult gameDifficult)
@@ -106,25 +104,8 @@ public class HeaderPanel : MonoBehaviour
         rect.DOKill();
         rect.anchoredPosition = new Vector2(originPos.x, originPos.y + 500f);
         rect.DOAnchorPosY(originPos.y, 0.5f).SetEase(Ease.OutBack);
-
-        if (gameManager == null) gameManager = CoreServices.Get<GameManager>();
-        if (levelLoader == null) levelLoader = CoreServices.Get<LevelLoader>();
-
-        if (coinsText != null) coinsText.text = CoreServices.Get<DataManager>().GetTotalCoins().ToString();
-        if (levelText != null) levelText.text = "Level " + (CoreServices.Get<DataManager>().GetCurrentLevel() + 1).ToString();
-        
-        if (movesText != null)
-        {
-            movesText.color = normalColor;
-            if (gameManager != null) movesText.text = gameManager.GetMaxMoves().ToString();
-        }
-
-        if (levelLoader != null)
-        {
-            OnUpdateProgress(new FinishedSlotsUpdatedEvent { finishedSlots = 0, totalSlots = levelLoader.GetNumsTopic() });
-            SetupProgressBar(levelLoader.gameDifficult);
-        }
-        StopWarningFlash();
+        // if(gameManager == null) Debug.LogError("GameManager is null in HeaderPanel");
+        movesText.text = CoreServices.Get<GameManager>().GetCurrentMoves().ToString();
     }
 
     public void Hide()
@@ -136,6 +117,26 @@ public class HeaderPanel : MonoBehaviour
             this.gameObject.SetActive(false);
             rect.anchoredPosition = originPos;
         });
+    }
+
+    public void Setup()
+    {
+
+        if (coinsText != null) coinsText.text = CoreServices.Get<DataManager>().GetTotalCoins().ToString();
+        if (levelText != null) levelText.text = "Level " + (CoreServices.Get<DataManager>().GetCurrentLevel() + 1).ToString();
+        
+        if (movesText != null)
+        {
+            movesText.color = normalColor;
+            if (CoreServices.Get<GameManager>() != null) movesText.text = CoreServices.Get<GameManager>().GetCurrentMoves().ToString();
+        }
+
+        if (CoreServices.Get<LevelLoader>() != null)
+        {
+            OnUpdateProgress(new FinishedSlotsUpdatedEvent { finishedSlots = 0, totalSlots = CoreServices.Get<LevelLoader>().GetNumsTopic() });
+            SetupProgressBar(CoreServices.Get<LevelLoader>().gameDifficult);
+        }
+        StopWarningFlash();
     }
 
    

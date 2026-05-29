@@ -71,6 +71,10 @@ public class UIManager : MonoBehaviour
 
             foreach(Menu menu in allMenu)
             {
+                if (menu is InGameMenu && (gameState == GameManager.GameState.Lose || gameState == GameManager.GameState.Pause || gameState == GameManager.GameState.Playing))
+                {
+                    continue;
+                }
                 menu.Hide();
             }
 
@@ -111,12 +115,22 @@ public class UIManager : MonoBehaviour
                         ShowMenu<EndGameMenu>();
                         break;
                 case GameManager.GameState.Playing:
-                    if(gameManager != null && gameManager.GetPrevState() != GameManager.GameState.Pause && gameManager.GetPrevState() != GameManager.GameState.Lose)
+                    if(gameManager != null && gameManager.GetPrevState() != GameManager.GameState.Pause)
                     {
                         ClearUIStack();
-                        // ingame.Show();
                         ShowMenu<InGameMenu>();
-                        StartCoroutine(ShowLoadingImage(1f,null));
+                        if(gameManager.GetPrevState() == GameManager.GameState.MainMenu)
+                        {
+                            StartCoroutine(ShowLoadingImage(1f,null));
+                            InGameMenu inGameMenu = GetMenu<InGameMenu>() as InGameMenu;
+                            if (inGameMenu != null) inGameMenu.Setup();
+                        }
+                        else if (gameManager.isRestarting)
+                        {
+                            GameEventBus.Publish(new LoadingFinished());
+                            InGameMenu inGameMenu = GetMenu<InGameMenu>() as InGameMenu;
+                            if (inGameMenu != null) inGameMenu.Setup();
+                        }
                     }
                     break;
             }

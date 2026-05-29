@@ -19,6 +19,7 @@ public class GameManager : MonoBehaviour
     private int moves;
     private int maxMoves;
     private bool isInfiniteMovesActive = false;
+    public bool isRestarting = false;
 
     // Dependencies injected via Init
     private CameraController cameraController;
@@ -60,7 +61,7 @@ public class GameManager : MonoBehaviour
     public GameState GetCurrState() => currState;
     public GameState GetPrevState() => prevState;
     public int GetMaxMoves() => maxMoves;
-    public int GetMoves() => moves;
+    public int GetCurrentMoves() => moves;
     public bool Moved()
     {
         return moves < maxMoves;
@@ -120,8 +121,7 @@ public class GameManager : MonoBehaviour
             GameEventBus.Publish(new LowMovesEvent());
             GameEventBus.Publish(new RequestUnlockBoosterEvent { boosterType = BoosterType.AddMove });
             CoreServices.Get<DataManager>().UnlockBooster((int)BoosterType.AddMove);
-            isWaitingForLowMoves = false;
-            yield break; // Không cần đợi nếu người chơi chưa từng dùng booster Extra Moves
+            // yield break; // Không cần đợi nếu người chơi chưa từng dùng booster Extra Moves
         }
         yield return new WaitForSeconds(2f); // Đợi 2s để tránh spam sự kiện khi người chơi nhanh tay
         GameEventBus.Publish(new LowMovesEvent());
@@ -145,8 +145,6 @@ public class GameManager : MonoBehaviour
                 GameEventBus.Publish(new RequestUnlockBoosterEvent { boosterType = BoosterType.Shuffle });
                 CoreServices.Get<DataManager>().UnlockBooster((int)BoosterType.Shuffle);
             }
-            isWaitingForNoMoves = false;
-            yield break; // Không cần đợi nếu người chơi chưa từng dùng booster Shuffle hoặc Undo
         }
         yield return new WaitForSeconds(5f);
 
@@ -188,9 +186,13 @@ public class GameManager : MonoBehaviour
     }
     public void RestartLevel()
     {
+        isRestarting = true;
         SetupLevel(maxMoves);
         levelLoader.LoadLevel();
+        CoreServices.Get<GamePlayController>().ResetSelection();
+        CoreServices.Get<GamePlayController>().ResetUndoStack();
         ChangeState(GameState.Playing);
+        isRestarting = false;
     }
 
     public void AddMoveToContinue(int extraMoves)
@@ -239,7 +241,7 @@ public class GameManager : MonoBehaviour
             CoreServices.Get<GamePlayController>().ResetUndoStack();
         }
 
-        GameEventBus.Publish<GameStateChangedEvent>(new GameStateChangedEvent { newState = currState });
+        GameEventBus.Publish(new GameStateChangedEvent { newState = currState });
         Debug.Log($"[GameManager] State Changed: {prevState} -> {currState}");
     }
 }
