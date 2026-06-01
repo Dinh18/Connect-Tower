@@ -54,7 +54,7 @@ public static class Constants
     // Block
     public static float BLOCK_HEIGHT = 0.65f;
     // Data Level
-    public const string LEVELS_PATH = "Data/Levels";
+    public const string LEVELS_PATH = "Data/Levels_2";
     // // Scene Name
     // public const string INITIALIZER_SCENE_NAME = "InitializerScene";
     // public const string MENU_SCENE_NAME = "MenuScene";
