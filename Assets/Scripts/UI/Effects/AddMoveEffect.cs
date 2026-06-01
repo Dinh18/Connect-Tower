@@ -32,28 +32,38 @@ public class AddMoveEffect : MonoBehaviour, IBoosterEffect
 
         Rect safeArea = Screen.safeArea;
 
-        Vector3 topCenterScreen = new Vector3(safeArea.width / 2, safeArea.height, 0);
-        Vector3 bottomCenterScreen = new Vector3(safeArea.width / 2, originPos.y + 10, 0);
+        Vector3 startPoint = this.transform.position; // Điểm xuất phát là vị trí của AddMoveEffect trên Canvas
+        Vector3 endPoint = moveCountText.position;
 
-        snowEffectPrefab.position = bottomCenterScreen;
-        sequence.Append(snowEffectPrefab.DOMove(topCenterScreen, 1f).SetEase(Ease.InOutQuad));
-        sequence.Join(snowEffectPrefab.DOScale(10f, 1f).SetEase(Ease.InOutQuad));
+        // Điểm uốn cong cố định ở giữa màn hình để đảm bảo không bay ra ngoài
+        Vector3 curvePoint = new Vector3(safeArea.width / 2, safeArea.height / 2, 0);
+        
+        Vector3[] pathArr = new Vector3[] { startPoint, curvePoint, endPoint };
 
-        // float explosionTime = 0.2f;
+        snowEffectPrefab.position = startPoint;
+        snowEffectPrefab.localScale = Vector3.one;
 
-        // // Phóng to đột ngột
-        // sequence.Append(snowEffectPrefab.DOScale(6f, explosionTime).SetEase(Ease.OutExpo));
+        float flyDuration = 1.0f;
+
+        // Bay theo đường cong
+        sequence.Append(snowEffectPrefab.DOPath(pathArr, flyDuration, PathType.CatmullRom).SetEase(Ease.OutSine));
+        
+        // Hiệu ứng scale tạo độ sâu 3D (phóng to khi ra giữa, thu nhỏ khi đến đích)
+        sequence.Join(snowEffectPrefab.DOScale(8f, flyDuration / 2f).SetEase(Ease.OutQuad));
+        sequence.Insert(flyDuration / 2f, snowEffectPrefab.DOScale(1f, flyDuration / 2f).SetEase(Ease.InQuad));
+
+        // Xoay tròn tạo cảm giác động năng
+        sequence.Join(snowEffectPrefab.DORotate(new Vector3(0, 0, -720f), flyDuration, RotateMode.FastBeyond360).SetRelative(true).SetEase(Ease.InOutSine));
 
         sequence.AppendCallback(() => {
-            snowExplosionPrefab.position = snowEffectPrefab.position;
+            snowExplosionPrefab.position = moveCountText.position;
             snowExplosionPrefab.gameObject.SetActive(true);
-            // countdownImage.SetActive(true);
-            // DOTween.To(() => frostEffect.FrostAmount, 
-            //            x => frostEffect.FrostAmount = x, 
-            //            0.5f, 
-            //            0.5f)
-            //       .SetEase(Ease.OutQuad);
-            StartCoroutine(ResetEffect(ExcuteBooster, bottomCenterScreen));
+            
+            // Rung text moveCount để tăng lực va chạm
+            moveCountText.DOKill();
+            moveCountText.DOShakeScale(0.4f, 0.5f, 10, 90f, true);
+            
+            StartCoroutine(ResetEffect(ExcuteBooster, startPoint));
         });
     }
     public IEnumerator ResetEffect(Action ExcuteBooster, Vector3 bottomCenterScreen)

@@ -81,8 +81,53 @@ public class ShowMechanicStep : TutorialStep
 
     public override void Enter()
     {
+        var levelLoader = CoreServices.Get<LevelLoader>();
+        var dataManager = CoreServices.Get<DataManager>();
         var tutorialUI = CoreServices.Get<TutorialUIController>();
-        if (tutorialUI != null)
+
+        if (levelLoader == null || dataManager == null || tutorialUI == null) return;
+
+        MechanicData mechanicData = dataManager.GetMechanic(mechanicId);
+        string mechanicName = mechanicData != null ? mechanicData.nameMechanic.ToLower() : "";
+        GameObject targetObject = null;
+
+        if (mechanicName.Contains("block"))
+        {
+            foreach (var slot in levelLoader.slots)
+            {
+                foreach (var block in slot.blocks)
+                {
+                    if (mechanicName.Contains("hidden") && block.GetBlockType() == BlockController.BlockType.Hide)
+                    {
+                        targetObject = block.gameObject;
+                        break;
+                    }
+                }
+                if (targetObject != null) break;
+            }
+        }
+        else if (mechanicName.Contains("slot"))
+        {
+            foreach (var slot in levelLoader.slots)
+            {
+                if (mechanicName.Contains("hidden") && slot.slotType == SlotController.SlotType.Hide)
+                {
+                    targetObject = slot.gameObject;
+                    break;
+                }
+                else if (mechanicName.Contains("ice") && slot.slotType == SlotController.SlotType.Ice)
+                {
+                    targetObject = slot.gameObject;
+                    break;
+                }
+            }
+        }
+
+        if (targetObject != null)
+        {
+            tutorialUI.StartTutorial(targetObject, instruction, true);
+        }
+        else
         {
             tutorialUI.StartMechanicTutorial(mechanicId, instruction);
         }
@@ -90,7 +135,6 @@ public class ShowMechanicStep : TutorialStep
 
     public override bool Execute(object data)
     {
-        // Nhận event bất kỳ để đóng (ví dụ null data)
         CompleteStep();
         return true;
     }
@@ -100,7 +144,7 @@ public class ShowMechanicStep : TutorialStep
         var tutorialUI = CoreServices.Get<TutorialUIController>();
         if (tutorialUI != null)
         {
-            tutorialUI.EndTutorial(); // Dùng tạm EndTutorial() để tắt UI
+            tutorialUI.EndTutorial();
         }
     }
 }
@@ -121,7 +165,7 @@ public class ClickButtonStep : TutorialStep
         TutorialUIController tutorialUI = CoreServices.Get<TutorialUIController>();
         if(tutorialUI != null && targetButton != null)
         {
-            tutorialUI.StartTutorial(targetButton.gameObject, instruction);
+            tutorialUI.StartTutorial(targetButton.gameObject, instruction, true);
         }
         if (targetButton != null)
         {

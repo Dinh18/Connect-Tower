@@ -20,6 +20,7 @@ public class BoosterButton : MonoBehaviour
         boosterButton.onClick.AddListener(OnButtonClicked);
         GameEventBus.Subscribe<BoosterCountUpdatedEvent>(UpdateCountText);
         GameEventBus.Subscribe<RequestUnlockBoosterEvent>(UnClockBooster);
+        GameEventBus.Subscribe<BoosterAnimationStateEvent>(OnBoosterAnimationStateChanged);
     }
 
     void OnDisable()
@@ -27,6 +28,12 @@ public class BoosterButton : MonoBehaviour
         boosterButton.onClick.RemoveListener(OnButtonClicked);
         GameEventBus.UnSubscribe<BoosterCountUpdatedEvent>(UpdateCountText);
         GameEventBus.UnSubscribe<RequestUnlockBoosterEvent>(UnClockBooster);
+        GameEventBus.UnSubscribe<BoosterAnimationStateEvent>(OnBoosterAnimationStateChanged);
+    }
+
+    private void OnBoosterAnimationStateChanged(BoosterAnimationStateEvent evt)
+    {
+        boosterButton.interactable = !evt.isAnimating;
     }
 
     void Awake()
@@ -91,13 +98,32 @@ public class BoosterButton : MonoBehaviour
 
         if(CoreServices.Get<GameManager>().GetCurrState() == GameManager.GameState.Pause) return;
 
-        boosterButton.interactable = false;
-        if(boosterEffect != null) boosterEffect.PlayEffect(booster.Excute);
-        if(booster.GetBoosterType() == BoosterType.Shuffle || booster.GetBoosterType() == BoosterType.Undo)
+        GameEventBus.Publish(new BoosterAnimationStateEvent { isAnimating = true });
+        CoreServices.Get<InputManager>().SetInputBlocked(true);
+
+        if(boosterEffect != null) 
         {
-            GameEventBus.Publish(new BoardStateChangedEvent());
+            boosterEffect.PlayEffect(() => 
+            {
+                booster.Excute();
+                if(booster.GetBoosterType() == BoosterType.Shuffle || booster.GetBoosterType() == BoosterType.Undo)
+                {
+                    GameEventBus.Publish(new BoardStateChangedEvent());
+                }
+                CoreServices.Get<InputManager>().SetInputBlocked(false);
+                GameEventBus.Publish(new BoosterAnimationStateEvent { isAnimating = false });
+            });
         }
-        boosterButton.interactable = true;
+        else
+        {
+            booster.Excute();
+            if(booster.GetBoosterType() == BoosterType.Shuffle || booster.GetBoosterType() == BoosterType.Undo)
+            {
+                GameEventBus.Publish(new BoardStateChangedEvent());
+            }
+            CoreServices.Get<InputManager>().SetInputBlocked(false);
+            GameEventBus.Publish(new BoosterAnimationStateEvent { isAnimating = false });
+        }
     }
 
     private void UnClockBooster(RequestUnlockBoosterEvent evt)

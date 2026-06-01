@@ -236,4 +236,9 @@ public class HeaderPanel : MonoBehaviour
     {
         if (coinsText != null) coinsText.text = coinsUpdatedEvent.totalCoins.ToString();
     }
+
+    public Transform GetProgressBarTransform()
+    {
+        return finishedSlotsSlider != null ? finishedSlotsSlider.transform : null;
+    }
 }

@@ -933,6 +933,164 @@ public class RuntimeLevelEditorManager : MonoBehaviour
         CoreServices.Get<InputManager>().SetInputBlocked(false);
     }
 
+    public void StartAutoPlayFail()
+    {
+        if (autoPlayCoroutine != null) StopCoroutine(autoPlayCoroutine);
+        autoPlayCoroutine = StartCoroutine(AutoPlayFailRoutine());
+    }
+
+    private System.Collections.IEnumerator AutoPlayFailRoutine()
+    {
+        GameState initial = CreateInitialState();
+        if (initial.IsWin())
+        {
+            Debug.Log("Level is already won.");
+            yield break;
+        }
+
+        var reachable = new HashSet<GameState>();
+        var queue = new Queue<Node>();
+        var adj = new Dictionary<GameState, List<GameState>>();
+        
+        var startNode = new Node { state = initial, parent = null, fromSlot = -1, toSlot = -1, g = 0, h = 0 };
+        reachable.Add(initial);
+        queue.Enqueue(startNode);
+        
+        int expanded = 0;
+        int maxSearchNodes = 50000;
+        
+        List<Node> allNodes = new List<Node>();
+        allNodes.Add(startNode);
+
+        while (queue.Count > 0 && expanded < maxSearchNodes)
+        {
+            Node currNode = queue.Dequeue();
+            GameState curr = currNode.state;
+            expanded++;
+            
+            var succNodes = GenerateSuccessors(currNode);
+            
+            List<GameState> nextStates = new List<GameState>();
+            foreach (var node in succNodes)
+            {
+                nextStates.Add(node.state);
+                
+                if (!reachable.Contains(node.state))
+                {
+                    reachable.Add(node.state);
+                    queue.Enqueue(node);
+                    allNodes.Add(node);
+                }
+            }
+            adj[curr] = nextStates;
+        }
+
+        var canReachWin = new HashSet<GameState>();
+        var revQueue = new Queue<GameState>();
+        var revAdj = new Dictionary<GameState, List<GameState>>();
+
+        foreach (var s in reachable) revAdj[s] = new List<GameState>();
+        foreach (var kvp in adj)
+        {
+            foreach (var n in kvp.Value)
+            {
+                revAdj[n].Add(kvp.Key);
+            }
+        }
+
+        foreach (var s in reachable)
+        {
+            if (s.IsWin())
+            {
+                canReachWin.Add(s);
+                revQueue.Enqueue(s);
+            }
+        }
+
+        while (revQueue.Count > 0)
+        {
+            GameState curr = revQueue.Dequeue();
+            foreach (var prev in revAdj[curr])
+            {
+                if (!canReachWin.Contains(prev))
+                {
+                    canReachWin.Add(prev);
+                    revQueue.Enqueue(prev);
+                }
+            }
+        }
+
+        Node stuckNode = null;
+        Node fallbackStuckNode = null;
+        foreach (var node in allNodes)
+        {
+            if (!canReachWin.Contains(node.state))
+            {
+                if (fallbackStuckNode == null) fallbackStuckNode = node;
+                if (adj.ContainsKey(node.state) && adj[node.state].Count == 0)
+                {
+                    stuckNode = node;
+                    break;
+                }
+            }
+        }
+        if (stuckNode == null) stuckNode = fallbackStuckNode;
+
+        if (stuckNode == null)
+        {
+            Debug.Log($"<color=green>Không có trạng thái bị kẹt nào! (Level Foolproof)</color>");
+            yield break;
+        }
+
+        var path = new List<Node>();
+        Node pathNode = stuckNode;
+        while (pathNode != null && pathNode.parent != null)
+        {
+            path.Add(pathNode);
+            pathNode = pathNode.parent;
+        }
+        path.Reverse();
+
+        int minSteps = path.Count; 
+        Debug.Log($"<color=red><b>TÌM THẤY TRẠNG THÁI BỊ KẸT SAU: {minSteps} BƯỚC ĐI.</b></color>");
+        Debug.Log($"AutoPlayFail: Bắt đầu tự động chơi {minSteps} bước để minh họa bị kẹt...");
+
+        Playtest();
+        yield return new WaitForSeconds(1.5f); 
+
+        CoreServices.Get<InputManager>().SetInputBlocked(true);
+
+        foreach (Node step in path)
+        {
+            if (CoreServices.Get<GameManager>().GetCurrState() != GameManager.GameState.Playing) break;
+
+            List<SlotController> runtimeSlots = CoreServices.Get<SlotsManager>().GetAllSlots();
+            SlotController source = runtimeSlots[step.fromSlot];
+            SlotController target = runtimeSlots[step.toSlot];
+
+            if(source.SelectToMove())
+            {
+                yield return new WaitForSeconds(0.2f);
+                if (target.SelectToRecive(source))
+                {
+                    yield return new WaitForSeconds(0.6f);
+                }
+                else 
+                {
+                    Debug.LogError("AutoPlayFail: Failed to move blocks!");
+                    source.UnSelect();
+                    break;
+                }
+            }
+            else
+            {
+                Debug.LogError("AutoPlayFail: Failed to select source slot!");
+                break;
+            }
+        }
+        CoreServices.Get<InputManager>().SetInputBlocked(false);
+    }
+
     private void OnGUI()
     {
         // Thu nhỏ UI một chút theo yêu cầu
@@ -985,35 +1143,53 @@ public class RuntimeLevelEditorManager : MonoBehaviour
         InitManagers();
 
         int numSlots = row1 + row2;
-        int numTopics = numSlots - 2;
-        if (numTopics <= 0) return;
+        
+        // Lưu lại danh sách topic người dùng đã chọn trước khi GenerateGrid (vì nó gọi Reset)
+        List<BlockTopic> userSelectedTopics = new List<BlockTopic>(topics);
 
         // Reset grid
         GenerateGrid();
-        topics.Clear();
-        amountBlockOfTopic.Clear();
+        
         currentPaintbrushTopic = null;
         currentPaintbrushIndex = -1;
 
-        if (availableTopics == null || availableTopics.Length == 0) return;
-
-        List<BlockTopic> poolTopics = new List<BlockTopic>(availableTopics);
-        for (int i = 0; i < poolTopics.Count; i++)
+        if (userSelectedTopics.Count > 0)
         {
-            BlockTopic temp = poolTopics[i];
-            int randomIndex = Random.Range(i, poolTopics.Count);
-            poolTopics[i] = poolTopics[randomIndex];
-            poolTopics[randomIndex] = temp;
+            topics = userSelectedTopics;
+            amountBlockOfTopic.Clear();
+            for (int i = 0; i < topics.Count; i++) amountBlockOfTopic.Add(4);
+        }
+        else
+        {
+            int numTopics = numSlots - 2;
+            if (numTopics <= 0) return;
+            
+            topics.Clear();
+            amountBlockOfTopic.Clear();
+
+            if (availableTopics == null || availableTopics.Length == 0) return;
+
+            List<BlockTopic> poolTopics = new List<BlockTopic>(availableTopics);
+            for (int i = 0; i < poolTopics.Count; i++)
+            {
+                BlockTopic temp = poolTopics[i];
+                int randomIndex = Random.Range(i, poolTopics.Count);
+                poolTopics[i] = poolTopics[randomIndex];
+                poolTopics[randomIndex] = temp;
+            }
+
+            for (int i = 0; i < Mathf.Min(numTopics, poolTopics.Count); i++)
+            {
+                topics.Add(poolTopics[i]);
+                amountBlockOfTopic.Add(4);
+            }
         }
 
-        for (int i = 0; i < Mathf.Min(numTopics, poolTopics.Count); i++)
-        {
-            topics.Add(poolTopics[i]);
-            amountBlockOfTopic.Add(4);
-        }
-
-        int maxRetries = 50; // Tăng lên để có nhiều cơ hội tìm thấy level Foolproof hơn
+        int maxRetries = 50; // Thử nhiều lần để tìm level ít bị kẹt nhất
         bool foundSolvable = false;
+        int minStuckCount = int.MaxValue;
+        List<BlockSetupData>[] bestSlots = new List<BlockSetupData>[numSlots];
+        for (int i = 0; i < numSlots; i++) bestSlots[i] = new List<BlockSetupData>();
 
         for (int retry = 0; retry < maxRetries; retry++)
         {
@@ -1089,8 +1265,20 @@ public class RuntimeLevelEditorManager : MonoBehaviour
                 }
             }
 
-            // Kiểm tra khả năng giải và tính Foolproof
-            if (IsLevelFoolproof(CreateInitialState()))
+            // Tính số lượng trạng thái bị kẹt
+            int stuckCount = GetStuckCount(CreateInitialState());
+            
+            if (stuckCount < minStuckCount)
+            {
+                minStuckCount = stuckCount;
+                for (int i = 0; i < numSlots; i++)
+                {
+                    bestSlots[i].Clear();
+                    bestSlots[i].AddRange(slots[i].blocks);
+                }
+            }
+
+            if (stuckCount == 0)
             {
                 foundSolvable = true;
                 Debug.Log($"<color=green>Đã tạo level HOÀN HẢO (Foolproof) thành công sau {retry + 1} lần thử nghiệm.</color>");
@@ -1098,9 +1286,16 @@ public class RuntimeLevelEditorManager : MonoBehaviour
             }
         }
 
+        // Áp dụng cấu hình tốt nhất tìm được
+        for (int i = 0; i < numSlots; i++)
+        {
+            slots[i].blocks.Clear();
+            slots[i].blocks.AddRange(bestSlots[i]);
+        }
+
         if (!foundSolvable)
         {
-            Debug.LogWarning("Không tìm được cấu hình HOÀN HẢO sau 50 lần thử! Có thể level quá khó hoặc ít cột rỗng. Sẽ giữ cấu hình ngẫu nhiên cuối cùng.");
+            Debug.LogWarning($"Không tìm được cấu hình HOÀN HẢO sau {maxRetries} lần thử! Đã dùng cấu hình tốt nhất tìm được (có {minStuckCount} trạng thái kẹt).");
         }
 
         RenderGrid();
@@ -1165,7 +1360,7 @@ public class RuntimeLevelEditorManager : MonoBehaviour
         return false;
     }
 
-    private bool IsLevelFoolproof(GameState initial)
+    private int GetStuckCount(GameState initial)
     {
         var reachable = new HashSet<GameState>();
         var queue = new Queue<GameState>();
@@ -1200,8 +1395,8 @@ public class RuntimeLevelEditorManager : MonoBehaviour
             }
         }
 
-        // Nếu level quá phức tạp để check nhanh, ta có thể bỏ qua (hoặc bạn có thể cho return false để khắt khe hơn)
-        if (expanded >= maxSearchNodes) return false; 
+        // Nếu level quá phức tạp để check nhanh, ta trả về số lượng kẹt cực lớn
+        if (expanded >= maxSearchNodes) return 999999; 
 
         var canReachWin = new HashSet<GameState>();
         var revQueue = new Queue<GameState>();
@@ -1235,7 +1430,7 @@ public class RuntimeLevelEditorManager : MonoBehaviour
             }
         }
 
-        return reachable.Count == canReachWin.Count;
+        return reachable.Count - canReachWin.Count;
     }
 
     public void CheckFoolproof()
@@ -1530,6 +1725,11 @@ public class RuntimeLevelEditorManager : MonoBehaviour
         if (GUILayout.Button("6. Kiểm tra Bị Kẹt (Foolproof)", GUILayout.Height(40)))
         {
             CheckFoolproof();
+        }
+
+        if (GUILayout.Button("7. Auto Play (Thử đi vào kẹt)", GUILayout.Height(40)))
+        {
+            StartAutoPlayFail();
         }
 
         GUILayout.EndScrollView();

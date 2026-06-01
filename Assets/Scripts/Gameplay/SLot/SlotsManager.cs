@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 
 public class SlotsManager : MonoBehaviour
@@ -114,7 +115,13 @@ public class SlotsManager : MonoBehaviour
     private void CheckLevelComplete(int topicID)
     {
         finishedTopic++;
-        GameEventBus.Publish(new FinishedSlotsUpdatedEvent { finishedSlots = finishedTopic, totalSlots = numsTopic });
+        int currentFinished = finishedTopic;
+        int currentTotal = numsTopic;
+        
+        DOVirtual.DelayedCall(0.8f, () => {
+            GameEventBus.Publish(new FinishedSlotsUpdatedEvent { finishedSlots = currentFinished, totalSlots = currentTotal });
+        });
+
         foreach(SlotController slot in levelLoader.slots)
         {
             if(!slot.isRevealed && slot.blockTopic.topicID == topicID){
@@ -130,8 +137,11 @@ public class SlotsManager : MonoBehaviour
             }
         }
         levelCompleted = true;
-        CoreServices.Get<GameManager>().ChangeState(GameManager.GameState.Win);
-        levelLoader.LevelUp();
+        
+        DOVirtual.DelayedCall(1.1f, () => {
+            CoreServices.Get<GameManager>().ChangeState(GameManager.GameState.Win);
+            levelLoader.LevelUp();
+        });
     }
 
     public bool GetLevelComleted() => levelCompleted;

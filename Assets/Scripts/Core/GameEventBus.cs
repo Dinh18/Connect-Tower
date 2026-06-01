@@ -192,3 +192,8 @@ public struct RequestUnlockBoosterEvent  : IGameEvent
 {
     public BoosterType boosterType;
 }
+
+public struct BoosterAnimationStateEvent : IGameEvent
+{
+    public bool isAnimating;
+}

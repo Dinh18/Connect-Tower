@@ -65,9 +65,6 @@ public class UIManager : MonoBehaviour
     {
         GameManager.GameState gameState = gameStateChangedEvent.newState;
         {
-            // endGameUI.Hide();
-            // mainMenu.Hide();
-            // if(gameState == GameManager.GameState.MainMenu) ingame.Hide();
 
             foreach(Menu menu in allMenu)
             {
@@ -93,14 +90,14 @@ public class UIManager : MonoBehaviour
                         Debug.Log("Het tim");
                         GameEventBus.Publish(new RequestChangeAnimationNPC{newState = NPCState.Sleep});
                     }
-                    else if(gameManager != null && gameManager.GetPrevState() == GameManager.GameState.Win)
-                    {
-                        GameEventBus.Publish(new RequestChangeAnimationNPC{newState = NPCState.Excited});
-                    }
-                    else if(gameManager != null && gameManager.GetPrevState() == GameManager.GameState.Lose)
-                    {
-                        GameEventBus.Publish(new RequestChangeAnimationNPC{newState = NPCState.Crying});
-                    }
+                    // else if(gameManager != null && gameManager.GetPrevState() == GameManager.GameState.Win)
+                    // {
+                    //     GameEventBus.Publish(new RequestChangeAnimationNPC{newState = NPCState.Excited});
+                    // }
+                    // else if(gameManager != null && gameManager.GetPrevState() == GameManager.GameState.Lose)
+                    // {
+                    //     GameEventBus.Publish(new RequestChangeAnimationNPC{newState = NPCState.Crying});
+                    // }
                     
                     if(gameManager != null && gameManager.GetPrevState() == GameManager.GameState.None)
                         StartCoroutine(ShowLoadingImage(3f,() => GameEventBus.Publish(new RequestChangeAnimationNPC{newState = NPCState.Waving})));
@@ -112,6 +109,7 @@ public class UIManager : MonoBehaviour
                         break;
                 case GameManager.GameState.Lose:
                         // endGameUI.ShowLevelFailedPanel();
+                        GameEventBus.Publish(new RequestChangeAnimationNPC{newState = NPCState.Crying});
                         ShowMenu<EndGameMenu>();
                         break;
                 case GameManager.GameState.Playing:
@@ -148,7 +146,7 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    private Menu GetMenu<T>() where T : Menu
+    public Menu GetMenu<T>() where T : Menu
     {
         foreach(var menu in allMenu)
         {

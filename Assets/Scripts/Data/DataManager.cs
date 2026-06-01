@@ -273,7 +273,7 @@ public class DataManager : MonoBehaviour
         {
             if(id.ToString() == boosterData.id)
             {
-                if(playerData.currentLevel == GetBooster(id).unlockedLevel && !playerData.progress.unlockedBoosters[id.ToString()]) return true;
+                if(playerData.currentLevel == GetBooster(id).unlockedLevel && !IsUnLockedBooster(id)) return true;
                 else return false;
             }
         }

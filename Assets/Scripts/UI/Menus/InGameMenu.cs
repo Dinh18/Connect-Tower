@@ -35,8 +35,7 @@ public class InGameMenu : Menu
         if (gameManager == null) gameManager = CoreServices.Get<GameManager>();
         if (levelLoader == null) levelLoader = CoreServices.Get<LevelLoader>();
 
-        
-        // if (borderPanel != null) borderPanel.Show();
+
     }
 
     public override void Hide() 
@@ -68,5 +67,10 @@ public class InGameMenu : Menu
     {
         if (headerPanel != null) headerPanel.Setup();
         if (bottomPanel != null) bottomPanel.Setup();
+    }
+
+    public HeaderPanel GetHeaderPanel()
+    {
+        return headerPanel;
     }
 }

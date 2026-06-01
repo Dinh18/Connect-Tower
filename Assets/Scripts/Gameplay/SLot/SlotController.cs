@@ -49,6 +49,7 @@ public class SlotController : MonoBehaviour
     private int row;
     private int blocksToMove;
     [SerializeField] private float delayBetweenBlocks = 0.1f;
+    [SerializeField] private Transform completedVFX;
     
     public static event Action<int> OnSlotCompleted;
     public static event Action<bool> OnMoveFisnished;
@@ -342,9 +343,79 @@ public class SlotController : MonoBehaviour
         }
         header.Show();
         slotVFX.PlayVFX();
+        PlayCompletedVFX();
         Debug.Log("Slot Completed");
         OnSlotCompleted?.Invoke(blocks.Peek().GetTopicID());
         CoreServices.Get<GamePlayController>().ResetUndoStack();
+    }
+
+    private void PlayCompletedVFX()
+    {
+        if (completedVFX == null) return;
+        
+        var uiManager = CoreServices.Get<UIManager>();
+        Transform targetTransform = null;
+        if (uiManager != null)
+        {
+            var inGameMenu = uiManager.GetMenu<InGameMenu>() as InGameMenu;
+            if (inGameMenu != null)
+            {
+                targetTransform = inGameMenu.GetHeaderPanel()?.GetProgressBarTransform();
+            }
+        }
+        
+        if (targetTransform == null) return;
+
+        Camera mainCam = Camera.main;
+        if (mainCam == null) return;
+
+        Canvas canvas = targetTransform.GetComponentInParent<Canvas>();
+        Camera canvasCam = (canvas != null && canvas.renderMode == RenderMode.ScreenSpaceOverlay) ? null : canvas?.worldCamera;
+        
+        Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(canvasCam, targetTransform.position);
+        
+        float distance = Mathf.Abs(mainCam.transform.position.z - transform.position.z);
+        Vector3 targetWorldPos = mainCam.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, distance));
+
+        completedVFX.gameObject.SetActive(true);
+
+        for(int i = 0; i < completedVFX.childCount; i++)
+        {
+            Transform p = completedVFX.GetChild(i);
+            p.gameObject.SetActive(true);
+            
+            ParticleSystem[] pSystems = p.GetComponentsInChildren<ParticleSystem>();
+            foreach(var ps in pSystems)
+            {
+                ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                ps.Play(true);
+            }
+            
+            Vector3 startPos = transform.position;
+            p.position = startPos;
+            
+            Vector3 midPoint = startPos + (targetWorldPos - startPos) / 2f;
+            midPoint.x += UnityEngine.Random.Range(-2f, 2f);
+            midPoint.y += UnityEngine.Random.Range(0f, 2f);
+
+            Vector3[] path = new Vector3[] { startPos, midPoint, targetWorldPos };
+
+            float delay = i * 0.1f; 
+            p.DOPath(path, 0.8f, PathType.CatmullRom)
+             .SetDelay(delay)
+             .SetEase(Ease.InQuad)
+             .OnComplete(() => {
+                 p.gameObject.SetActive(false);
+                 p.localPosition = Vector3.zero;
+                 
+                 // Giết tween cũ và reset scale về mặc định trước khi rung
+                 targetTransform.DOKill(false);
+                 targetTransform.localScale = Vector3.one;
+                 targetTransform.DOPunchScale(Vector3.one * 0.15f, 0.3f).OnComplete(() => {
+                     targetTransform.localScale = Vector3.one;
+                 });
+             });
+        }
     }
 
     private void BlockStartMoving()

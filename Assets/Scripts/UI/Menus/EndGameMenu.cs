@@ -10,8 +10,6 @@ public class EndGameMenu : Menu
     [SerializeField] private LevelFailedPanel levelFailed;
     [SerializeField] private GameObject dimImage;
     [SerializeField] private GameObject levelCompletedVFX;
-    [SerializeField] private GameObject hardLevelFrame;
-
     public override void Show()
     {
         base.Show();
@@ -23,7 +21,6 @@ public class EndGameMenu : Menu
     {
         base.Hide();
         dimImage.SetActive(false);
-        if (hardLevelFrame != null) hardLevelFrame.SetActive(false);
         levelCompleted.Hide();
         levelFailed.Hide();
     }

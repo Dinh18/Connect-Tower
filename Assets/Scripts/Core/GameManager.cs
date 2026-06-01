@@ -90,7 +90,8 @@ public class GameManager : MonoBehaviour
             
             if(moves <= 0 && !slotsManager.GetLevelComleted())
             {
-                ChangeState(GameState.Lose);
+                // ChangeState(GameState.Lose);
+                CoreServices.Get<UIManager>().ShowUI<OutOfMovePopup>();
                 // CoreServices.Get<DataManager>().ResetWinStreak();
             }
             else if (!slotsManager.GetLevelComleted())
@@ -195,10 +196,17 @@ public class GameManager : MonoBehaviour
         isRestarting = false;
     }
 
-    public void AddMoveToContinue(int extraMoves)
+    public bool AddMoveToContinue(int extraMoves)
     {
-        AddMove(extraMoves);
-        ChangeState(GameState.Playing);
+        if(CoreServices.Get<DataManager>().GetTotalCoins() >= 900)
+        {
+            AddMove(extraMoves);
+            CoreServices.Get<DataManager>().UseCoins(900);
+            ChangeState(GameState.Playing);
+            return true;
+        }
+        return false;
+        
     }
     
     public void ChangeState(GameState newState)

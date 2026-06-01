@@ -6,33 +6,46 @@ public class LevelFailedPanel : Panel
 {
     // private UIManager uIManager; // Loại bỏ phụ thuộc
     [SerializeField] private Button tryAgainButton;
-    [SerializeField] private Button addMoveButton;
     [SerializeField] private Button backMainMenuButton;
-    [SerializeField] private Transform blockLeft, blockRight, titleText;
 
     void OnEnable()
     {
         backMainMenuButton.onClick.AddListener(OnClickBackHome);
         tryAgainButton.onClick.AddListener(OnClickTryAgain);
-        addMoveButton.onClick.AddListener(OnClickAddMove);
     }
 
     void OnDisable()
     {
         backMainMenuButton.onClick.RemoveAllListeners();
         tryAgainButton.onClick.RemoveAllListeners();
-        addMoveButton.onClick.RemoveAllListeners();
     }
 
     public override void Show()
     {
         gameObject.SetActive(true);
-        blockLeft.localScale = Vector3.zero;
-        blockRight.localScale = Vector3.zero;
-        titleText.localScale = Vector3.zero;
-        blockLeft.DOScale(1, 0.5f).SetEase(Ease.OutBack);
-        blockRight.DOScale(1, 0.5f).SetEase(Ease.OutBack);
-        titleText.DOScale(1, 0.5f).SetEase(Ease.OutBack);
+        if (transform.childCount > 1)
+        {
+            Transform panelHolder = transform.GetChild(1);
+            panelHolder.DOKill();
+            panelHolder.localScale = Vector3.zero;
+            panelHolder.DOScale(1f, 0.5f).SetEase(Ease.OutBack).SetUpdate(true);
+            
+            Transform background = transform.GetChild(0);
+            if (background.TryGetComponent<Image>(out Image bgImage))
+            {
+                bgImage.DOKill();
+                Color c = bgImage.color;
+                c.a = 0;
+                bgImage.color = c;
+                bgImage.DOFade(0.86f, 0.3f).SetUpdate(true);
+            }
+        }
+        else
+        {
+            transform.DOKill();
+            transform.localScale = Vector3.zero;
+            transform.DOScale(1f, 0.5f).SetEase(Ease.OutBack).SetUpdate(true);
+        }
     }
 
     private void OnClickBackHome()
@@ -45,10 +58,26 @@ public class LevelFailedPanel : Panel
         CoreServices.Get<GameManager>().RestartLevel();
     }
     
-    private void OnClickAddMove()
+    public override void Hide() 
     {
-        CoreServices.Get<GameManager>().AddMoveToContinue(5);
+        if (transform.childCount > 1)
+        {
+            Transform panelHolder = transform.GetChild(1);
+            panelHolder.DOKill();
+            panelHolder.DOScale(0f, 0.3f).SetEase(Ease.InBack).SetUpdate(true).OnComplete(() => gameObject.SetActive(false));
+            
+            Transform background = transform.GetChild(0);
+            if (background.TryGetComponent<Image>(out Image bgImage))
+            {
+                bgImage.DOKill();
+                bgImage.DOFade(0f, 0.3f).SetUpdate(true);
+            }
+        }
+        else
+        {
+            transform.DOKill();
+            transform.DOScale(0f, 0.3f).SetEase(Ease.InBack).SetUpdate(true).OnComplete(() => gameObject.SetActive(false));
+        }
     }
-    public override void Hide() => gameObject.SetActive(false);
     public GameObject GetGameObject() => this.gameObject;
 }

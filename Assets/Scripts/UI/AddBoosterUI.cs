@@ -17,6 +17,7 @@ public class AddBoosterUI : Popup
     [SerializeField] private Sprite addMoveIcon;
     [SerializeField] private Sprite shuffleIcon;
     [SerializeField] private Sprite hintIcon;
+    [SerializeField] private Sprite undoIcon;
     
     private RectTransform boosterTransform;
     private BoosterButton boosterButton;
@@ -81,10 +82,15 @@ public class AddBoosterUI : Popup
             boosterIconImage.sprite = shuffleIcon;
             tutorialText.text = "Use it to shuffle the blocks";
         }
-        else
+        else if(boosterType == BoosterType.Hint)
         {
             tutorialText.text = "Use it to see matching blocks";
             boosterIconImage.sprite = hintIcon;
+        }
+        else if(boosterType == BoosterType.Undo)
+        {
+            tutorialText.text = "Use it to back previous step";
+            boosterIconImage.sprite = undoIcon;
         }
     }
 

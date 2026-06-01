@@ -5,7 +5,7 @@ Shader "UI/TransparentHole"
         [PerRendererData] _MainTex ("Sprite Texture", 2D) = "white" {}
         _Color ("Background Color", Color) = (0,0,0,0.8)
         _HoleCenter ("Hole Center (UV)", Vector) = (0.5, 0.5, 0, 0)
-        _HoleRadius ("Hole Radius", Float) = 0.1
+        _HoleSize ("Hole Size", Vector) = (0.1, 0.1, 0, 0)
         _Softness ("Edge Softness", Float) = 0.05
         _AspectRatio ("Aspect Ratio (Width/Height)", Float) = 1.0
     }
@@ -50,7 +50,7 @@ Shader "UI/TransparentHole"
             sampler2D _MainTex;
             fixed4 _Color;
             float4 _HoleCenter;
-            float _HoleRadius;
+            float4 _HoleSize;
             float _Softness;
             float _AspectRatio;
 
@@ -68,18 +68,20 @@ Shader "UI/TransparentHole"
                 float2 uv = IN.texcoord;
                 float2 center = _HoleCenter.xy;
                 
-                // Cân bằng tỉ lệ khung hình để lỗ hổng luôn là hình tròn (không bị méo thành oval)
+                // Đưa trục x về cùng hệ quy chiếu với trục y
                 uv.x *= _AspectRatio;
                 center.x *= _AspectRatio;
 
-                // Tính khoảng cách từ pixel hiện tại tới tâm lỗ hổng
-                float dist = distance(uv, center);
+                // Tính khoảng cách tương đối tới tâm theo 2 trục của elip
+                float2 diff = uv - center;
+                float dist = length(float2(diff.x / max(0.001, _HoleSize.x), diff.y / max(0.001, _HoleSize.y)));
 
                 fixed4 c = tex2D(_MainTex, IN.texcoord) * IN.color;
 
-                // Tạo hiệu ứng mờ dần (softness/feather) ở viền lỗ hổng thay vì cắt cứng
-                // Từ _HoleRadius đến _HoleRadius + _Softness, alpha sẽ tăng dần từ 0 đến 1 (nhân với alpha hiện tại)
-                float alphaMult = smoothstep(_HoleRadius, _HoleRadius + _Softness, dist);
+                // Tạo hiệu ứng mờ dần (softness)
+                // dist = 1.0 là biên của elip. Tính toán độ mềm (softness) tương đối.
+                float normSoftness = _Softness / max(0.001, min(_HoleSize.x, _HoleSize.y));
+                float alphaMult = smoothstep(1.0, 1.0 + normSoftness, dist);
                 c.a *= alphaMult;
 
                 return c;
