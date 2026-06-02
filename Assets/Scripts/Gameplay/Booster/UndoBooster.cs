@@ -34,7 +34,7 @@ public class UndoBooster : Booster
         }
     }
 
-    public override void Excute()
+    public override void Excute(System.Action onComplete = null)
     {
         // 1. Chỉ làm nhiệm vụ BÁO CÁO lên EventBus: "Tôi cần thực thi Undo"
         GameEventBus.Publish(new RequestExecuteBoosterEvent
@@ -53,6 +53,7 @@ public class UndoBooster : Booster
                     // Nếu thất bại (hết bước), hiện thông báo
                     if (floatingNotifier != null) floatingNotifier.ShowWarning("No last move found!");
                 }
+                onComplete?.Invoke();
             }
         });
     }

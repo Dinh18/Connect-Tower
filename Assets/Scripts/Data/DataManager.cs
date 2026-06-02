@@ -20,6 +20,7 @@ public class DataManager : MonoBehaviour
     private string userId;
     private string saveFilePath;
     public bool dataReady = false;
+    public int sessionUndoCount = 5;
 
     public void Init()
     {
@@ -241,6 +242,8 @@ public class DataManager : MonoBehaviour
     }
     public int GetNumsBooster(int id)
     {
+        if (id == 3) return sessionUndoCount;
+        
         if(!playerData.inventory.boosters.ContainsKey(id.ToString()))
         {
             Debug.LogWarning("Booster khong ton tai");
@@ -363,6 +366,8 @@ public class DataManager : MonoBehaviour
 
     public int GetAmountOfBoosterByID(int id)
     {
+        if (id == 3) return sessionUndoCount;
+        
         if(playerData.inventory.boosters.ContainsKey(id.ToString())) return playerData.inventory.boosters[id.ToString()];
         Debug.LogError("Booster Không tồn tại");
         return 0;
@@ -371,6 +376,17 @@ public class DataManager : MonoBehaviour
     public void UseBooster(int id)
     {
         if (LevelLoader.isPlaytestingTempLevel) return;
+        
+        if (id == 3)
+        {
+            if (sessionUndoCount > 0)
+            {
+                sessionUndoCount--;
+                GameEventBus.Publish(new BoosterCountUpdatedEvent { boosterId = id, count = sessionUndoCount });
+            }
+            return;
+        }
+        
         if(!playerData.inventory.boosters.ContainsKey(id.ToString())) return;
 
         playerData.inventory.boosters[id.ToString()]--;
@@ -380,12 +396,26 @@ public class DataManager : MonoBehaviour
 
     public void AddBooster(int id, int amount, bool isFree = false)
     {
+        if (id == 3)
+        {
+            sessionUndoCount += amount;
+            if(!isFree) UseCoins(GetBooster(id).price);
+            GameEventBus.Publish(new BoosterCountUpdatedEvent { boosterId = id, count = sessionUndoCount });
+            return;
+        }
+        
         if(!playerData.inventory.boosters.ContainsKey(id.ToString())) return;
 
         playerData.inventory.boosters[id.ToString()] += amount;
         if(!isFree) UseCoins(GetBooster(id).price);
         GameEventBus.Publish(new BoosterCountUpdatedEvent { boosterId = id, count = playerData.inventory.boosters[id.ToString()]});
         
+    }
+    
+    public void ResetSessionUndo()
+    {
+        sessionUndoCount = 5;
+        GameEventBus.Publish(new BoosterCountUpdatedEvent { boosterId = 3, count = sessionUndoCount });
     }
 
     // public void UnlockBooster(int id)

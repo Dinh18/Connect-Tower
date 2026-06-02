@@ -24,14 +24,22 @@ public class HomePanel : Panel
     [SerializeField] private Text heartCountText;
     [SerializeField] private Image heartIcon;
     [SerializeField] private Button addHeartButton;
-    [Header("Button Play Background")]
+    [Header("Button Play Setting")]
     [SerializeField] private Sprite greenPlayButton;
     [SerializeField] private Sprite redPlayButton;
     [SerializeField] private Sprite purplePlayButton;
+    [SerializeField] private Sprite hardSkull;
+    [SerializeField] private Sprite spHardSkull;
+    [SerializeField] private Image skullLeftImage;
+    [SerializeField] private Image skullRightImage;
 
     private MainMenu mainMenu;
 
     private bool enableAddHeartButton;
+
+    private Quaternion skullLeftOriginalRot;
+    private Quaternion skullRightOriginalRot;
+    private bool isSkullsRotInitialized = false;
 
     void OnEnable()
     {
@@ -90,6 +98,10 @@ public class HomePanel : Panel
     {
         LevelLoader.GameDifficult difficultLevel = (LevelLoader.GameDifficult)CoreServices.Get<LevelLoader>()
                                                 .GetDifficultLevel(CoreServices.Get<DataManager>().GetCurrentLevel());
+        
+        bool showLeft = false;
+        bool showRight = false;
+
         if(difficultLevel == LevelLoader.GameDifficult.Easy)
         {
             playButton.gameObject.GetComponent<Image>().sprite = greenPlayButton;
@@ -97,12 +109,93 @@ public class HomePanel : Panel
         else if(difficultLevel == LevelLoader.GameDifficult.Hard)
         {
             playButton.gameObject.GetComponent<Image>().sprite = purplePlayButton;
+            skullLeftImage.sprite = hardSkull;
+            showLeft = true;
         }
         else
         {
             playButton.gameObject.GetComponent<Image>().sprite = redPlayButton;
+            skullLeftImage.sprite = spHardSkull;
+            showLeft = true;
+            showRight = true;
         }
         playText.text = "Level "+(CoreServices.Get<DataManager>().GetCurrentLevel() + 1).ToString();
+        AnimateSkulls(showLeft, showRight);
+    }
+
+    private void AnimateSkulls(bool showLeft, bool showRight)
+    {
+        if (!isSkullsRotInitialized)
+        {
+            skullLeftOriginalRot = skullLeftImage.transform.localRotation;
+            skullRightOriginalRot = skullRightImage.transform.localRotation;
+            isSkullsRotInitialized = true;
+        }
+
+        if (showLeft)
+        {
+            skullLeftImage.transform.DOKill();
+            skullLeftImage.transform.localRotation = skullLeftOriginalRot;
+            
+            Sequence seqLeft = DOTween.Sequence();
+            
+            if (!skullLeftImage.gameObject.activeSelf)
+            {
+                skullLeftImage.gameObject.SetActive(true);
+                skullLeftImage.transform.localScale = Vector3.zero;
+                seqLeft.Append(skullLeftImage.transform.DOScale(1.1f, 0.4f).SetEase(Ease.OutBack));
+            }
+            else
+            {
+                skullLeftImage.transform.localScale = Vector3.one;
+            }
+            
+            seqLeft.Append(skullLeftImage.transform.DOScale(0.95f, 0.8f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine));
+            skullLeftImage.transform.DOLocalRotate(new Vector3(0, 0, 5f), 1f).SetRelative(true).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
+        }
+        else
+        {
+            if (skullLeftImage.gameObject.activeSelf)
+            {
+                skullLeftImage.transform.DOKill();
+                skullLeftImage.transform.DOScale(0f, 0.3f).SetEase(Ease.InBack).OnComplete(() => {
+                    skullLeftImage.gameObject.SetActive(false);
+                });
+            }
+        }
+
+        if (showRight)
+        {
+            skullRightImage.transform.DOKill();
+            skullRightImage.transform.localRotation = skullRightOriginalRot;
+
+            Sequence seqRight = DOTween.Sequence();
+            
+            if (!skullRightImage.gameObject.activeSelf)
+            {
+                skullRightImage.gameObject.SetActive(true);
+                skullRightImage.transform.localScale = Vector3.zero;
+                seqRight.AppendInterval(0.15f);
+                seqRight.Append(skullRightImage.transform.DOScale(1.1f, 0.4f).SetEase(Ease.OutBack));
+            }
+            else
+            {
+                skullRightImage.transform.localScale = Vector3.one;
+            }
+
+            seqRight.Append(skullRightImage.transform.DOScale(0.95f, 0.8f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine));
+            skullRightImage.transform.DOLocalRotate(new Vector3(0, 0, -5f), 1f).SetRelative(true).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine).SetDelay(0.2f);
+        }
+        else
+        {
+            if (skullRightImage.gameObject.activeSelf)
+            {
+                skullRightImage.transform.DOKill();
+                skullRightImage.transform.DOScale(0f, 0.3f).SetEase(Ease.InBack).OnComplete(() => {
+                    skullRightImage.gameObject.SetActive(false);
+                });
+            }
+        }
     }
 
     private void PlayAnimationPlayButton()
@@ -140,7 +233,7 @@ public class HomePanel : Panel
 
         // 2. Canh thời gian để đổi chữ. 
         // Giả sử Particle mất 0.15s để phình to che kín chữ. Ta dùng DOVirtual.DelayedCall để đợi.
-        DOVirtual.DelayedCall(0f, () => 
+        DOVirtual.DelayedCall(0.15f, () => 
         {
             SetupButton();
         });

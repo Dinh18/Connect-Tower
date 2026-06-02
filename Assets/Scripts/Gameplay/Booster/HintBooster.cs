@@ -5,7 +5,7 @@ public class HintBooster : Booster
     [SerializeField] private FloatingNotifier floatingNotifier;
     public override BoosterType GetBoosterType() => BoosterType.Hint;
 
-    public override void Excute()
+    public override void Excute(System.Action onComplete = null)
     {
         GameEventBus.Publish(new RequestExecuteBoosterEvent 
         { 
@@ -22,6 +22,7 @@ public class HintBooster : Booster
                 {
                     floatingNotifier.ShowWarning("All blocks have been revealed!");
                 }
+                onComplete?.Invoke();
             }
         });
     }

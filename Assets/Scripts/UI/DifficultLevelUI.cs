@@ -19,6 +19,7 @@ public class DifficultLevel : MonoBehaviour
     [Header("Super Hard Level Setting")]
     [SerializeField] private Color spHardBgColor;
     [SerializeField] private Color spHardBgTextColor;
+    [SerializeField] private GameObject fireHolder;
 
     // Biến để lưu vị trí Y ban đầu của NPC
     private float npcOriginalPosY;
@@ -37,6 +38,8 @@ public class DifficultLevel : MonoBehaviour
             bgTextImage.color = hardbgTextColor;
             difficultLevelText.text = "HARD LEVEL";
             shadowText.text = "HARD LEVEL";
+            fireHolder.SetActive(false);
+            // GameEventBus.Publish(new RequestChangeAnimationBoss { newState = BossState.Hard });
 
         }
         else if(difficultLevel == LevelLoader.GameDifficult.VeryHard)
@@ -45,6 +48,8 @@ public class DifficultLevel : MonoBehaviour
             bgTextImage.color = spHardBgTextColor;
             difficultLevelText.text = "SUPER HARD";
             shadowText.text = "SUPER HARD";
+            fireHolder.SetActive(true);
+            // GameEventBus.Publish(new RequestChangeAnimationBoss { newState = BossState.SuperHard });
         }
         this.gameObject.SetActive(true);
 
@@ -78,6 +83,20 @@ public class DifficultLevel : MonoBehaviour
         // NPC phóng to và nảy từ dưới chui lên trên banner
         sequence.Insert(0.2f, hard_NPC_Image.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutBack));
         sequence.Insert(0.2f, hard_NPC_Image.DOLocalMoveY(npcOriginalPosY, 0.5f).SetEase(Ease.OutBack));
+
+        sequence.OnComplete(() => {
+            // Sau khi hoàn thành Animation, đợi 1.5s rồi tự động ẩn đi
+            // DOVirtual.DelayedCall(1.5f, HideDifficultLevel);
+            if(difficultLevel == LevelLoader.GameDifficult.Hard)
+        {
+            GameEventBus.Publish(new RequestChangeAnimationBoss { newState = BossState.Hard });
+
+        }
+        else if(difficultLevel == LevelLoader.GameDifficult.VeryHard)
+        {
+            GameEventBus.Publish(new RequestChangeAnimationBoss { newState = BossState.SuperHard });
+        }
+        });
 
         // 3. Đợi 1.5s rồi tự động ẩn đi (Thay cho Coroutine)
         DOVirtual.DelayedCall(1.5f, HideDifficultLevel);

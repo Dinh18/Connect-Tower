@@ -23,12 +23,11 @@ public class HintEffectController : MonoBehaviour
     {
         if (evt.boosterType == BoosterType.Hint)
         {
-            bool searched = SearchedBlocks();
-            evt.onComplete?.Invoke(searched);
+            SearchedBlocks(evt.onComplete);
         }
     }
 
-    private bool SearchedBlocks()
+    private void SearchedBlocks(System.Action<bool> onComplete)
     {
         bool hasHiddenBlocks = false;
         foreach(SlotController slot in CoreServices.Get<SlotsManager>().GetAllSlots())
@@ -40,7 +39,11 @@ public class HintEffectController : MonoBehaviour
             }
         }
 
-        if (!hasHiddenBlocks) return false;
+        if (!hasHiddenBlocks) 
+        {
+            onComplete?.Invoke(false);
+            return;
+        }
 
         dimImage.SetActive(true);
         CoreServices.Get<InputManager>().SetInputBlocked(true);
@@ -49,9 +52,8 @@ public class HintEffectController : MonoBehaviour
         magnifyingGlass.Activate(mainCamera, duration, () => {
             dimImage.SetActive(false);
             CoreServices.Get<InputManager>().SetInputBlocked(false);
+            onComplete?.Invoke(true);
         });
-
-        return true;
     }
 
     public IEnumerator HintCoroutine(float time, GameObject hintImage1, GameObject hintImage2, BlockController block1, BlockController block2 = null)

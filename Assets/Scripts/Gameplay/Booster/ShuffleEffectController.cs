@@ -24,12 +24,11 @@ public class ShuffleEffectController : MonoBehaviour
     {
         if (evt.boosterType == BoosterType.Shuffle)
         {
-            ShuffleBlock();
-            evt.onComplete?.Invoke(true);
+            ShuffleBlock(evt.onComplete);
         }
     }
 
-    private void ShuffleBlock()
+    private void ShuffleBlock(System.Action<bool> onComplete)
     {
         List<BlockController> diffcultBLocks = new List<BlockController>();
         Dictionary<int, List<BlockController>> sameBlocks = new Dictionary<int, List<BlockController>>();
@@ -197,6 +196,7 @@ public class ShuffleEffectController : MonoBehaviour
 
         sequence.OnComplete(() => {
             centerPivot.rotation = Quaternion.identity;
+            onComplete?.Invoke(true);
         });
     }   
 

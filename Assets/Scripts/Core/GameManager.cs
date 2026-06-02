@@ -72,6 +72,7 @@ public class GameManager : MonoBehaviour
         this.maxMoves = maxMoves;
         OnChangeMoves?.Invoke(moves);
         GameEventBus.Publish(new MovesUpdatedEvent { currentMoves = this.moves });
+        CoreServices.Get<DataManager>().ResetSessionUndo();
         cameraController.FitCamera(slotsManager.row1, slotsManager.row2);
     }
 
@@ -147,7 +148,7 @@ public class GameManager : MonoBehaviour
                 CoreServices.Get<DataManager>().UnlockBooster((int)BoosterType.Shuffle);
             }
         }
-        yield return new WaitForSeconds(5f);
+        yield return new WaitForSeconds(3f);
 
         // Sau 5s, kiểm tra xem game còn đang chơi không và chưa qua màn
         if (currState == GameState.Playing && !slotsManager.GetLevelComleted())

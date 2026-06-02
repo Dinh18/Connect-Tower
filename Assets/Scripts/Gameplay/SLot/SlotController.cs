@@ -256,18 +256,30 @@ public class SlotController : MonoBehaviour
 
     public List<Vector3> PathToMoveBlock(SlotController sourceSlot, int index, float startY)
     {
+        float zOffset = -2.0f; // Di chuyển block tiến về phía camera để không bị che bởi slot khác
+        
         float finalPeakX = (sourceSlot.arcPeak.position.y < this.arcPeak.position.y) ? sourceSlot.arcPeak.position.x : this.arcPeak.position.x;
-            float finalPeakY = Mathf.Max(sourceSlot.arcPeak.position.y, this.arcPeak.position.y);
-            float finalPeakZ = (sourceSlot.arcPeak.position.y < this.arcPeak.position.y) ? sourceSlot.arcPeak.position.z : this.arcPeak.position.z;
-            Vector3 finalPeak = new Vector3(finalPeakX, finalPeakY, finalPeakZ); 
+        float finalPeakY = Mathf.Max(sourceSlot.arcPeak.position.y, this.arcPeak.position.y);
+        float finalPeakZ = ((sourceSlot.arcPeak.position.y < this.arcPeak.position.y) ? sourceSlot.arcPeak.position.z : this.arcPeak.position.z) + zOffset;
+        Vector3 finalPeak = new Vector3(finalPeakX, finalPeakY, finalPeakZ); 
 
-            Vector3 finalDestination = new Vector3(this.stackAnchor.position.x, startY + height * index, this.stackAnchor.position.z);    
-            List<Vector3> path = new List<Vector3>{
-                sourceSlot.arcPeak.position,
-                finalPeak,
-                finalDestination
-            };
-            if(sourceSlot.arcPeak.position.y < this.arcPeak.position.y) path.Insert(2, this.arcPeak.position);
+        Vector3 finalDestination = new Vector3(this.stackAnchor.position.x, startY + height * index, this.stackAnchor.position.z);    
+        
+        Vector3 sourcePeak = sourceSlot.arcPeak.position;
+        sourcePeak.z += zOffset;
+
+        List<Vector3> path = new List<Vector3>{
+            sourcePeak,
+            finalPeak,
+            finalDestination
+        };
+        
+        if(sourceSlot.arcPeak.position.y < this.arcPeak.position.y) 
+        {
+            Vector3 targetPeak = this.arcPeak.position;
+            targetPeak.z += zOffset;
+            path.Insert(2, targetPeak);
+        }
         return path;
     }
     
@@ -291,7 +303,6 @@ public class SlotController : MonoBehaviour
         return true;
     }
     
-    // Đổi GameObject block thành BlockController block để tránh gọi GetComponent
     private void MoveBlockSmoothly(BlockController block, List<Vector3> path, float duration, SlotController slot = null, bool isSameType = false, bool isSlotEmpty = false, float delay = 0f)
     {
         BlockStartMoving();
@@ -299,9 +310,10 @@ public class SlotController : MonoBehaviour
 
         block.transform.DOKill();
 
-        block.transform.DOPath(pathArr, duration, PathType.CatmullRom)
+        // Tăng resolution từ mặc định (10) lên 30 để đường cong CatmullRom mềm và mượt hơn
+        block.transform.DOPath(pathArr, duration, PathType.CatmullRom, PathMode.Full3D, 30)
             .SetDelay(delay)
-            .SetEase(Ease.InOutQuad)
+            .SetEase(Ease.InOutSine) // Dùng InOutSine cho cảm giác mượt mà (soft) hơn InOutQuad
             .OnComplete(() => 
             {
                 BlockReachedDestination(block, slot, isSameType, isSlotEmpty); 
@@ -584,7 +596,11 @@ public class SlotController : MonoBehaviour
         Vector3 destination = new Vector3(stackAnchor.position.x,
                                           stackAnchor.position.y + Constants.BLOCK_HEIGHT * blocks.Count,
                                           stackAnchor.position.z);
-        List<Vector3> path = new List<Vector3>{arcPeak.position, destination};
+                                          
+        Vector3 peak = arcPeak.position;
+        peak.z -= 2.0f; // Di chuyển block tiến về phía camera để không bị che bởi slot khác
+        
+        List<Vector3> path = new List<Vector3>{peak, destination};
         
         block.transform.DOKill(); // Tối ưu: DOKill trước khi gán Tween mới
         block.transform.DOPath(path.ToArray(), 0.5f, PathType.CatmullRom);

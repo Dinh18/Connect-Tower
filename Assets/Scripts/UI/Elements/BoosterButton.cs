@@ -105,7 +105,21 @@ public class BoosterButton : MonoBehaviour
         {
             boosterEffect.PlayEffect(() => 
             {
-                booster.Excute();
+                booster.Excute(() => 
+                {
+                    if(booster.GetBoosterType() == BoosterType.Shuffle || booster.GetBoosterType() == BoosterType.Undo)
+                    {
+                        GameEventBus.Publish(new BoardStateChangedEvent());
+                    }
+                    CoreServices.Get<InputManager>().SetInputBlocked(false);
+                    GameEventBus.Publish(new BoosterAnimationStateEvent { isAnimating = false });
+                });
+            });
+        }
+        else
+        {
+            booster.Excute(() => 
+            {
                 if(booster.GetBoosterType() == BoosterType.Shuffle || booster.GetBoosterType() == BoosterType.Undo)
                 {
                     GameEventBus.Publish(new BoardStateChangedEvent());
@@ -113,16 +127,6 @@ public class BoosterButton : MonoBehaviour
                 CoreServices.Get<InputManager>().SetInputBlocked(false);
                 GameEventBus.Publish(new BoosterAnimationStateEvent { isAnimating = false });
             });
-        }
-        else
-        {
-            booster.Excute();
-            if(booster.GetBoosterType() == BoosterType.Shuffle || booster.GetBoosterType() == BoosterType.Undo)
-            {
-                GameEventBus.Publish(new BoardStateChangedEvent());
-            }
-            CoreServices.Get<InputManager>().SetInputBlocked(false);
-            GameEventBus.Publish(new BoosterAnimationStateEvent { isAnimating = false });
         }
     }
 

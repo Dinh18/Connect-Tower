@@ -11,6 +11,7 @@ public class RuntimeLevelEditorManager : MonoBehaviour
     public static RuntimeLevelEditorManager Instance { get; private set; }
 
     [Header("Level Data Config")]
+    public string levelFolder = "Data/Levels";
     public int levelIndex = 0;
     public int moves = 10;
     public int difficulty = 0; // 0: Easy, 1: Hard, 2: VeryHard
@@ -45,7 +46,7 @@ public class RuntimeLevelEditorManager : MonoBehaviour
 
     private void RefreshAvailableLevels()
     {
-        availableLevels = Resources.LoadAll<LevelDataSO>("Data/Levels");
+        availableLevels = Resources.LoadAll<LevelDataSO>(levelFolder);
         System.Array.Sort(availableLevels, (a, b) => a.level.CompareTo(b.level));
     }
 
@@ -356,16 +357,17 @@ public class RuntimeLevelEditorManager : MonoBehaviour
     {
         InitManagers();
 #if UNITY_EDITOR
-        string assetPath = $"Assets/Resources/Data/Levels/Level_{levelIndex:D2}.asset";
-        LevelDataSO so = UnityEditor.AssetDatabase.LoadAssetAtPath<LevelDataSO>(assetPath);
+        LevelDataSO[] allLevels = Resources.LoadAll<LevelDataSO>(levelFolder);
+        LevelDataSO so = System.Array.Find(allLevels, l => l.level == levelIndex);
+        
         if (so != null)
         {
             LoadFromSO(so);
-            Debug.Log("Loaded level from " + assetPath);
+            Debug.Log($"Loaded level {levelIndex} from folder {levelFolder}");
         }
         else
         {
-            Debug.LogError("Not found: " + assetPath);
+            Debug.LogError($"Not found level {levelIndex} in folder {levelFolder}");
         }
 #else
         string path = Path.Combine(Application.persistentDataPath, $"Level_{levelIndex:D2}.json");
@@ -485,7 +487,7 @@ public class RuntimeLevelEditorManager : MonoBehaviour
         LevelDataSO newLevelData = GenerateLevelDataSO();
 
 #if UNITY_EDITOR
-        string dir = "Assets/Resources/Data/Levels";
+        string dir = $"Assets/Resources/{levelFolder}";
         if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
         
         string assetPath = $"{dir}/Level_{levelIndex:D2}.asset";
@@ -514,7 +516,7 @@ public class RuntimeLevelEditorManager : MonoBehaviour
         LevelDataSO newLevelData = GenerateLevelDataSO();
 
 #if UNITY_EDITOR
-        string dir = "Assets/Resources/Data/Levels";
+        string dir = $"Assets/Resources/{levelFolder}";
         if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
 
         // Tìm Max Level

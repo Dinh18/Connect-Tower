@@ -169,6 +169,11 @@ public struct RequestChangeAnimationNPC : IGameEvent
     public NPCState newState;
 }
 
+public struct RequestChangeAnimationBoss : IGameEvent
+{
+    public BossState newState;
+}
+
 public struct LoadingFinished : IGameEvent
 {
     
