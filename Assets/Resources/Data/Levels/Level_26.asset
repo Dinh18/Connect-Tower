@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LevelDataSO
   level: 26
   numsTopic: 5
-  difficult: 1
+  difficult: 0
   moves: 21
   row1: 4
   row2: 3

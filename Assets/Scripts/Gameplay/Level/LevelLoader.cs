@@ -29,6 +29,7 @@ public class LevelLoader : MonoBehaviour
         
         // Pre-load resources
         levelDatas = Resources.LoadAll<LevelDataSO>(Constants.LEVELS_PATH);
+        System.Array.Sort(levelDatas, (a, b) => a.level.CompareTo(b.level));
         blocksManager.PoolBlock(40);
         slotsManager.PoolSlot(10);
     }

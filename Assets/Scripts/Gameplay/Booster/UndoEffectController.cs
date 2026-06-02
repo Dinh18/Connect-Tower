@@ -62,6 +62,9 @@ public class UndoEffectController : MonoBehaviour
 
             // Bay lùi theo đường cong (Dùng Ease.InOutBack để có cảm giác giật về)
             undoSeq.Insert(delay + 0.3f, block.transform.DOPath(pathArr.ToArray(), flightDuration, PathType.CatmullRom).SetEase(Ease.InOutBack));
+            undoSeq.InsertCallback(delay + 0.3f, () => {
+                GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.MoveWoosh});
+            });
             
             // Xoay lộn vòng ngược chiều kim đồng hồ để tạo cảm giác "Rewind" (quay ngược thời gian)
             undoSeq.Insert(delay + 0.3f, block.transform.DORotate(new Vector3(0, 0, -360f), flightDuration, RotateMode.FastBeyond360).SetRelative(true).SetEase(Ease.InOutQuad));

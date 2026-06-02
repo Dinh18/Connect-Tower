@@ -24,11 +24,16 @@ public class AnimationButton : MonoBehaviour, IPointerDownHandler, IPointerUpHan
     // Lực nảy lên (Giá trị dương để nút phồng ra)
     public Vector3 punchForceUp = new Vector3(0.15f, 0.15f, 0f);
 
+    [Header("Target to animate (defaults to this transform)")]
+    public Transform targetTransform;
+
     void Awake()
     {
-        if (transform.localScale != Vector3.zero)
+        if (targetTransform == null) targetTransform = transform;
+
+        if (targetTransform.localScale != Vector3.zero)
         {
-            originalScale = transform.localScale;
+            originalScale = targetTransform.localScale;
         }
         else
         {
@@ -40,7 +45,8 @@ public class AnimationButton : MonoBehaviour, IPointerDownHandler, IPointerUpHan
     {
         // AudioManager.Instance.PlayButtonDownAudio();
         GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.ButtonDown});
-        transform.DOKill();
+        if (targetTransform == null) targetTransform = transform;
+        targetTransform.DOKill();
         // HapticManager.Instance.PlayHaptic();
         
         // SỬA LỖI TEOTÓP: Luôn lấy originalScale làm gốc
@@ -50,9 +56,9 @@ public class AnimationButton : MonoBehaviour, IPointerDownHandler, IPointerUpHan
         Sequence sequence = DOTween.Sequence().SetUpdate(true);
 
         // 1. Ép nhanh về size nhỏ
-        sequence.Append(transform.DOScale(targetPushScale, pushDuration));
+        sequence.Append(targetTransform.DOScale(targetPushScale, pushDuration));
         // 2. Punch tại vị trí size nhỏ đó
-        sequence.Append(transform.DOPunchScale(punchForceDown, punchDuration, vibrato, elasticity));
+        sequence.Append(targetTransform.DOPunchScale(punchForceDown, punchDuration, vibrato, elasticity));
     }
 
     public void OnPointerUp(PointerEventData eventData)
@@ -60,19 +66,23 @@ public class AnimationButton : MonoBehaviour, IPointerDownHandler, IPointerUpHan
         // AudioManager.Instance.PlayButtonAudio();
         // AudioManager.Instance.PlayButtonUpAudio();
         GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.ButtonUp});
-        transform.DOKill();
+        if (targetTransform == null) targetTransform = transform;
+        targetTransform.DOKill();
         
         Sequence sequence = DOTween.Sequence().SetUpdate(true);
 
         // 1. Nở nhanh về size gốc
-        sequence.Append(transform.DOScale(originalScale, releaseDuration).SetEase(Ease.OutQuad));
+        sequence.Append(targetTransform.DOScale(originalScale, releaseDuration).SetEase(Ease.OutQuad));
         // 2. Punch phồng ra tại size gốc (Dùng biến punchForceUp bạn đã khai báo)
-        sequence.Append(transform.DOPunchScale(punchForceUp, punchDuration, vibrato, elasticity));
+        sequence.Append(targetTransform.DOPunchScale(punchForceUp, punchDuration, vibrato, elasticity));
     }
 
     void OnDisable()
     {
-        transform.DOKill();
-        transform.localScale = originalScale;
+        if (targetTransform != null)
+        {
+            targetTransform.DOKill();
+            targetTransform.localScale = originalScale;
+        }
     }
 }

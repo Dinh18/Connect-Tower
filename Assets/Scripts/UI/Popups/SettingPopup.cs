@@ -9,8 +9,10 @@ public class SettingPopup : Popup
     [SerializeField] private Button closeButton;
     // [SerializeField] private Button backHomeButton;
     [SerializeField] private GameObject soundInActive;
+    [SerializeField] private GameObject musicInActive;
     [SerializeField] private GameObject hapticInActive;
     [SerializeField] private Button soundButton;
+    [SerializeField] private Button musicButton;
     [SerializeField] private Button hapticButton;
     private void ClosePopup()
     {
@@ -19,12 +21,14 @@ public class SettingPopup : Popup
     void OnEnable()
     {
         soundButton.onClick.AddListener(OnClickSoundButton);
+        musicButton.onClick.AddListener(OnClickMusicButton);
         hapticButton.onClick.AddListener(OnClickHapticButton);
         closeButton.onClick.AddListener(ClosePopup);
     }
     void OnDisable()
     {
         soundButton.onClick.RemoveListener(OnClickSoundButton);
+        musicButton.onClick.RemoveListener(OnClickMusicButton);
         hapticButton.onClick.RemoveListener(OnClickHapticButton);
         closeButton.onClick.RemoveListener(ClosePopup);
     }
@@ -45,6 +49,8 @@ public class SettingPopup : Popup
 
         if(CoreServices.Get<AudioManager>().IsSoundOn()) soundInActive.SetActive(false);
         else soundInActive.SetActive(true);
+        if(CoreServices.Get<AudioManager>().IsMusicOn()) musicInActive.SetActive(false);
+        else musicInActive.SetActive(true);
         if(HapticManager.Instance.IsHapticOn()) hapticInActive.SetActive(false);
         else hapticInActive.SetActive(true);
     }
@@ -55,11 +61,17 @@ public class SettingPopup : Popup
         else soundInActive.SetActive(true);
     }
 
+    private void OnClickMusicButton()
+    {
+        if(CoreServices.Get<AudioManager>().ToggleMusic()) musicInActive.SetActive(false);
+        else musicInActive.SetActive(true);
+    }
     private void OnClickHapticButton()
     {
         if(HapticManager.Instance.ToggleHaptic()) hapticInActive.gameObject.SetActive(false);
         else hapticInActive.gameObject.SetActive(true);
     }
+
 
 
 }

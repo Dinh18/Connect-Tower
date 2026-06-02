@@ -13,7 +13,6 @@ public class ShuffleBooster : Booster
                 if (success)
                 {
                     CoreServices.Get<DataManager>().UseBooster((int)BoosterType.Shuffle);
-                    GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.Shuffle});
                 }
                 onComplete?.Invoke();
             }

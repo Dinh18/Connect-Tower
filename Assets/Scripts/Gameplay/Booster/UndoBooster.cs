@@ -46,7 +46,7 @@ public class UndoBooster : Booster
                 {
                     // Trừ số lượng Booster và phát âm thanh
                     CoreServices.Get<DataManager>().UseBooster((int)BoosterType.Undo);
-                    GameEventBus.Publish(new RequestPlaySFX { soundID = SoundID.HintBooster });
+                    GameEventBus.Publish(new RequestPlaySFX { soundID = SoundID.AddMove});
                 }
                 else
                 {

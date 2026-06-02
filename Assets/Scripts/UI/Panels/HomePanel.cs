@@ -41,6 +41,15 @@ public class HomePanel : Panel
     private Quaternion skullRightOriginalRot;
     private bool isSkullsRotInitialized = false;
 
+    void Awake()
+    {
+        var animBtn = playButton.GetComponent<AnimationButton>();
+        if (animBtn != null && playHolder != null)
+        {
+            animBtn.targetTransform = playHolder;
+        }
+    }
+
     void OnEnable()
     {
         playButton.onClick.AddListener(OnClickPlay);

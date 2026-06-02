@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::LevelDataSO
   level: 30
   numsTopic: 7
-  difficult: 1
+  difficult: 2
   moves: 23
   row1: 5
   row2: 4
@@ -91,7 +91,7 @@ MonoBehaviour:
     - typeBlock: 1
       blockTopic: {fileID: 11400000, guid: a99386bc90ebbea4a8bb3ea98546efd4, type: 2}
       indexSprite: 2
-    - typeBlock: 1
+    - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 98915fdbbf67814439f1b00cc5e62342, type: 2}
       indexSprite: 2
     - typeBlock: 0
@@ -104,7 +104,7 @@ MonoBehaviour:
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 7be9b15994bd2484db3fd395112e1b0e, type: 2}
       indexSprite: 2
-    - typeBlock: 1
+    - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: a6ae0a6f94c880d478b3d354abe1e4af, type: 2}
       indexSprite: 0
     - typeBlock: 0

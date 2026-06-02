@@ -76,6 +76,7 @@ public class UIManager : MonoBehaviour
             }
 
             ClearUIStack();
+            // CoreServices.Get<AudioManager>().StopBG();
 
             if(sharedDimImage != null) sharedDimImage.SetActive(false);
             
@@ -84,20 +85,13 @@ public class UIManager : MonoBehaviour
                 case GameManager.GameState.MainMenu:
                     // mainMenu.Show();
                     ShowMenu<MainMenu>();
+                    CoreServices.Get<AudioManager>().PlayMainMenuBG();
                     GameEventBus.Publish(new RequestChangeAnimationNPC{newState = NPCState.Idle});
                     if(CoreServices.Get<DataManager>().GetHearts() <= 0)
                     {
                         Debug.Log("Het tim");
                         GameEventBus.Publish(new RequestChangeAnimationNPC{newState = NPCState.Sleep});
                     }
-                    // else if(gameManager != null && gameManager.GetPrevState() == GameManager.GameState.Win)
-                    // {
-                    //     GameEventBus.Publish(new RequestChangeAnimationNPC{newState = NPCState.Excited});
-                    // }
-                    // else if(gameManager != null && gameManager.GetPrevState() == GameManager.GameState.Lose)
-                    // {
-                    //     GameEventBus.Publish(new RequestChangeAnimationNPC{newState = NPCState.Crying});
-                    // }
                     
                     if(gameManager != null && gameManager.GetPrevState() == GameManager.GameState.None)
                         StartCoroutine(ShowLoadingImage(3f,() => GameEventBus.Publish(new RequestChangeAnimationNPC{newState = NPCState.Waving})));
@@ -113,6 +107,7 @@ public class UIManager : MonoBehaviour
                         ShowMenu<EndGameMenu>();
                         break;
                 case GameManager.GameState.Playing:
+                    CoreServices.Get<AudioManager>().PlayInGameBG();
                     if(gameManager != null && gameManager.GetPrevState() != GameManager.GameState.Pause)
                     {
                         ClearUIStack();

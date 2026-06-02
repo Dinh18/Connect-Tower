@@ -4,9 +4,16 @@ using UnityEngine;
 public class AudioManager : MonoBehaviour
 {
     [SerializeField] private AudioSource sfxSource;
+    [SerializeField] private AudioSource bgSource;
     private AudioSO[] audios;
+    [SerializeField] private AudioClip ingameBGClip;
+    [SerializeField] private AudioClip mainMenuBGClip;
+
     private bool isSoundOn;
+    private bool isMusicOn;
     public static event Action<bool> OnToggle;
+    public static event Action<bool> OnMusicToggle;
+
     public void Init()
     {
         LoadAudioSetting();
@@ -46,6 +53,11 @@ public class AudioManager : MonoBehaviour
     private void LoadAudioSetting()
     {
         isSoundOn = PlayerPrefs.GetInt("SoundState", 1) == 1;
+        isMusicOn = PlayerPrefs.GetInt("MusicState", 1) == 1;
+        if (bgSource != null)
+        {
+            bgSource.mute = !isMusicOn;
+        }
     }
 
     public bool ToggleSound()
@@ -57,9 +69,60 @@ public class AudioManager : MonoBehaviour
         return isSoundOn;
     }
 
+    public void PlayInGameBG()
+    {
+        if (bgSource != null)
+        {
+            bgSource.clip = ingameBGClip;
+            if (isMusicOn)
+            {
+                bgSource.Play();
+                bgSource.loop = true;
+            }
+        }
+    }
+
+    public void PlayMainMenuBG()
+    {
+        if (bgSource != null)
+        {
+            bgSource.clip = mainMenuBGClip;
+            if (isMusicOn)
+            {
+                bgSource.Play();
+                bgSource.loop = true;
+            }
+        }
+    }
+
+    public void StopBG()
+    {
+        if (bgSource != null)
+        {
+            bgSource.Stop();
+        }
+    }
+
     public bool IsSoundOn()
     {
         return isSoundOn;
     }
 
+    public bool ToggleMusic()
+    {
+        isMusicOn = !isMusicOn;
+        PlayerPrefs.SetInt("MusicState", isMusicOn ? 1 : 0);
+        PlayerPrefs.Save();
+        if (bgSource != null)
+        {
+            bgSource.mute = !isMusicOn;
+        }
+        OnMusicToggle?.Invoke(isMusicOn);
+        return isMusicOn;
+    }
+
+    public bool IsMusicOn()
+    {
+        return isMusicOn;
+    }
 }

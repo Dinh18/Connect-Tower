@@ -103,6 +103,7 @@ public class ShuffleEffectController : MonoBehaviour
             float absoluteStartTime = shakeDuration + moveIndex * 0.04f; // staggered start
 
             // 3. Move along spiral, scale down, and tumble
+            
             sequence.Insert(absoluteStartTime, block.transform.DOPath(pathArr, pullDuration, PathType.CatmullRom).SetEase(Ease.InSine));
             sequence.Insert(absoluteStartTime, block.transform.DOScale(Vector3.zero, pullDuration).SetEase(Ease.InSine));
             sequence.Insert(absoluteStartTime, block.transform.DORotate(new Vector3(0, 0, 1080f), pullDuration, RotateMode.FastBeyond360).SetRelative(true).SetEase(Ease.InQuad));
@@ -111,6 +112,10 @@ public class ShuffleEffectController : MonoBehaviour
         }
 
         float endTime = shakeDuration + (moveIndex * 0.04f) + pullDuration;
+
+        sequence.InsertCallback(shakeDuration, () => {
+                GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.Shuffle});
+            });
         
         blackHole.transform.localScale = Vector3.zero;
         
@@ -171,6 +176,7 @@ public class ShuffleEffectController : MonoBehaviour
 
                 sequence.InsertCallback(absoluteDropTime, () => {
                     block.transform.SetParent(CoreServices.Get<BlocksManager>().transform);
+                    GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.MoveWoosh});
                     block.transform.DOKill(); 
                 });
                 

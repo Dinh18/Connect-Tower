@@ -42,7 +42,7 @@ MonoBehaviour:
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 74f9d22de1d401247a9bda634d6463d0, type: 2}
       indexSprite: 0
-    - typeBlock: 1
+    - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 0021005b7baf3a2489c148af617e4153, type: 2}
       indexSprite: 0
     - typeBlock: 0
