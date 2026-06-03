@@ -34,7 +34,7 @@ public class LevelCompletedPanel : Panel
         if (textCointTextContinue != null) textCointTextContinue.text = winAmount.ToString();
         if (textCointTextAds != null) textCointTextAds.text = (winAmount * 2).ToString();
 
-        oldCoins = CoreServices.Get<DataManager>().GetTotalCoins() - winAmount;
+        oldCoins = CoreServices.Get<DataManager>().GetTotalCoins();
         if (coinText != null) coinText.text = oldCoins.ToString();
         
         if (continueButton != null && continueButton.image != null) continueButton.image.raycastTarget = true;
@@ -89,6 +89,7 @@ public class LevelCompletedPanel : Panel
         adsButton.image.raycastTarget = false;
         continueButton.image.raycastTarget = false;
         int winAmount = CoreServices.Get<LevelLoader>().GetCurrentLevelReward();
+        CoreServices.Get<DataManager>().AddCoins(winAmount);
         StartCoroutine(SpawnWinCoinsRoutine(winAmount, true));
     }
     private void OnAdsClicked()
@@ -96,6 +97,7 @@ public class LevelCompletedPanel : Panel
         continueButton.image.raycastTarget = false;
         adsButton.image.raycastTarget = false;
         int winAmount = CoreServices.Get<LevelLoader>().GetCurrentLevelReward() * 2;
+        CoreServices.Get<DataManager>().AddCoins(winAmount);
         StartCoroutine(SpawnWinCoinsRoutine(winAmount, false));
     }
 

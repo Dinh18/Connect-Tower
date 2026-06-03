@@ -25,6 +25,8 @@ public class TutorialUIController : MonoBehaviour
     private Tween holdersTween;
     private Coroutine tutorialCoroutine;
 
+    public bool CanCloseTutorial => canCloseTutorial;
+
     void Awake()
     {
         CoreServices.Register<TutorialUIController>(this);
@@ -113,10 +115,10 @@ public class TutorialUIController : MonoBehaviour
 
     private void DoStartTutorial(GameObject target, string instruction, bool forceCircle)
     {
-        // Prevent closing tutorial for 1.5 seconds
+        // Prevent closing tutorial for 0.5 seconds
         canCloseTutorial = false;
         delayTween?.Kill();
-        delayTween = DOVirtual.DelayedCall(1.5f, () => canCloseTutorial = true);
+        delayTween = DOVirtual.DelayedCall(1f, () => canCloseTutorial = true);
 
         tutorialCanvas.SetActive(true);
         AnimateHolders();
@@ -295,10 +297,10 @@ public class TutorialUIController : MonoBehaviour
 
     private void DoStartMechanicTutorial(string mechanicId)
     {
-        // Prevent closing tutorial for 1.5 seconds
+        // Prevent closing tutorial for 0.5 seconds
         canCloseTutorial = false;
         delayTween?.Kill();
-        delayTween = DOVirtual.DelayedCall(1.5f, () => canCloseTutorial = true);
+        delayTween = DOVirtual.DelayedCall(0.5f, () => canCloseTutorial = true);
 
         tutorialCanvas.SetActive(true);
         AnimateHolders();

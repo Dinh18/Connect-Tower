@@ -62,11 +62,6 @@ public class LevelLoader : MonoBehaviour
 
     public int GetCurrentLevelReward()
     {
-        GameConfigSO config = Resources.Load<GameConfigSO>("GameConfig");
-        if (config == null) return 40;
-
-        if (gameDifficult == GameDifficult.Easy) return config.coinRewardEasy;
-        if (gameDifficult == GameDifficult.Hard) return config.coinRewardHard;
-        return config.coinRewardSuperHard;
+        return CoreServices.Get<DataManager>().CoinReward(gameDifficult);
     }
 }

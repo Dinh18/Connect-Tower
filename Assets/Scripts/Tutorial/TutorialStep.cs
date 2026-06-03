@@ -51,6 +51,9 @@ public class ClickSlotStep : TutorialStep
 
             if (clickedSlot == targetSlot)
             {
+                var tutorialUI = CoreServices.Get<TutorialUIController>();
+                if (tutorialUI != null && !tutorialUI.CanCloseTutorial) return false;
+
                 CompleteStep();
                 return true;
             }
@@ -135,6 +138,9 @@ public class ShowMechanicStep : TutorialStep
 
     public override bool Execute(object data)
     {
+        var tutorialUI = CoreServices.Get<TutorialUIController>();
+        if (tutorialUI != null && !tutorialUI.CanCloseTutorial) return false;
+
         CompleteStep();
         return true;
     }
@@ -175,6 +181,9 @@ public class ClickButtonStep : TutorialStep
 
     private void OnButtonClicked()
     {
+        var tutorialUI = CoreServices.Get<TutorialUIController>();
+        if (tutorialUI != null && !tutorialUI.CanCloseTutorial) return;
+
         CompleteStep();
     }
 
@@ -182,6 +191,9 @@ public class ClickButtonStep : TutorialStep
     {
         if (data is GameObject clickedObj && clickedObj == targetButton?.gameObject)
         {
+            var tutorialUI = CoreServices.Get<TutorialUIController>();
+            if (tutorialUI != null && !tutorialUI.CanCloseTutorial) return false;
+
             CompleteStep();
             return true;
         }

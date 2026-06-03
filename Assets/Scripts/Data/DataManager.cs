@@ -16,6 +16,7 @@ public class DataManager : MonoBehaviour
     public AvatarDataSO[] allAvatars;
     public BoosterDataSO[] allBoosters; 
     public MechanicData[] allMechanics;
+    public GameConfigSO gameConfig;
     private FirebaseFirestore db;
     private string userId;
     private string saveFilePath;
@@ -187,6 +188,21 @@ public class DataManager : MonoBehaviour
     }
 
     // --- DATA ACCESSORS ---
+
+    public int CoinReward(LevelLoader.GameDifficult gameDifficult)
+    {
+        switch (gameDifficult)
+        {
+            case LevelLoader.GameDifficult.Easy:
+                return gameConfig.coinRewardEasy;
+            case LevelLoader.GameDifficult.Hard:
+                return gameConfig.coinRewardHard;
+            case LevelLoader.GameDifficult.VeryHard:
+                return gameConfig.coinRewardSuperHard;
+            default:
+                return 0;
+        }
+    }
     public FrameDataSO[] GetAllFrameData()
     {
         return allFrames;
@@ -340,11 +356,11 @@ public class DataManager : MonoBehaviour
         if (LevelLoader.isPlaytestingTempLevel) return;
         if(playerData.currentLevel < maxLevel) playerData.currentLevel++;
         
-        GameConfigSO config = Resources.Load<GameConfigSO>("GameConfig");
-        int reward = (gameDifficult == LevelLoader.GameDifficult.Easy) ? (config?.coinRewardEasy ?? 40) : 
-                     (gameDifficult == LevelLoader.GameDifficult.Hard) ? (config?.coinRewardHard ?? 80) : (config?.coinRewardSuperHard ?? 120);
+        // GameConfigSO config = Resources.Load<GameConfigSO>("GameConfig");
+        // int reward = (gameDifficult == LevelLoader.GameDifficult.Easy) ? (config?.coinRewardEasy ?? 40) : 
+        //              (gameDifficult == LevelLoader.GameDifficult.Hard) ? (config?.coinRewardHard ?? 80) : (config?.coinRewardSuperHard ?? 120);
 
-        AddCoins(reward);
+        // AddCoins(reward);
 
         // Auto unlock boosters based on level
         // foreach(var b in playerData.inventory.boosters)

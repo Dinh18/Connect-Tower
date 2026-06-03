@@ -71,6 +71,12 @@ public class TutorialService : MonoBehaviour
     {
         if (currentSequence != null && currentSequence.IsActive) return;
 
+        var gamePlayController = CoreServices.Get<GamePlayController>();
+        if (gamePlayController != null)
+        {
+            gamePlayController.CancelSelection();
+        }
+
         currentSequence = sequence;
         currentSequence.OnSequenceComplete += () => 
         {

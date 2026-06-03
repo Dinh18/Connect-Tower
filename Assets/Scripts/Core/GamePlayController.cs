@@ -40,6 +40,15 @@ public class GamePlayController : MonoBehaviour
         selectedSlot = null;
     }
 
+    public void CancelSelection()
+    {
+        if (hasSelected && selectedSlot != null)
+        {
+            selectedSlot.UnSelect();
+        }
+        ResetSelection();
+    }
+
     public void ResetUndoStack()
     {
         undoStack = new Stack<MoveStep>();
