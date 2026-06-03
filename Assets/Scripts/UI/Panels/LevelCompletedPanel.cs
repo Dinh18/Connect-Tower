@@ -7,26 +7,38 @@ public class LevelCompletedPanel : Panel
 {
     // private UIManager uIManager; // Loại bỏ phụ thuộc
     [SerializeField] private Button continueButton;
+    [SerializeField] private Button adsButton;
     [SerializeField] private Transform header;
     [SerializeField] private Transform coinImage;
     [SerializeField] private Text coinText;
+    [SerializeField] private Text textCointTextContinue;
+    [SerializeField] private Text textCointTextAds;
     private int oldCoins;
 
     void OnEnable()
     {
         continueButton.onClick.AddListener(OnContinueClicked);
+        adsButton.onClick.AddListener(OnAdsClicked);
     }
 
     void OnDisable()
     {
         continueButton.onClick.RemoveAllListeners();
+        adsButton.onClick.RemoveAllListeners();
     }
 
     public override void Show()
     {
         int winAmount = CoreServices.Get<LevelLoader>().GetCurrentLevelReward();
+        
+        if (textCointTextContinue != null) textCointTextContinue.text = winAmount.ToString();
+        if (textCointTextAds != null) textCointTextAds.text = (winAmount * 2).ToString();
+
         oldCoins = CoreServices.Get<DataManager>().GetTotalCoins() - winAmount;
         if (coinText != null) coinText.text = oldCoins.ToString();
+        
+        if (continueButton != null && continueButton.image != null) continueButton.image.raycastTarget = true;
+        if (adsButton != null && adsButton.image != null) adsButton.image.raycastTarget = true;
 
         this.gameObject.SetActive(true);
         StartCoroutine(ShowCoroutine());
@@ -74,17 +86,33 @@ public class LevelCompletedPanel : Panel
 
     private void OnContinueClicked()
     {
+        adsButton.image.raycastTarget = false;
         continueButton.image.raycastTarget = false;
         int winAmount = CoreServices.Get<LevelLoader>().GetCurrentLevelReward();
-        StartCoroutine(SpawnWinCoinsRoutine(winAmount));
+        StartCoroutine(SpawnWinCoinsRoutine(winAmount, true));
+    }
+    private void OnAdsClicked()
+    {
+        continueButton.image.raycastTarget = false;
+        adsButton.image.raycastTarget = false;
+        int winAmount = CoreServices.Get<LevelLoader>().GetCurrentLevelReward() * 2;
+        StartCoroutine(SpawnWinCoinsRoutine(winAmount, false));
     }
 
-    private IEnumerator SpawnWinCoinsRoutine(int winAmount)
+    private IEnumerator SpawnWinCoinsRoutine(int winAmount, bool isContinue)
     {
         if(coinText != null) DOTween.Kill(coinText.transform);
+        Vector2 buttonPos;
 
-        Vector2 buttonPos = continueButton.transform.position;
-        
+        if(isContinue)
+        {
+            buttonPos = continueButton.transform.position;
+        }
+        else
+        {
+            buttonPos = adsButton.transform.position;
+        }
+
         int visualCoins = 10;
         int coinValueBase = winAmount / visualCoins;
         int coinValueRemainder = winAmount % visualCoins;
@@ -112,6 +140,7 @@ public class LevelCompletedPanel : Panel
         yield return new WaitForSeconds(0.8f);
         
         continueButton.image.raycastTarget = true;
+        if (adsButton != null && adsButton.image != null) adsButton.image.raycastTarget = true;
         CoreServices.Get<GameManager>().ChangeState(GameManager.GameState.MainMenu);
     }
 

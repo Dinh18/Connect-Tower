@@ -509,6 +509,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AnimationButton
   punchForceDown: {x: -0.15, y: -0.15, z: 0}
   punchForceUp: {x: 0.15, y: 0.15, z: 0}
+  targetTransform: {fileID: 0}
 --- !u!1 &259928044822909967
 GameObject:
   m_ObjectHideFlags: 0
@@ -883,7 +884,6 @@ RectTransform:
   m_Children:
   - {fileID: 6018729230153313405}
   - {fileID: 6218975195721660287}
-  - {fileID: 1438671698393834886}
   m_Father: {fileID: 6408762770204625531}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -1293,6 +1293,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AnimationButton
   punchForceDown: {x: -0.15, y: -0.15, z: 0}
   punchForceUp: {x: 0.15, y: 0.15, z: 0}
+  targetTransform: {fileID: 0}
 --- !u!1 &533220419782125650
 GameObject:
   m_ObjectHideFlags: 0
@@ -2521,11 +2522,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1338951235601903989}
+  m_Father: {fileID: 314597842040521070}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 317, y: 124.5}
+  m_AnchoredPosition: {x: 282.00003, y: 99.50002}
   m_SizeDelta: {x: 394, y: 89}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5668302228120416139
@@ -2876,6 +2877,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AnimationButton
   punchForceDown: {x: -0.15, y: -0.15, z: 0}
   punchForceUp: {x: 0.15, y: 0.15, z: 0}
+  targetTransform: {fileID: 0}
 --- !u!1 &1190704420155053736
 GameObject:
   m_ObjectHideFlags: 0
@@ -3654,6 +3656,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AnimationButton
   punchForceDown: {x: -0.15, y: -0.15, z: 0}
   punchForceUp: {x: 0.15, y: 0.15, z: 0}
+  targetTransform: {fileID: 0}
 --- !u!1 &1518949713401179081
 GameObject:
   m_ObjectHideFlags: 0
@@ -4522,6 +4525,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AnimationButton
   punchForceDown: {x: -0.15, y: -0.15, z: 0}
   punchForceUp: {x: 0.15, y: 0.15, z: 0}
+  targetTransform: {fileID: 0}
 --- !u!1 &2000175287752351304
 GameObject:
   m_ObjectHideFlags: 0
@@ -6017,6 +6021,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AnimationButton
   punchForceDown: {x: -0.15, y: -0.15, z: 0}
   punchForceUp: {x: 0.15, y: 0.15, z: 0}
+  targetTransform: {fileID: 0}
 --- !u!1 &3075654940001664930
 GameObject:
   m_ObjectHideFlags: 0
@@ -6634,6 +6639,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AnimationButton
   punchForceDown: {x: -0.15, y: -0.15, z: 0}
   punchForceUp: {x: 0.15, y: 0.15, z: 0}
+  targetTransform: {fileID: 0}
 --- !u!1 &3274916306739889806
 GameObject:
   m_ObjectHideFlags: 0
@@ -6732,6 +6738,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AnimationButton
   punchForceDown: {x: -0.15, y: -0.15, z: 0}
   punchForceUp: {x: 0.15, y: 0.15, z: 0}
+  targetTransform: {fileID: 0}
 --- !u!1 &3279509488429440309
 GameObject:
   m_ObjectHideFlags: 0
@@ -6765,6 +6772,7 @@ RectTransform:
   - {fileID: 3233140814858119660}
   - {fileID: 6030786840260942960}
   - {fileID: 6907094399591584265}
+  - {fileID: 1438671698393834886}
   m_Father: {fileID: 1560675307160571786}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -6830,6 +6838,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AnimationButton
   punchForceDown: {x: -0.15, y: -0.15, z: 0}
   punchForceUp: {x: 0.15, y: 0.15, z: 0}
+  targetTransform: {fileID: 0}
 --- !u!1 &3282414849527349559
 GameObject:
   m_ObjectHideFlags: 0
@@ -7463,6 +7472,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AnimationButton
   punchForceDown: {x: -0.15, y: -0.15, z: 0}
   punchForceUp: {x: 0.15, y: 0.15, z: 0}
+  targetTransform: {fileID: 0}
 --- !u!1 &3560261427689651287
 GameObject:
   m_ObjectHideFlags: 0
@@ -7917,6 +7927,7 @@ RectTransform:
   - {fileID: 5505692110055040192}
   - {fileID: 1022730976514694737}
   - {fileID: 8413988021264124755}
+  - {fileID: 4062052114816359203}
   m_Father: {fileID: 1338951235601903989}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -7982,6 +7993,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AnimationButton
   punchForceDown: {x: -0.15, y: -0.15, z: 0}
   punchForceUp: {x: 0.15, y: 0.15, z: 0}
+  targetTransform: {fileID: 0}
 --- !u!1 &4104758411476631478
 GameObject:
   m_ObjectHideFlags: 0
@@ -8616,6 +8628,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AnimationButton
   punchForceDown: {x: -0.15, y: -0.15, z: 0}
   punchForceUp: {x: 0.15, y: 0.15, z: 0}
+  targetTransform: {fileID: 0}
 --- !u!1 &4450812868940564652
 GameObject:
   m_ObjectHideFlags: 0
@@ -9257,9 +9270,9 @@ RectTransform:
   m_Father: {fileID: 1579176937123004275}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -4, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!222 &6130411039813668080
 CanvasRenderer:
@@ -10347,6 +10360,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AnimationButton
   punchForceDown: {x: -0.15, y: -0.15, z: 0}
   punchForceUp: {x: 0.15, y: 0.15, z: 0}
+  targetTransform: {fileID: 0}
 --- !u!1 &5386955826309005250
 GameObject:
   m_ObjectHideFlags: 0
@@ -10692,6 +10706,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AnimationButton
   punchForceDown: {x: -0.15, y: -0.15, z: 0}
   punchForceUp: {x: 0.15, y: 0.15, z: 0}
+  targetTransform: {fileID: 0}
 --- !u!1 &5543708258010491921
 GameObject:
   m_ObjectHideFlags: 0
@@ -11997,11 +12012,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1560675307160571786}
+  m_Father: {fileID: 6218975195721660287}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 317, y: 124.5}
+  m_AnchoredPosition: {x: 282.00003, y: 99.50002}
   m_SizeDelta: {x: 394, y: 89}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5780701367259025627
@@ -12182,6 +12197,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AnimationButton
   punchForceDown: {x: -0.15, y: -0.15, z: 0}
   punchForceUp: {x: 0.15, y: 0.15, z: 0}
+  targetTransform: {fileID: 0}
 --- !u!1 &6270253966674145510
 GameObject:
   m_ObjectHideFlags: 0
@@ -15458,7 +15474,6 @@ RectTransform:
   m_Children:
   - {fileID: 6278720020462631327}
   - {fileID: 314597842040521070}
-  - {fileID: 4062052114816359203}
   m_Father: {fileID: 6408762770204625531}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
@@ -15499,7 +15514,7 @@ RectTransform:
   m_Father: {fileID: 3059959281268208137}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 0.37889236}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -16039,6 +16054,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AnimationButton
   punchForceDown: {x: -0.15, y: -0.15, z: 0}
   punchForceUp: {x: 0.15, y: 0.15, z: 0}
+  targetTransform: {fileID: 0}
 --- !u!1 &8726922557333805249
 GameObject:
   m_ObjectHideFlags: 0
@@ -16314,6 +16330,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AnimationButton
   punchForceDown: {x: -0.15, y: -0.15, z: 0}
   punchForceUp: {x: 0.15, y: 0.15, z: 0}
+  targetTransform: {fileID: 0}
 --- !u!1 &8864185806275714286
 GameObject:
   m_ObjectHideFlags: 0
@@ -16876,6 +16893,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AnimationButton
   punchForceDown: {x: -0.15, y: -0.15, z: 0}
   punchForceUp: {x: 0.15, y: 0.15, z: 0}
+  targetTransform: {fileID: 0}
 --- !u!1 &9028550887317315213
 GameObject:
   m_ObjectHideFlags: 0
@@ -17262,6 +17280,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AnimationButton
   punchForceDown: {x: -0.15, y: -0.15, z: 0}
   punchForceUp: {x: 0.15, y: 0.15, z: 0}
+  targetTransform: {fileID: 0}
 --- !u!1 &9147643920105706734
 GameObject:
   m_ObjectHideFlags: 0

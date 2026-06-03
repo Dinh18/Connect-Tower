@@ -51,7 +51,7 @@ public class SettingPopup : Popup
         else soundInActive.SetActive(true);
         if(CoreServices.Get<AudioManager>().IsMusicOn()) musicInActive.SetActive(false);
         else musicInActive.SetActive(true);
-        if(HapticManager.Instance.IsHapticOn()) hapticInActive.SetActive(false);
+        if(CoreServices.Get<HapticManager>().IsHapticOn()) hapticInActive.SetActive(false);
         else hapticInActive.SetActive(true);
     }
 
@@ -68,7 +68,7 @@ public class SettingPopup : Popup
     }
     private void OnClickHapticButton()
     {
-        if(HapticManager.Instance.ToggleHaptic()) hapticInActive.gameObject.SetActive(false);
+        if(CoreServices.Get<HapticManager>().ToggleHaptic()) hapticInActive.gameObject.SetActive(false);
         else hapticInActive.gameObject.SetActive(true);
     }
 

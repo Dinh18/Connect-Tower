@@ -25,10 +25,10 @@ MonoBehaviour:
     blocks:
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 2dd88a1d811201149b5cd390f58cf364, type: 2}
-      indexSprite: 0
+      indexSprite: 3
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 2dd88a1d811201149b5cd390f58cf364, type: 2}
-      indexSprite: 1
+      indexSprite: 2
   - slotType: 0
     position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
@@ -38,7 +38,7 @@ MonoBehaviour:
       indexSprite: 0
     - typeBlock: 1
       blockTopic: {fileID: 11400000, guid: a99386bc90ebbea4a8bb3ea98546efd4, type: 2}
-      indexSprite: 0
+      indexSprite: 1
   - slotType: 0
     position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
@@ -51,20 +51,20 @@ MonoBehaviour:
       indexSprite: 0
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: a99386bc90ebbea4a8bb3ea98546efd4, type: 2}
-      indexSprite: 1
+      indexSprite: 3
   - slotType: 0
     position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: da38108e0f4e91044b8b4800fda519cf, type: 2}
-      indexSprite: 0
-    - typeBlock: 1
-      blockTopic: {fileID: 11400000, guid: 98915fdbbf67814439f1b00cc5e62342, type: 2}
       indexSprite: 1
     - typeBlock: 1
-      blockTopic: {fileID: 11400000, guid: a99386bc90ebbea4a8bb3ea98546efd4, type: 2}
+      blockTopic: {fileID: 11400000, guid: 98915fdbbf67814439f1b00cc5e62342, type: 2}
       indexSprite: 2
+    - typeBlock: 1
+      blockTopic: {fileID: 11400000, guid: a99386bc90ebbea4a8bb3ea98546efd4, type: 2}
+      indexSprite: 0
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 6f336c99264b55c4baeac5d504d47d3f, type: 2}
       indexSprite: 0
@@ -74,10 +74,10 @@ MonoBehaviour:
     blocks:
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: da38108e0f4e91044b8b4800fda519cf, type: 2}
-      indexSprite: 1
+      indexSprite: 2
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: da38108e0f4e91044b8b4800fda519cf, type: 2}
-      indexSprite: 2
+      indexSprite: 0
   - slotType: 0
     position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
@@ -87,23 +87,23 @@ MonoBehaviour:
       indexSprite: 1
     - typeBlock: 1
       blockTopic: {fileID: 11400000, guid: 966d946d9f5ef604e8585fdda006ba49, type: 2}
-      indexSprite: 1
+      indexSprite: 2
     - typeBlock: 1
       blockTopic: {fileID: 11400000, guid: 98915fdbbf67814439f1b00cc5e62342, type: 2}
-      indexSprite: 2
+      indexSprite: 1
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 2dd88a1d811201149b5cd390f58cf364, type: 2}
-      indexSprite: 2
+      indexSprite: 0
   - slotType: 0
     position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 2dd88a1d811201149b5cd390f58cf364, type: 2}
-      indexSprite: 3
+      indexSprite: 1
     - typeBlock: 1
       blockTopic: {fileID: 11400000, guid: a99386bc90ebbea4a8bb3ea98546efd4, type: 2}
-      indexSprite: 3
+      indexSprite: 2
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 98915fdbbf67814439f1b00cc5e62342, type: 2}
       indexSprite: 3
@@ -113,29 +113,29 @@ MonoBehaviour:
     blocks:
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 6f336c99264b55c4baeac5d504d47d3f, type: 2}
-      indexSprite: 2
+      indexSprite: 3
     - typeBlock: 1
       blockTopic: {fileID: 11400000, guid: 6f336c99264b55c4baeac5d504d47d3f, type: 2}
-      indexSprite: 3
+      indexSprite: 2
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 86aa26c66b53e6a40aae465960b1b8b0, type: 2}
-      indexSprite: 1
+      indexSprite: 2
     - typeBlock: 1
       blockTopic: {fileID: 11400000, guid: 966d946d9f5ef604e8585fdda006ba49, type: 2}
-      indexSprite: 2
+      indexSprite: 3
   - slotType: 0
     position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 966d946d9f5ef604e8585fdda006ba49, type: 2}
-      indexSprite: 3
+      indexSprite: 1
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 86aa26c66b53e6a40aae465960b1b8b0, type: 2}
       indexSprite: 3
     - typeBlock: 1
       blockTopic: {fileID: 11400000, guid: 86aa26c66b53e6a40aae465960b1b8b0, type: 2}
-      indexSprite: 2
+      indexSprite: 1
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: da38108e0f4e91044b8b4800fda519cf, type: 2}
       indexSprite: 3

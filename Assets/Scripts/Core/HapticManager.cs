@@ -5,12 +5,10 @@ using UnityEngine;
 
 public class HapticManager : MonoBehaviour
 {
-    public static HapticManager Instance;
     private bool isHapticOn;
     public static Action<bool> OnToggle;
     void Awake()
     {
-        Instance = this;
         LoadHapticSetting();
         CoreServices.Register<HapticManager>(this);
     }
@@ -18,6 +16,18 @@ public class HapticManager : MonoBehaviour
     public void PlayHaptic()
     {
         if(!isHapticOn) return;
+        HapticFeedback.LightFeedback();
+    }
+
+    public void DelayPlayHaptic(float delay)
+    {
+        if(!isHapticOn) return;
+        StartCoroutine(DelayHapticCoroutine(delay));
+    }
+
+    private IEnumerator DelayHapticCoroutine(float delay)
+    {
+        yield return new WaitForSeconds(delay);
         HapticFeedback.LightFeedback();
     }
 

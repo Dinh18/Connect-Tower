@@ -84,7 +84,7 @@ public class GamePlayController : MonoBehaviour
             }
         }
 
-        HapticManager.Instance.PlayHaptic();
+        CoreServices.Get<HapticManager>().PlayHaptic();
         if(!hasSelected && !slot.isFinished && slot.blocks.Count > 0)
         {
             if(slot.SelectToMove())

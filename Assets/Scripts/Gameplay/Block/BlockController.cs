@@ -40,7 +40,7 @@ public class BlockController : MonoBehaviour
     [SerializeField] private ColorBlock colorBlock;
     [SerializeField] private GameObject outLine;
     [SerializeField] private ItemImageBlock itemImageBlock;
-    [SerializeField] private GameObject hideImage;
+    // [SerializeField] private GameObject hideImage;
     [SerializeField] private GameObject hideVFX;
     [SerializeField] private GameObject iceVFX;
     [SerializeField] private ParticleSystem difVFX;
@@ -83,7 +83,7 @@ public class BlockController : MonoBehaviour
         itemImageBlock.ShowImage();
         HideIceImage();
         iceVFX.SetActive(false);
-        hideImage.SetActive(false);
+        // hideImage.SetActive(false);
         hideVFX.SetActive(false);
         difVFX.Stop();
         ResetOutLint();
@@ -99,7 +99,7 @@ public class BlockController : MonoBehaviour
         if(type == BlockType.Hide)
         {
             ChangeMaterialOutLine(Constants.MATERIAL_COLOR_HIDE_PATH);
-            hideImage.SetActive(true);
+            // hideImage.SetActive(true);
             maskHole.SetActive(true);
             itemImageBlock.HideImage();
             isRevealed = false;
@@ -124,7 +124,7 @@ public class BlockController : MonoBehaviour
     {
         ChangeMaterialOutLine(Constants.MATERIAL_COLOR_W_PATH);
         itemImageBlock.ShowImage();
-        hideImage.SetActive(false);
+        // hideImage.SetActive(false);
         hideVFX.SetActive(true);
         maskHole.SetActive(false);
         isRevealed = true;
@@ -224,20 +224,37 @@ public class BlockController : MonoBehaviour
     }
     
     public void FallEffect(int index)
+{
+    visual.DOKill(false); 
+
+    Vector3 baseLocalPos = Vector3.zero;
+    float jumpPower = Mathf.Max(0.1f, 0.5f - (index * 0.15f)); 
+    
+    // (Tùy chọn) Nếu bạn muốn các block rơi lần lượt, hãy thêm Delay ở đây:
+    // float fallDelay = index * 0.15f; 
+
+    Sequence seq = DOTween.Sequence();
+    
+    // seq.PrependInterval(fallDelay); // Bật dòng này nếu muốn block rơi so le nhau
+    
+    // 1. Nhảy lên và rơi xuống (mất 0.4s)
+    seq.Append(visual.DOLocalJump(baseLocalPos, jumpPower, 1, 0.4f));
+    
+    // 2. NGAY KHI chạm đất -> Kích hoạt Haptic ngay lập tức
+    seq.AppendCallback(() => 
     {
-        visual.DOKill(false); 
+        // Lưu ý: Không cần hàm DelayPlayHaptic nữa, hãy gọi thẳng hàm PlayHaptic bình thường
+        CoreServices.Get<HapticManager>().PlayHaptic(); 
+    });
+    
+    // 3. Hiệu ứng bẹp/nhún sau khi chạm đất
+    seq.Append(visual.DOPunchPosition(new Vector3(0, 0.2f, 0), 0.2f, 1, 0));
+}
 
-        Vector3 baseLocalPos = Vector3.zero;
-        float jumpPower = Mathf.Max(0.1f, 0.5f - (index * 0.15f)); 
-
-        Sequence seq = DOTween.Sequence();
-        seq.Append(visual.DOLocalJump(baseLocalPos, jumpPower, 1, 0.4f));
-        seq.Append(visual.DOPunchPosition(new Vector3(0, 0.2f, 0), 0.2f, 1, 0));
-    }
     
     public void PlayErrorShake(Action onCompleteCallBack = null)
     {
-        HapticManager.Instance.PlayHaptic();
+        CoreServices.Get<HapticManager>().PlayHaptic();
         visual.DOKill(false);
         visual.localPosition = Vector3.zero;
         visual.DOShakePosition(0.3f, new Vector3(0.1f, 0f, 0f), 15).OnComplete(() =>{

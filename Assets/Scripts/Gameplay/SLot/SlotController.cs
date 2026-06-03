@@ -40,6 +40,8 @@ public class SlotController : MonoBehaviour
     [SerializeField] private Image itemImage;
     public bool isRevealed;
     public BlockTopic blockTopic = null;
+
+    public GameObject GetQuestionTopicImageObject() => itemImage != null ? itemImage.gameObject : null;
     
     [Header("Ice Slot Settings")]
     [SerializeField] private GameObject BaseSlot;
@@ -419,7 +421,8 @@ public class SlotController : MonoBehaviour
              .OnComplete(() => {
                  p.gameObject.SetActive(false);
                  p.localPosition = Vector3.zero;
-                 
+                 CoreServices.Get<AudioManager>().PlayTingSFX(i);
+                 CoreServices.Get<HapticManager>().PlayHaptic();
                  // Giết tween cũ và reset scale về mặc định trước khi rung
                  targetTransform.DOKill(false);
                  targetTransform.localScale = Vector3.one;

@@ -40,11 +40,20 @@ public class CameraController : MonoBehaviour
 
         // Với màn hình iPad (rộng hơn) hoặc đt dài (hẹp hơn), chiều cao phần trăm UI sẽ tự scale theo
         float aspectMultiplier = mainCamera.aspect / referenceAspect;
+        
+        // SỬA LỖI IPAD: Trên iPad (aspect ratio lớn, VD: 3:4 = 0.75), 
+        // nếu scale margin tuyến tính thì vùng playable sẽ bị bóp lại quá nhỏ -> Board bị thu nhỏ cực độ.
+        // Giải pháp: Giảm mức độ ảnh hưởng của aspectMultiplier trên iPad.
+        if (mainCamera.aspect > 0.65f)
+        {
+            aspectMultiplier = Mathf.Lerp(1f, aspectMultiplier, 0.4f);
+        }
+
         float topUIMargin = baseTopUIMargin * aspectMultiplier;
         float bottomUIMargin = baseBottomUIMargin * aspectMultiplier;
         
         // Vùng không gian có thể hiển thị Grid (Playable Area)
-        float playableHeightRatio = Mathf.Clamp(1f - topUIMargin - bottomUIMargin, 0.35f, 0.8f);
+        float playableHeightRatio = Mathf.Clamp(1f - topUIMargin - bottomUIMargin, 0.45f, 0.8f);
 
         // 3. Tính toán Orthographic Size để bao trọn Grid
         // Chiều cao: Phải nằm trọn trong vùng Playable

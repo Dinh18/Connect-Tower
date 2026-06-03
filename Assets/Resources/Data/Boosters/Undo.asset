@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BoosterDataSO
   id: 3
   nameBooster: Undo
-  description: Use it to back previous step
+  description: In each level, you will have 5 chances to go back to the previous
+    step.
   price: 900
   unlockedLevel: 8

@@ -125,13 +125,15 @@ public class TutorialUIController : MonoBehaviour
         if (handImage != null) handImage.SetActive(true);
 
         RectTransform targetRect = target.GetComponent<RectTransform>();
+        Canvas parentCanvas = targetRect != null ? targetRect.GetComponentInParent<Canvas>() : null;
+        bool isWorldSpaceUI = parentCanvas != null && parentCanvas.renderMode == RenderMode.WorldSpace;
         RectTransform dimRect = dimImage.GetComponent<RectTransform>();
         Image dimImg = dimImage.GetComponent<Image>();
         
         dimImage.SetActive(true);
         Vector2 localPoint = Vector2.zero;
 
-        if(targetRect != null)
+        if(targetRect != null && !isWorldSpaceUI)
         {
             if (handImage != null) handImage.GetComponent<RectTransform>().position = targetRect.position;
             if (dimImg != null) dimImg.raycastTarget = true;
@@ -176,7 +178,7 @@ public class TutorialUIController : MonoBehaviour
 
             float targetRadiusX = 0f;
             float targetRadiusY = 0f;
-            if (targetRect == null)
+            if (targetRect == null || isWorldSpaceUI)
             {
                 Renderer rend = target.GetComponentInChildren<Renderer>();
                 if (rend != null)
@@ -224,6 +226,32 @@ public class TutorialUIController : MonoBehaviour
 
                     targetRadiusX *= 1.2f; // padding
                     targetRadiusY *= 1.2f; // padding
+                    
+                    targetRadiusX = Mathf.Clamp(targetRadiusX, 0.05f, 0.4f);
+                    targetRadiusY = Mathf.Clamp(targetRadiusY, 0.05f, 0.4f);
+                }
+                else if (targetRect != null && isWorldSpaceUI)
+                {
+                    Vector3[] corners = new Vector3[4];
+                    targetRect.GetWorldCorners(corners);
+
+                    float minX = float.MaxValue, maxX = float.MinValue;
+                    float minY = float.MaxValue, maxY = float.MinValue;
+
+                    foreach (Vector3 corner in corners)
+                    {
+                        Vector3 screenPt = Camera.main.WorldToScreenPoint(corner);
+                        if (screenPt.x < minX) minX = screenPt.x;
+                        if (screenPt.x > maxX) maxX = screenPt.x;
+                        if (screenPt.y < minY) minY = screenPt.y;
+                        if (screenPt.y > maxY) maxY = screenPt.y;
+                    }
+
+                    targetRadiusX = ((maxX - minX) / 2f) / Screen.height;
+                    targetRadiusY = ((maxY - minY) / 2f) / Screen.height;
+
+                    targetRadiusX *= 1.2f; 
+                    targetRadiusY *= 1.2f; 
                     
                     targetRadiusX = Mathf.Clamp(targetRadiusX, 0.05f, 0.4f);
                     targetRadiusY = Mathf.Clamp(targetRadiusY, 0.05f, 0.4f);

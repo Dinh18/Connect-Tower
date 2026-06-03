@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BoosterDataSO
   id: 0
   nameBooster: Infinity Move
-  description: Use this to avoid losing moves for 15 seconds.
+  description: Use this to avoid losing moves for 10 seconds.
   price: 900
   unlockedLevel: 15

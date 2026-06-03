@@ -20,20 +20,22 @@ MonoBehaviour:
   row2: 0
   slots:
   - slotType: 0
+    position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
     blocks:
-    - typeBlock: 0
-      blockTopic: {fileID: 11400000, guid: 27d30a38d595de94591d1f11cbc32f07, type: 2}
-      indexSprite: 0
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 27d30a38d595de94591d1f11cbc32f07, type: 2}
       indexSprite: 1
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 27d30a38d595de94591d1f11cbc32f07, type: 2}
+      indexSprite: 3
+    - typeBlock: 0
+      blockTopic: {fileID: 11400000, guid: 27d30a38d595de94591d1f11cbc32f07, type: 2}
       indexSprite: 2
   - slotType: 0
+    position: {x: 0, y: 0, z: 0}
     questionTopic: {fileID: 0}
     blocks:
     - typeBlock: 0
       blockTopic: {fileID: 11400000, guid: 27d30a38d595de94591d1f11cbc32f07, type: 2}
-      indexSprite: 3
+      indexSprite: 0

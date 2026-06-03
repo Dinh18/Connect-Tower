@@ -4,7 +4,8 @@ public enum TypeToggle
 {
     None,
     Haptic,
-    Sound
+    Sound,
+    Music
 }
 
 public class SettingToggleButton : MonoBehaviour
@@ -16,13 +17,18 @@ public class SettingToggleButton : MonoBehaviour
     {
         if(typeToggle == TypeToggle.Sound) AudioManager.OnToggle += UpdateUI;
         else if(typeToggle == TypeToggle.Haptic) HapticManager.OnToggle += UpdateUI;
+        else if(typeToggle == TypeToggle.Music) AudioManager.OnMusicToggle += UpdateUI;
         if(typeToggle == TypeToggle.Sound)
         {
             inactiveIcon.SetActive(!CoreServices.Get<AudioManager>().IsSoundOn());
         }
         else if(typeToggle == TypeToggle.Haptic)
         {
-            inactiveIcon.SetActive(!HapticManager.Instance.IsHapticOn());
+            inactiveIcon.SetActive(!CoreServices.Get<HapticManager>().IsHapticOn());
+        }
+        else if(typeToggle == TypeToggle.Music)
+        {
+            inactiveIcon.SetActive(!CoreServices.Get<AudioManager>().IsMusicOn());
         }
     }
 
@@ -30,6 +36,7 @@ public class SettingToggleButton : MonoBehaviour
     {
         if(typeToggle == TypeToggle.Sound) AudioManager.OnToggle -= UpdateUI;
         else if(typeToggle == TypeToggle.Haptic) HapticManager.OnToggle -= UpdateUI;
+        else if(typeToggle == TypeToggle.Music) AudioManager.OnToggle -= UpdateUI;
     }
 
     private void UpdateUI(bool isOn)
@@ -39,6 +46,10 @@ public class SettingToggleButton : MonoBehaviour
             inactiveIcon.SetActive(!isOn);
         }
         else if(typeToggle == TypeToggle.Haptic)
+        {
+            inactiveIcon.SetActive(!isOn);
+        }
+        else if(typeToggle == TypeToggle.Music)
         {
             inactiveIcon.SetActive(!isOn);
         }

@@ -250,7 +250,7 @@ public class HomePanel : Panel
 
     private IEnumerator DelayPlaySadAnim()
     {
-        yield return new WaitForSeconds(30);
+        yield return new WaitForSeconds(15);
         GameEventBus.Publish(new RequestChangeAnimationNPC{newState = NPCState.Sad});
     }
 

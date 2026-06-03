@@ -193,8 +193,10 @@ public class GameManager : MonoBehaviour
         levelLoader.LoadLevel();
         CoreServices.Get<GamePlayController>().ResetSelection();
         CoreServices.Get<GamePlayController>().ResetUndoStack();
+        GameEventBus.Publish(new BoardStateChangedEvent());
         ChangeState(GameState.Playing);
         isRestarting = false;
+        
     }
 
     public bool AddMoveToContinue(int extraMoves)
@@ -250,7 +252,27 @@ public class GameManager : MonoBehaviour
             CoreServices.Get<GamePlayController>().ResetUndoStack();
         }
 
+        if(currState == GameState.Playing && prevState == GameState.MainMenu)
+        {
+            DataManager dataManager = CoreServices.Get<DataManager>();
+            foreach(BoosterDataSO booster in dataManager.GetAllBoosters())
+            {
+                if(dataManager.IsFirstTimeUserBooster(int.Parse(booster.id)))
+                {
+                    StartCoroutine(DelayedTutorial(2f, dataManager, booster));
+                    break;
+                }
+            }
+        }
         GameEventBus.Publish(new GameStateChangedEvent { newState = currState });
         Debug.Log($"[GameManager] State Changed: {prevState} -> {currState}");
+    }
+
+    public IEnumerator DelayedTutorial(float delay, DataManager dataManager, BoosterDataSO booster)
+    {
+        if(booster.unlockedLevel == dataManager.GetCurrentLevel() && int.Parse(booster.id) != (int)BoosterType.Hint) yield break;
+        yield return new WaitForSeconds(delay);
+        GameEventBus.Publish(new RequestUnlockBoosterEvent { boosterType = (BoosterType)int.Parse(booster.id) });
+        dataManager.UnlockBooster(int.Parse(booster.id));
     }
 }

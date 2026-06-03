@@ -45,6 +45,7 @@ public class AnimationButton : MonoBehaviour, IPointerDownHandler, IPointerUpHan
     {
         // AudioManager.Instance.PlayButtonDownAudio();
         GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.ButtonDown});
+        CoreServices.Get<HapticManager>().PlayHaptic();
         if (targetTransform == null) targetTransform = transform;
         targetTransform.DOKill();
         // HapticManager.Instance.PlayHaptic();

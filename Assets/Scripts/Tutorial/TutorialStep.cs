@@ -112,7 +112,7 @@ public class ShowMechanicStep : TutorialStep
             {
                 if (mechanicName.Contains("hidden") && slot.slotType == SlotController.SlotType.Hide)
                 {
-                    targetObject = slot.gameObject;
+                    targetObject = slot.GetQuestionTopicImageObject() != null ? slot.GetQuestionTopicImageObject() : slot.gameObject;
                     break;
                 }
                 else if (mechanicName.Contains("ice") && slot.slotType == SlotController.SlotType.Ice)

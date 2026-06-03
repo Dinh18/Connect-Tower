@@ -8,6 +8,10 @@ public class BorderFlash : MonoBehaviour
     [SerializeField] private Image iceBorderImage;     // Kéo object Ice vào
     [SerializeField] private float borderMaxAlpha = 0.5f;
 
+    private BorderType currentActiveBorder;
+    private bool isFlashing = false;
+    private Tween restartWarningTween;
+
     void OnEnable()
     {
         GameEventBus.Subscribe<StartBorderFlashEvent>(StartFlash);
@@ -20,10 +24,15 @@ public class BorderFlash : MonoBehaviour
         GameEventBus.UnSubscribe<StopBorderFlashEvent>(StopFlash);
         warningBorderImage.DOKill();
         iceBorderImage.DOKill();
+        restartWarningTween?.Kill();
     }
 
     public void StartFlash(StartBorderFlashEvent startBorderFlash)
     {   
+        restartWarningTween?.Kill();
+        currentActiveBorder = startBorderFlash.borderType;
+        isFlashing = true;
+
         float flashSpeed = startBorderFlash.flashSpeed;
         Image activeImage = null;
 
@@ -55,10 +64,34 @@ public class BorderFlash : MonoBehaviour
 
     public void StopFlash(StopBorderFlashEvent stopBorderFlash)
     {
+        restartWarningTween?.Kill();
+
         warningBorderImage.DOKill();
         iceBorderImage.DOKill();
         
         warningBorderImage.DOFade(0f, 0.2f);
         iceBorderImage.DOFade(0f, 0.2f);
+
+        if (isFlashing && currentActiveBorder == BorderType.Ice)
+        {
+            var gameManager = CoreServices.Get<GameManager>();
+            if (gameManager != null)
+            {
+                int moves = gameManager.GetCurrentMoves();
+                if (moves > 0 && moves <= 5)
+                {
+                    restartWarningTween = DOVirtual.DelayedCall(0.25f, () => 
+                    {
+                        var gm = CoreServices.Get<GameManager>();
+                        if (gm != null && gm.GetCurrentMoves() > 0 && gm.GetCurrentMoves() <= 5)
+                        {
+                            StartFlash(new StartBorderFlashEvent { borderType = BorderType.Warning, flashSpeed = 0.5f });
+                        }
+                    });
+                }
+            }
+        }
+        
+        isFlashing = false;
     }
 }

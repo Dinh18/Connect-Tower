@@ -5,7 +5,9 @@ public class AudioManager : MonoBehaviour
 {
     [SerializeField] private AudioSource sfxSource;
     [SerializeField] private AudioSource bgSource;
+    [SerializeField] private AudioSource mixSource;
     private AudioSO[] audios;
+    [SerializeField] private AudioClip tingClip;
     [SerializeField] private AudioClip ingameBGClip;
     [SerializeField] private AudioClip mainMenuBGClip;
 
@@ -49,6 +51,13 @@ public class AudioManager : MonoBehaviour
         {
             Debug.LogWarning($"[AudioManager] Không tìm thấy audio clip cho: {evt.soundID}");
         }
+    }
+    public void PlayTingSFX(int index)
+    {
+        if(!isSoundOn) return;
+        mixSource.clip = tingClip;
+        mixSource.pitch = 1 + index*0.05f; // Tăng pitch nhẹ cho mỗi lần gọi để tạo cảm giác "ting" khác nhau
+        mixSource.Play();
     }
     private void LoadAudioSetting()
     {

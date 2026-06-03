@@ -27,8 +27,10 @@ public class DataManager : MonoBehaviour
         // saveFilePath = Path.Combine(Application.persistentDataPath, "saveData.json");
         db = FirebaseFirestore.DefaultInstance;;
 
-        userId = "Test_Player_2";
+        // userId = "Test_Player_10";
         // Debug.Log("Dùng tạm Device ID làm User ID: " + userId);
+
+        userId = SystemInfo.deviceUniqueIdentifier;
 
         // TODO: Khi làm hệ thống đăng nhập.
         // if (FirebaseAuth.DefaultInstance.CurrentUser != null)
@@ -197,6 +199,10 @@ public class DataManager : MonoBehaviour
     {
         return allMechanics;
     }
+    public BoosterDataSO[] GetAllBoosters()
+    {
+        return allBoosters;
+    }
     public FrameDataSO GetFrameByID(string id)
     {
         foreach(var frame in allFrames)
@@ -276,7 +282,7 @@ public class DataManager : MonoBehaviour
         {
             if(id.ToString() == boosterData.id)
             {
-                if(playerData.currentLevel == GetBooster(id).unlockedLevel && !IsUnLockedBooster(id)) return true;
+                if(playerData.currentLevel >= GetBooster(id).unlockedLevel && !IsUnLockedBooster(id)) return true;
                 else return false;
             }
         }
