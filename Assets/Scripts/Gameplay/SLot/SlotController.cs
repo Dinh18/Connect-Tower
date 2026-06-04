@@ -163,6 +163,8 @@ public class SlotController : MonoBehaviour
         || gameManager.GetCurrState() == GameManager.GameState.Lose
         || !isRevealed || slotType == SlotType.Ice) return false;
         
+        if (blocks.Count > 0 && !blocks.Peek().isRevealed) return false;
+
         int topicID = blocks.Peek().GetTopicID();
         int i = 0;
 
@@ -196,7 +198,7 @@ public class SlotController : MonoBehaviour
     {
         if(isMoving || isFinished || gameManager.GetCurrState() == GameManager.GameState.Pause
             || gameManager.GetCurrState() == GameManager.GameState.Lose
-            || !isRevealed || (this.blocks.Count > 0 && this.blocks.Peek().GetTopicID() != otherSlot.blocks.Peek().GetTopicID()))
+            || !isRevealed || (this.blocks.Count > 0 && (!this.blocks.Peek().isRevealed || this.blocks.Peek().GetTopicID() != otherSlot.blocks.Peek().GetTopicID())))
                  return false;
             
         if(slotType == SlotType.Ice)
@@ -244,15 +246,7 @@ public class SlotController : MonoBehaviour
             MoveBlockSmoothly(block, path, moveDuration, otherSlot, isSameType, isSlotEmpty, delay);     
         }
         
-        int j = 0;
-        foreach (BlockController block in otherSlot.blocks)
-        {
-            if(block.GetTopicID() != topicID || !block.isRevealed) break;
-            block.ChangeState(BlockController.BlockState.None);
-            Vector3 targetPosition = new Vector3(otherSlot.stackAnchor.position.x, otherSlot.stackAnchor.position.y + (otherSlot.blocks.Count - 1 - j) * Constants.BLOCK_HEIGHT, otherSlot.stackAnchor.position.z);
-            MoveBlockSmoothly(block, new List<Vector3> { targetPosition }, selectDuration);
-            j++;
-        }
+        otherSlot.UnSelect();
         return true;
     }
 
@@ -291,6 +285,8 @@ public class SlotController : MonoBehaviour
         || gameManager.GetCurrState() == GameManager.GameState.Lose
         || !isRevealed) return false;
         
+        if (blocks.Count == 0) return true;
+
         int topicID = blocks.Peek().GetTopicID();
         int i = 0;
         foreach(BlockController block in blocks)

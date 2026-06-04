@@ -110,44 +110,109 @@ public class ShuffleEffectController : MonoBehaviour
         float endTime = spinDelay + spinDuration;
 
         List<SlotController> randomSlots = new List<SlotController>(slotsManager.GetAllSlots());
-        ShuffleList(randomSlots);
-        ShuffleList(diffcultBLocks);
+        List<BlockController> initialDifficultBlocks = new List<BlockController>(diffcultBLocks);
 
-        foreach(var kvp in sameBlocks) 
+        bool foundSolvable = false;
+        int attempt = 0;
+        
+        SlotController[] bestTargetSlots = null;
+        List<BlockController> bestDifficultBlocks = null;
+        
+        while (!foundSolvable && attempt < 100)
         {
-            diffcultBLocks.AddRange(kvp.Value);
-        }
+            attempt++;
+            ShuffleList(randomSlots);
+            
+            diffcultBLocks = new List<BlockController>(initialDifficultBlocks);
+            ShuffleList(diffcultBLocks);
 
-        int index = 0;
-        int safeCounter = 0; 
+            foreach(var kvp in sameBlocks) 
+            {
+                diffcultBLocks.AddRange(kvp.Value);
+            }
+
+            int index = 0;
+            bool assignmentFailed = false;
+
+            Dictionary<SlotController, int> logicalBlocks = new Dictionary<SlotController, int>();
+            foreach(var slot in randomSlots) {
+                logicalBlocks[slot] = slot.blocks.Count;
+            }
+
+            SlotController[] tempTargetSlots = new SlotController[diffcultBLocks.Count];
+
+            // 1. Ensure slots with hidden blocks get at least 1 block
+            foreach(var slot in randomSlots) {
+                if (slot.blocks.Count > 0 && !slot.blocks.Peek().isRevealed && slot.slotType != SlotController.SlotType.Ice) {
+                    if (index < diffcultBLocks.Count) {
+                        tempTargetSlots[index] = slot;
+                        logicalBlocks[slot]++;
+                        index++;
+                    }
+                }
+            }
+
+            // 2. Distribute the rest
+            int safeCounter = 0;
+            while(index < diffcultBLocks.Count)
+            {
+                safeCounter++;
+                if (safeCounter > 1000) { assignmentFailed = true; break; }
+
+                for(int i = 0; i < randomSlots.Count; i++)
+                {
+                    if(index >= diffcultBLocks.Count) break;
+
+                    SlotController slot = randomSlots[i];
+                    if(logicalBlocks[slot] >= 4 || !slot.isRevealed || slot.slotType == SlotController.SlotType.Ice) continue;
+
+                    tempTargetSlots[index] = slot;
+                    logicalBlocks[slot]++;
+                    index++;
+                }
+            }
+
+            if (assignmentFailed) continue;
+
+            // Apply logically
+            for(int i = 0; i < diffcultBLocks.Count; i++) {
+                tempTargetSlots[i].blocks.Push(diffcultBLocks[i]);
+            }
+
+            // Check if solvable
+            if (slotsManager.HasAvailableMoves()) {
+                foundSolvable = true;
+            }
+            
+            // Revert logical state
+            for(int i = diffcultBLocks.Count - 1; i >= 0; i--) {
+                tempTargetSlots[i].blocks.Pop();
+            }
+
+            // Always save the latest valid assignment in case we don't find a solvable one
+            bestTargetSlots = tempTargetSlots;
+            bestDifficultBlocks = diffcultBLocks;
+        }
 
         float dropStartTime = endTime + 0.2f;
         float duration = 0.8f;
 
-        while(index < diffcultBLocks.Count)
+        if (bestTargetSlots != null && bestDifficultBlocks != null)
         {
-            safeCounter++;
-            if (safeCounter > 1000) break;
-
-            for(int i = 0; i < randomSlots.Count; i++)
+            for(int i = 0; i < bestDifficultBlocks.Count; i++)
             {
-                if(index >= diffcultBLocks.Count) break;
-
-                if(randomSlots[i].blocks.Count >= 4 || !randomSlots[i].isRevealed || randomSlots[i].slotType == SlotController.SlotType.Ice) continue;
-
-                BlockController block = diffcultBLocks[index];
-                SlotController slot = randomSlots[i];
+                BlockController block = bestDifficultBlocks[i];
+                SlotController slot = bestTargetSlots[i];
                 
                 Vector3 destination = new Vector3(slot.stackAnchor.position.x,
                                                 slot.stackAnchor.position.y + Constants.BLOCK_HEIGHT * slot.blocks.Count,
                                                 slot.stackAnchor.position.z);
                 List<Vector3> path = new List<Vector3>{slot.arcPeak.position, destination};
 
-                float absoluteDropTime = dropStartTime + (index * 0.04f); 
+                float absoluteDropTime = dropStartTime + (i * 0.04f); 
 
                 sequence.InsertCallback(absoluteDropTime, () => {
                     block.transform.SetParent(CoreServices.Get<BlocksManager>().transform);
-                    // GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.MoveWoosh});
                     CoreServices.Get<HapticManager>().PlayHaptic();
                     block.transform.DOKill(); 
                 });
@@ -156,7 +221,6 @@ public class ShuffleEffectController : MonoBehaviour
                 sequence.Insert(absoluteDropTime, block.transform.DOScale(Vector3.one, duration));
 
                 slot.blocks.Push(block);
-                index++;
             }
         }
         
