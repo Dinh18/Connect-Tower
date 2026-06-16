@@ -44,11 +44,14 @@ public class BlockController : MonoBehaviour
     [SerializeField] private GameObject hideVFX;
     [SerializeField] private GameObject iceVFX;
     [SerializeField] private ParticleSystem difVFX;
+    [SerializeField] private ParticleSystem sameVFX;
     [SerializeField] private GameObject iceImage;
     [SerializeField] private Transform visual;
     [SerializeField] private GameObject maskHole;
+    [SerializeField] private GameObject spcialBlockVFX;
     
     public bool isRevealed;
+    public bool isSpecialBlock { get; private set; }
     
     // Caching MeshRenderer để tránh tốn CPU gọi GetComponent liên tục
     private MeshRenderer outLineRenderer;
@@ -61,8 +64,8 @@ public class BlockController : MonoBehaviour
         }
     }
 
-    public int GetTopicID() => topic.topicID;
-    public string GetTopicName() => topic.name;
+    public int GetTopicID() => topic != null ? topic.topicID : -1;
+    public string GetTopicName() => topic != null ? topic.name : "SpecialTop";
     public BlockTopic GetBlockTopic() => topic;
     public Sprite GetItemImage() => itemImage;
 
@@ -72,15 +75,19 @@ public class BlockController : MonoBehaviour
     public BlockType GetBlockType() => type;
     public void SetBlockType(BlockType type) => this.type = type;
 
-    public void Setup(BlocksManager blocksManager, int color, BlockTopic topic, BlockType type, Sprite itemImage, SlotController slot)
+    public void Setup(BlocksManager blocksManager, int color, BlockTopic topic, BlockType type, Sprite itemImage, SlotController slot, bool isSpecialBlock = false)
     {
         this.blocksManager = blocksManager;
         this.colorBlock = (ColorBlock) color;
         this.topic = topic;
         this.type = type;
         this.itemImage = itemImage;
-        itemImageBlock.AddImage(itemImage);
-        itemImageBlock.ShowImage();
+        this.isSpecialBlock = isSpecialBlock;
+        if (itemImage != null)
+        {
+            itemImageBlock.AddImage(itemImage);
+            itemImageBlock.ShowImage();
+        }
         HideIceImage();
         iceVFX.SetActive(false);
         // hideImage.SetActive(false);
@@ -88,6 +95,7 @@ public class BlockController : MonoBehaviour
         difVFX.Stop();
         ResetOutLint();
         maskHole.SetActive(false);
+        spcialBlockVFX.SetActive(false);
         transform.DOKill();
         ChangeState(BlockState.None);
         
@@ -106,8 +114,23 @@ public class BlockController : MonoBehaviour
         }
         else
         {
-            itemImageBlock.AddImage(itemImage);
+            if (itemImage != null)
+            {
+                itemImageBlock.AddImage(itemImage);
+            }
             isRevealed = true;
+        }
+
+        if (this.isSpecialBlock)
+        {
+            // Simple visual indicator for now: Change outline to a specific color or keep it active with a specific glow
+            // We'll use the 'W' color (white/glow) as a placeholder for special block indication if it's not hidden
+            if (type != BlockType.Hide)
+            {
+                ChangeMaterialOutLine(Constants.MATERIAL_Special_PATH);
+                spcialBlockVFX.SetActive(true);
+            }
+            itemImageBlock.HideImage();
         }
     }
     
@@ -128,6 +151,13 @@ public class BlockController : MonoBehaviour
         hideVFX.SetActive(true);
         maskHole.SetActive(false);
         isRevealed = true;
+        
+        if (isSpecialBlock)
+        {
+            ChangeMaterialOutLine(Constants.MATERIAL_Special_PATH);
+            itemImageBlock.HideImage();
+        }
+
         // AudioManager.Instance.PlayHideBlockAudio();
         GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.HideBlock});
     }
@@ -173,6 +203,11 @@ public class BlockController : MonoBehaviour
             default: materialObj = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_W_PATH); break; 
         }
         
+        if (isSpecialBlock && type != BlockType.Hide)
+        {
+            materialObj = blocksManager.GetMaterial(Constants.MATERIAL_COLOR_W_PATH);
+        }
+
         if (outLineRenderer != null)
         {
             outLineRenderer.material = materialObj;
@@ -217,39 +252,86 @@ public class BlockController : MonoBehaviour
         visual.DOKill();
         visual.localPosition = Vector3.zero;
         visual.localRotation = Quaternion.identity;
+        visual.localScale = new Vector3(0.75f, 0.75f, 0.75f);
         
-        visual.DOLocalRotate(new Vector3(0, 0, 6f), 0.35f)
-              .SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
-        visual.DOLocalMoveY(0.08f, 0.35f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);  
+        Sequence seq = DOTween.Sequence();
+        seq.SetTarget(visual);
+        seq.Append(visual.DOLocalRotate(new Vector3(0, 0, 3f), 0.5f).SetEase(Ease.OutSine));
+        seq.Append(visual.DOLocalRotate(new Vector3(0, 0, -3f), 1f).SetEase(Ease.InOutSine));
+        seq.Append(visual.DOLocalRotate(new Vector3(0, 0, 0f), 0.5f).SetEase(Ease.InSine));
+        seq.SetLoops(-1);
+
+        visual.DOLocalMoveY(0.08f, 1f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);  
     }
     
     public void FallEffect(int index)
-{
-    visual.DOKill(false); 
-
-    Vector3 baseLocalPos = Vector3.zero;
-    float jumpPower = Mathf.Max(0.1f, 0.5f - (index * 0.15f)); 
-    
-    // (Tùy chọn) Nếu bạn muốn các block rơi lần lượt, hãy thêm Delay ở đây:
-    // float fallDelay = index * 0.15f; 
-
-    Sequence seq = DOTween.Sequence();
-    
-    // seq.PrependInterval(fallDelay); // Bật dòng này nếu muốn block rơi so le nhau
-    
-    // 1. Nhảy lên và rơi xuống (mất 0.4s)
-    seq.Append(visual.DOLocalJump(baseLocalPos, jumpPower, 1, 0.4f));
-    
-    // 2. NGAY KHI chạm đất -> Kích hoạt Haptic ngay lập tức
-    seq.AppendCallback(() => 
     {
-        // Lưu ý: Không cần hàm DelayPlayHaptic nữa, hãy gọi thẳng hàm PlayHaptic bình thường
-        CoreServices.Get<HapticManager>().PlayHaptic(); 
-    });
-    
-    // 3. Hiệu ứng bẹp/nhún sau khi chạm đất
-    seq.Append(visual.DOPunchPosition(new Vector3(0, 0.2f, 0), 0.2f, 1, 0));
-}
+        visual.DOKill(false); 
+        sameVFX.Play(true);
+        visual.localPosition = Vector3.zero;
+        visual.localRotation = Quaternion.identity;
+        visual.localScale = new Vector3(0.75f, 0.75f, 0.75f);
+
+        float jump1 = Mathf.Max(0.15f, 0.5f - (index * 0.12f)); 
+        float jump2 = jump1 * 0.4f; // Nảy lần 2 thấp hơn
+        float jump3 = jump1 * 0.15f; // Nảy lần 3 rất nhỏ
+
+        Sequence seq = DOTween.Sequence();
+        seq.SetTarget(visual);
+        
+        // --- Nhịp 1 (Nảy cao nhất) ---
+        seq.Append(visual.DOLocalMoveY(jump1, 0.15f).SetEase(Ease.OutQuad));
+        seq.Append(visual.DOLocalMoveY(0f, 0.15f).SetEase(Ease.InQuad));
+        seq.AppendCallback(() => CoreServices.Get<HapticManager>().PlayHaptic());
+        
+        // Squash 1 (Chạm đất bẹp mạnh)
+        seq.Append(visual.DOScale(new Vector3(0.85f, 0.6f, 0.85f), 0.06f).SetEase(Ease.OutQuad));
+        
+        // --- Nhịp 2 (Nảy vừa) ---
+        // Vừa nảy lên vừa dãn nhẹ (Stretch)
+        seq.Append(visual.DOLocalMoveY(jump2, 0.09f).SetEase(Ease.OutQuad));
+        seq.Join(visual.DOScale(new Vector3(0.72f, 0.78f, 0.72f), 0.09f).SetEase(Ease.OutQuad));
+        
+        // Rơi xuống, trở lại scale bình thường
+        seq.Append(visual.DOLocalMoveY(0f, 0.09f).SetEase(Ease.InQuad));
+        seq.Join(visual.DOScale(new Vector3(0.75f, 0.75f, 0.75f), 0.09f).SetEase(Ease.InQuad));
+
+        // Squash 2 (Chạm đất bẹp nhẹ)
+        seq.Append(visual.DOScale(new Vector3(0.8f, 0.68f, 0.8f), 0.04f).SetEase(Ease.OutQuad));
+
+        // --- Nhịp 3 (Nảy nhẹ) ---
+        // Trở về scale bình thường khi nảy lên
+        seq.Append(visual.DOLocalMoveY(jump3, 0.06f).SetEase(Ease.OutQuad));
+        seq.Join(visual.DOScale(new Vector3(0.75f, 0.75f, 0.75f), 0.06f).SetEase(Ease.OutQuad));
+        
+        // Rơi xuống lần cuối
+        seq.Append(visual.DOLocalMoveY(0f, 0.06f).SetEase(Ease.InQuad));
+
+        // Nảy nhẹ lần cuối (để có độ đàn hồi)
+        seq.Append(visual.DOScale(new Vector3(0.77f, 0.72f, 0.77f), 0.04f).SetEase(Ease.OutQuad));
+        seq.Append(visual.DOScale(new Vector3(0.75f, 0.75f, 0.75f), 0.08f).SetEase(Ease.OutBack));
+    }
+
+    public void IceShakeEffect(int index)
+    {
+        visual.DOKill(false); 
+        sameVFX.Play(true);
+        visual.localPosition = Vector3.zero;
+        visual.localRotation = Quaternion.identity;
+        visual.localScale = new Vector3(0.75f, 0.75f, 0.75f);
+
+        Sequence seq = DOTween.Sequence();
+        seq.SetTarget(visual);
+        
+        seq.Append(visual.DOShakePosition(0.25f, new Vector3(0.06f, 0f, 0.06f), 25));
+        seq.Join(visual.DOShakeRotation(0.25f, new Vector3(0f, 0f, 8f), 25));
+        seq.AppendCallback(() => CoreServices.Get<HapticManager>().PlayHaptic());
+        
+        seq.OnComplete(() => {
+            visual.localPosition = Vector3.zero;
+            visual.localRotation = Quaternion.identity;
+        });
+    }
 
     
     public void PlayErrorShake(Action onCompleteCallBack = null)

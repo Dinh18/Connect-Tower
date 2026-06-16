@@ -1,15 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 
 public class AddBoosterUI : Popup
 {
-    [SerializeField] private Text headerText;
-    [SerializeField] private Text tutorialText;
-    [SerializeField] private Text coinsText;
+    [SerializeField] private TextMeshProUGUI headerText;
+    [SerializeField] private TextMeshProUGUI tutorialText;
+    [SerializeField] private TextMeshProUGUI coinsText;
     [SerializeField] private Image boosterIconImage;
     [SerializeField] private Button addButton;
     // [SerializeField] private Button claimButton;

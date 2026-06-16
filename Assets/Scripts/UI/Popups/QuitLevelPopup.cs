@@ -1,10 +1,11 @@
 
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class QuitLevelPopup : Popup
 {
-    [SerializeField] private Text titleText;
+    [SerializeField] private TextMeshProUGUI titleText;
     [SerializeField] private Button closeButton;
     [SerializeField] private Button continueButton;
     [SerializeField] private Button homeButton;

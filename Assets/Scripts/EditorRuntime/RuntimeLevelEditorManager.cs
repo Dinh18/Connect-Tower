@@ -17,12 +17,15 @@ public class RuntimeLevelEditorManager : MonoBehaviour
     public int difficulty = 0; // 0: Easy, 1: Hard, 2: VeryHard
     public int row1 = 3;
     public int row2 = 3;
-    public enum EditActionMode { Block, Slot }
+    public enum EditActionMode { Block, Slot, DeleteSlot, MoveSlotRow }
     public EditActionMode currentEditMode = EditActionMode.Block;
     public BlockTopic currentHiddenSlotTopic = null;
 
     public SlotController.SlotType currentSlotMechanic = SlotController.SlotType.Normal;
     public BlockController.BlockType currentBlockMechanic = BlockController.BlockType.Normal;
+    public GameMode currentGameMode = GameMode.Normal;
+    public bool currentIsSpecialBlock = false;
+    public int currentBombMoveLimit = 20;
 
     public List<BlockTopic> topics = new List<BlockTopic>();
     public List<int> amountBlockOfTopic = new List<int>();
@@ -100,9 +103,30 @@ public class RuntimeLevelEditorManager : MonoBehaviour
                 Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                 if (Physics.Raycast(ray, out RaycastHit hit))
                 {
-                    if (hit.collider.TryGetComponent(out SlotController slot))
+                    SlotController slot = null;
+                    int targetIndex = -1;
+
+                    if (hit.collider.TryGetComponent(out BlockController blockObj))
                     {
-                        int targetIndex = 0;
+                        for(int s = 0; s < levelLoader.slots.Count; s++)
+                        {
+                            var sCtrl = levelLoader.slots[s];
+                            var blockArr = sCtrl.blocks.ToArray();
+                            for(int b = 0; b < blockArr.Length; b++)
+                            {
+                                if (blockArr[b] == blockObj)
+                                {
+                                    slot = sCtrl;
+                                    targetIndex = b; 
+                                    break;
+                                }
+                            }
+                            if (slot != null) break;
+                        }
+                    }
+                    else if (hit.collider.TryGetComponent(out SlotController slotObj))
+                    {
+                        slot = slotObj;
                         int slotIndex = levelLoader.slots.IndexOf(slot);
                         if (slotIndex != -1 && slots[slotIndex].blocks != null && slots[slotIndex].blocks.Count > 0)
                         {
@@ -123,7 +147,10 @@ public class RuntimeLevelEditorManager : MonoBehaviour
                                 }
                             }
                         }
-                        
+                    }
+
+                    if (slot != null)
+                    {
                         ProcessSlotClick(slot, rightClick, targetIndex);
                     }
                 }
@@ -196,6 +223,7 @@ public class RuntimeLevelEditorManager : MonoBehaviour
         currentHiddenSlotTopic = null;
         currentSlotMechanic = SlotController.SlotType.Normal;
         currentBlockMechanic = BlockController.BlockType.Normal;
+        currentBombMoveLimit = 20;
         row1 = 3;
         row2 = 3;
         moves = 0;
@@ -225,6 +253,41 @@ public class RuntimeLevelEditorManager : MonoBehaviour
 
         SaveUndoState();
 
+        if (currentEditMode == EditActionMode.DeleteSlot)
+        {
+            if (slots[slotIndex].blocks != null)
+            {
+                foreach (var block in slots[slotIndex].blocks)
+                {
+                    if (block.blockTopic != null)
+                    {
+                        int tIdx = topics.FindIndex(t => t != null && t.topicID == block.blockTopic.topicID);
+                        if (tIdx >= 0 && tIdx < amountBlockOfTopic.Count)
+                        {
+                            amountBlockOfTopic[tIdx]--;
+                        }
+                    }
+                }
+            }
+            slots.RemoveAt(slotIndex);
+            if (slotIndex < row1)
+            {
+                row1--;
+            }
+            else
+            {
+                row2--;
+            }
+            RenderGrid();
+            return;
+        }
+
+        if (currentEditMode == EditActionMode.MoveSlotRow)
+        {
+            MoveSlotToOtherRow(slotIndex);
+            return;
+        }
+
         if (currentEditMode == EditActionMode.Slot)
         {
             slots[slotIndex].slotType = currentSlotMechanic;
@@ -237,25 +300,58 @@ public class RuntimeLevelEditorManager : MonoBehaviour
             {
                 slots[slotIndex].questionTopic = null;
             }
+            
+            if (currentSlotMechanic == SlotController.SlotType.Bomb)
+            {
+                slots[slotIndex].bombMoveLimit = currentBombMoveLimit;
+            }
         }
         else if (currentEditMode == EditActionMode.Block)
         {
             if (isRightClick)
             {
-                RemoveBlockFromSlot(slotIndex);
+                RemoveBlockFromSlot(slotIndex, targetBlockIndex);
             }
             else
             {
                 if (currentPaintbrushTopic != null)
                 {
-                    AddBlockToSlot(slotIndex, currentPaintbrushTopic, (int)currentBlockMechanic);
+                    if (currentIsSpecialBlock)
+                    {
+                        AddBlockToSlot(slotIndex, null, (int)currentBlockMechanic);
+                    }
+                    else
+                    {
+                        AddBlockToSlot(slotIndex, currentPaintbrushTopic, (int)currentBlockMechanic);
+                    }
                 }
                 else
                 {
                     if (targetBlockIndex < 0) targetBlockIndex = 0;
                     if (slots[slotIndex].blocks != null && targetBlockIndex < slots[slotIndex].blocks.Count)
                     {
-                        slots[slotIndex].blocks[targetBlockIndex].typeBlock = currentBlockMechanic;
+                        var targetBlock = slots[slotIndex].blocks[targetBlockIndex];
+                        if (currentIsSpecialBlock && !targetBlock.isSpecialBlock)
+                        {
+                            if (targetBlock.blockTopic != null)
+                            {
+                                int tIdx = topics.FindIndex(t => t != null && t.topicID == targetBlock.blockTopic.topicID);
+                                if (tIdx >= 0 && tIdx < amountBlockOfTopic.Count)
+                                {
+                                    amountBlockOfTopic[tIdx]--;
+                                }
+                            }
+                            targetBlock.blockTopic = null;
+                        }
+                        
+                        targetBlock.typeBlock = currentBlockMechanic;
+                        targetBlock.isSpecialBlock = currentIsSpecialBlock;
+                        slots[slotIndex].blocks[targetBlockIndex] = targetBlock;
+                    }
+                    else if (currentIsSpecialBlock)
+                    {
+                        // If clicking empty space in mechanic mode but special block is checked, add it.
+                        AddBlockToSlot(slotIndex, null, (int)currentBlockMechanic);
                     }
                 }
             }
@@ -275,6 +371,7 @@ public class RuntimeLevelEditorManager : MonoBehaviour
     private void LoadFromSO(LevelDataSO tempSO)
     {
         levelIndex = tempSO.level;
+        currentGameMode = tempSO.gameMode;
         moves = tempSO.moves;
         difficulty = tempSO.difficult;
         row1 = tempSO.row1;
@@ -286,6 +383,7 @@ public class RuntimeLevelEditorManager : MonoBehaviour
             SlotSetupData newSlot = new SlotSetupData();
             newSlot.slotType = sData.slotType;
             newSlot.questionTopic = sData.questionTopic;
+            newSlot.bombMoveLimit = sData.bombMoveLimit;
             newSlot.blocks = new List<BlockSetupData>();
             if (sData.blocks != null)
             {
@@ -295,6 +393,7 @@ public class RuntimeLevelEditorManager : MonoBehaviour
                     newBlock.blockTopic = bData.blockTopic;
                     newBlock.typeBlock = bData.typeBlock;
                     newBlock.indexSprite = bData.indexSprite;
+                    newBlock.isSpecialBlock = bData.isSpecialBlock;
                     newSlot.blocks.Add(newBlock);
                 }
             }
@@ -318,7 +417,7 @@ public class RuntimeLevelEditorManager : MonoBehaviour
             }
             if (s.slotType == SlotController.SlotType.Hide && s.questionTopic != null)
             {
-                if (!topics.Exists(t => t.topicID == s.questionTopic.topicID))
+                if (!topics.Exists(t => t != null && t.topicID == s.questionTopic.topicID))
                 {
                     topics.Add(s.questionTopic);
                     amountBlockOfTopic.Add(0);
@@ -333,8 +432,11 @@ public class RuntimeLevelEditorManager : MonoBehaviour
             {
                 foreach (var b in s.blocks)
                 {
-                    int tIdx = topics.FindIndex(t => t.topicID == b.blockTopic.topicID);
-                    if (tIdx >= 0) amountBlockOfTopic[tIdx]++;
+                    if (b.blockTopic != null)
+                    {
+                        int tIdx = topics.FindIndex(t => t != null && t.topicID == b.blockTopic.topicID);
+                        if (tIdx >= 0) amountBlockOfTopic[tIdx]++;
+                    }
                 }
             }
         }
@@ -358,7 +460,7 @@ public class RuntimeLevelEditorManager : MonoBehaviour
         InitManagers();
 #if UNITY_EDITOR
         LevelDataSO[] allLevels = Resources.LoadAll<LevelDataSO>(levelFolder);
-        LevelDataSO so = System.Array.Find(allLevels, l => l.level == levelIndex);
+        LevelDataSO so = System.Array.Find(allLevels, l => l != null && l.level == levelIndex);
         
         if (so != null)
         {
@@ -396,6 +498,18 @@ public class RuntimeLevelEditorManager : MonoBehaviour
     public void AddBlockToSlot(int slotIndex, BlockTopic blockTopic, int typeBlock)
     {
         if (slots[slotIndex].blocks.Count >= 4) return;
+        
+        if (currentIsSpecialBlock)
+        {
+            BlockSetupData specialBlockSetup = new BlockSetupData();
+            specialBlockSetup.blockTopic = null;
+            specialBlockSetup.typeBlock = (BlockController.BlockType)typeBlock;
+            specialBlockSetup.isSpecialBlock = true;
+            specialBlockSetup.indexSprite = 0;
+            slots[slotIndex].blocks.Insert(0, specialBlockSetup);
+            return;
+        }
+
         if (currentPaintbrushIndex >= 0 && currentPaintbrushIndex < amountBlockOfTopic.Count)
         {
             if (amountBlockOfTopic[currentPaintbrushIndex] >= 4) return;
@@ -404,6 +518,7 @@ public class RuntimeLevelEditorManager : MonoBehaviour
         BlockSetupData newBlockSetup = new BlockSetupData();
         newBlockSetup.blockTopic = blockTopic;
         newBlockSetup.typeBlock = (BlockController.BlockType)typeBlock;
+        newBlockSetup.isSpecialBlock = false;
         
         if (currentPaintbrushIndex >= 0 && currentPaintbrushIndex < amountBlockOfTopic.Count)
         {
@@ -419,29 +534,93 @@ public class RuntimeLevelEditorManager : MonoBehaviour
         slots[slotIndex].blocks.Insert(0, newBlockSetup);
     }
 
-    public void RemoveBlockFromSlot(int slotIndex)
+    public void RemoveBlockFromSlot(int slotIndex, int targetBlockIndex)
     {
         if (slotIndex < 0 || slotIndex >= slots.Count) return;
 
         var slot = slots[slotIndex];
-        if (slot.blocks.Count == 0) return;
-
-        // Xóa block trên cùng (ở index 0 do đã Insert(0))
-        var block = slot.blocks[0];
+        if (slot.blocks == null || slot.blocks.Count == 0) return;
         
-        int tIdx = topics.FindIndex(t => t.topicID == block.blockTopic.topicID);
-        if (tIdx >= 0 && tIdx < amountBlockOfTopic.Count)
+        if (targetBlockIndex < 0) targetBlockIndex = 0;
+        if (targetBlockIndex >= slot.blocks.Count) return;
+
+        // Xóa block tại vị trí targetBlockIndex
+        var block = slot.blocks[targetBlockIndex];
+        
+        if (block.blockTopic != null)
         {
-            amountBlockOfTopic[tIdx]--;
+            int tIdx = topics.FindIndex(t => t != null && t.topicID == block.blockTopic.topicID);
+            if (tIdx >= 0 && tIdx < amountBlockOfTopic.Count)
+            {
+                amountBlockOfTopic[tIdx]--;
+            }
         }
 
-        slot.blocks.RemoveAt(0);
+        slot.blocks.RemoveAt(targetBlockIndex);
+    }
+
+    public void MoveSlotToOtherRow(int slotIndex)
+    {
+        if (slotIndex < 0 || slotIndex >= slots.Count) return;
+        SaveUndoState();
+
+        var slotToMove = slots[slotIndex];
+        slots.RemoveAt(slotIndex);
+
+        if (slotIndex < row1)
+        {
+            // Thuộc hàng 1, chuyển xuống hàng 2
+            row1--;
+            row2++;
+            // Đưa slot này vào cuối danh sách (tức là cuối hàng 2) hoặc chèn tuỳ ý
+            slots.Add(slotToMove); 
+        }
+        else
+        {
+            // Thuộc hàng 2, chuyển lên hàng 1
+            row2--;
+            row1++;
+            // Đưa slot này vào cuối hàng 1 (ngay trước các slot của hàng 2 hiện tại)
+            slots.Insert(row1 - 1, slotToMove); 
+        }
+        
+        RenderGrid();
+    }
+
+    public void SwapRows()
+    {
+        if (row1 == 0 && row2 == 0) return;
+        SaveUndoState();
+
+        List<SlotSetupData> newSlots = new List<SlotSetupData>();
+        
+        // Đưa các slot hàng 2 lên trước
+        for (int i = row1; i < row1 + row2; i++)
+        {
+            newSlots.Add(slots[i]);
+        }
+        
+        // Đưa các slot hàng 1 xuống sau
+        for (int i = 0; i < row1; i++)
+        {
+            newSlots.Add(slots[i]);
+        }
+
+        slots = newSlots;
+
+        // Hoán đổi số lượng slot của 2 hàng
+        int temp = row1;
+        row1 = row2;
+        row2 = temp;
+
+        RenderGrid();
     }
 
     private LevelDataSO GenerateLevelDataSO()
     {
         LevelDataSO so = ScriptableObject.CreateInstance<LevelDataSO>();
         so.level = levelIndex;
+        so.gameMode = currentGameMode;
         so.moves = moves;
         so.difficult = difficulty;
         so.row1 = row1;
@@ -454,6 +633,7 @@ public class RuntimeLevelEditorManager : MonoBehaviour
             SlotSetupData sData = new SlotSetupData();
             sData.slotType = s.slotType;
             sData.questionTopic = s.questionTopic;
+            sData.bombMoveLimit = s.bombMoveLimit;
             sData.blocks = new List<BlockSetupData>();
             foreach (var b in s.blocks)
             {
@@ -461,6 +641,7 @@ public class RuntimeLevelEditorManager : MonoBehaviour
                 bData.blockTopic = b.blockTopic;
                 bData.typeBlock = b.typeBlock;
                 bData.indexSprite = b.indexSprite;
+                bData.isSpecialBlock = b.isSpecialBlock;
                 sData.blocks.Add(bData);
             }
             so.slots.Add(sData);
@@ -586,6 +767,93 @@ public class RuntimeLevelEditorManager : MonoBehaviour
         string newFilePath = Path.Combine(dir, $"Level_{levelIndex:D2}.json");
         File.WriteAllText(newFilePath, newJson);
         Debug.Log($"<color=green>Đã chèn level mới JSON thành công tại {newFilePath}.</color>");
+#endif
+    }
+
+    public void DeleteLevel()
+    {
+#if UNITY_EDITOR
+        if (!EditorUtility.DisplayDialog("Xác nhận Xóa Level", 
+            $"Bạn sắp xóa Level ID {levelIndex}. Tất cả các level từ {levelIndex + 1} trở đi sẽ bị đẩy xuống 1 ID (ví dụ Level_{levelIndex+1:D2} thành Level_{levelIndex:D2}).\nBạn có chắc chắn muốn thực hiện không?", 
+            "Có, Xóa", "Hủy"))
+        {
+            return;
+        }
+#endif
+
+#if UNITY_EDITOR
+        string dir = $"Assets/Resources/{levelFolder}";
+        
+        string deletePath = $"{dir}/Level_{levelIndex:D2}.asset";
+        if (AssetDatabase.LoadAssetAtPath<LevelDataSO>(deletePath) != null)
+        {
+            AssetDatabase.DeleteAsset(deletePath);
+        }
+
+        // Tìm Max Level
+        int maxLevel = -1;
+        string[] guids = AssetDatabase.FindAssets("t:LevelDataSO", new[] { dir });
+        foreach(string guid in guids)
+        {
+            string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+            LevelDataSO so = AssetDatabase.LoadAssetAtPath<LevelDataSO>(assetPath);
+            if (so != null && so.level > maxLevel) 
+            {
+                maxLevel = so.level;
+            }
+        }
+
+        // Shift levels từ levelIndex + 1 đến maxLevel tiến về levelIndex
+        for (int i = levelIndex + 1; i <= maxLevel; i++)
+        {
+            string oldPath = $"{dir}/Level_{i:D2}.asset";
+            string newName = $"Level_{i - 1:D2}";
+            
+            LevelDataSO so = AssetDatabase.LoadAssetAtPath<LevelDataSO>(oldPath);
+            if (so != null)
+            {
+                so.level = i - 1;
+                EditorUtility.SetDirty(so);
+                AssetDatabase.RenameAsset(oldPath, newName);
+            }
+        }
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        Debug.Log($"<color=green>Đã xóa level {levelIndex} và dịch chuyển các level sau đó.</color>");
+#else
+        string dir = Application.persistentDataPath;
+        string deletePath = Path.Combine(dir, $"Level_{levelIndex:D2}.json");
+        if (File.Exists(deletePath))
+        {
+            File.Delete(deletePath);
+        }
+
+        int maxLevel = -1;
+        string[] files = Directory.GetFiles(dir, "Level_*.json");
+        foreach(string file in files)
+        {
+            string fileName = Path.GetFileNameWithoutExtension(file);
+            if (fileName.StartsWith("Level_") && int.TryParse(fileName.Substring(6), out int l))
+            {
+                if (l > maxLevel) maxLevel = l;
+            }
+        }
+
+        for (int i = levelIndex + 1; i <= maxLevel; i++)
+        {
+            string oldPath = Path.Combine(dir, $"Level_{i:D2}.json");
+            string newPath = Path.Combine(dir, $"Level_{i - 1:D2}.json");
+            if (File.Exists(oldPath))
+            {
+                string oldJson = File.ReadAllText(oldPath);
+                LevelDataSO tempSO = ScriptableObject.CreateInstance<LevelDataSO>();
+                JsonUtility.FromJsonOverwrite(oldJson, tempSO);
+                tempSO.level = i - 1;
+                File.WriteAllText(newPath, JsonUtility.ToJson(tempSO, true));
+                File.Delete(oldPath);
+            }
+        }
+        Debug.Log($"<color=green>Đã xóa level {levelIndex} JSON và dịch chuyển các level sau đó.</color>");
 #endif
     }
 
@@ -726,7 +994,7 @@ public class RuntimeLevelEditorManager : MonoBehaviour
             for (int j = sd.blocks.Count - 1; j >= 0; j--)
             {
                 var bd = sd.blocks[j];
-                state.slots[i].topics[state.slots[i].count] = bd.blockTopic.topicID;
+                state.slots[i].topics[state.slots[i].count] = bd.blockTopic != null ? bd.blockTopic.topicID : -1;
                 state.slots[i].hiddens[state.slots[i].count] = (bd.typeBlock == BlockController.BlockType.Hide);
                 state.slots[i].count++;
             }
@@ -1568,6 +1836,12 @@ public class RuntimeLevelEditorManager : MonoBehaviour
         GUILayout.EndHorizontal();
 
         GUILayout.BeginHorizontal();
+        GUILayout.Label("Game Mode:", GUILayout.Width(80));
+        if (GUILayout.Toggle(currentGameMode == GameMode.Normal, "Normal", "Button")) currentGameMode = GameMode.Normal;
+        if (GUILayout.Toggle(currentGameMode == GameMode.SpecialTop, "Special Top", "Button")) currentGameMode = GameMode.SpecialTop;
+        GUILayout.EndHorizontal();
+
+        GUILayout.BeginHorizontal();
         GUILayout.Label("Độ khó:", GUILayout.Width(60));
         if (GUILayout.Toggle(difficulty == 0, "Dễ", "Button")) difficulty = 0;
         if (GUILayout.Toggle(difficulty == 1, "Khó", "Button")) difficulty = 1;
@@ -1595,6 +1869,17 @@ public class RuntimeLevelEditorManager : MonoBehaviour
         if (GUILayout.Toggle(currentEditMode == EditActionMode.Block, "Sửa Block", "Button")) currentEditMode = EditActionMode.Block;
         if (GUILayout.Toggle(currentEditMode == EditActionMode.Slot, "Sửa Cột (Slot)", "Button")) currentEditMode = EditActionMode.Slot;
         GUILayout.EndHorizontal();
+        
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Toggle(currentEditMode == EditActionMode.DeleteSlot, "Xóa Slot", "Button")) currentEditMode = EditActionMode.DeleteSlot;
+        if (GUILayout.Toggle(currentEditMode == EditActionMode.MoveSlotRow, "Đổi Hàng", "Button")) currentEditMode = EditActionMode.MoveSlotRow;
+        GUILayout.EndHorizontal();
+
+        GUILayout.Space(5);
+        if (GUILayout.Button("Đảo Vị Trí Toàn Bộ 2 Hàng (Swap)", GUILayout.Height(30)))
+        {
+            SwapRows();
+        }
 
         GUILayout.Space(10);
         GUILayout.Label("--- CƠ CHẾ (Mechanics) ---", GUI.skin.box);
@@ -1606,6 +1891,7 @@ public class RuntimeLevelEditorManager : MonoBehaviour
             if (GUILayout.Toggle(currentSlotMechanic == SlotController.SlotType.Normal, "Bình Thường (Hủy)", "Button")) currentSlotMechanic = SlotController.SlotType.Normal;
             if (GUILayout.Toggle(currentSlotMechanic == SlotController.SlotType.Hide, "Ẩn (Hide)", "Button")) currentSlotMechanic = SlotController.SlotType.Hide;
             if (GUILayout.Toggle(currentSlotMechanic == SlotController.SlotType.Ice, "Băng (Ice)", "Button")) currentSlotMechanic = SlotController.SlotType.Ice;
+            if (GUILayout.Toggle(currentSlotMechanic == SlotController.SlotType.Bomb, "Bomb", "Button")) currentSlotMechanic = SlotController.SlotType.Bomb;
             GUILayout.EndHorizontal();
 
             if (currentSlotMechanic == SlotController.SlotType.Hide)
@@ -1621,6 +1907,15 @@ public class RuntimeLevelEditorManager : MonoBehaviour
                     }
                 }
             }
+            else if (currentSlotMechanic == SlotController.SlotType.Bomb)
+            {
+                GUILayout.Space(5);
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Số lượt Bomb:", GUILayout.Width(100));
+                string bombMoveStr = GUILayout.TextField(currentBombMoveLimit.ToString(), GUILayout.Width(50));
+                if (int.TryParse(bombMoveStr, out int bMove)) currentBombMoveLimit = bMove;
+                GUILayout.EndHorizontal();
+            }
         }
         else 
         {
@@ -1628,6 +1923,10 @@ public class RuntimeLevelEditorManager : MonoBehaviour
             GUILayout.BeginHorizontal();
             if (GUILayout.Toggle(currentBlockMechanic == BlockController.BlockType.Normal, "Bình Thường (Hủy)", "Button")) currentBlockMechanic = BlockController.BlockType.Normal;
             if (GUILayout.Toggle(currentBlockMechanic == BlockController.BlockType.Hide, "Ẩn (Hide)", "Button")) currentBlockMechanic = BlockController.BlockType.Hide;
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            currentIsSpecialBlock = GUILayout.Toggle(currentIsSpecialBlock, "Block Đặc Biệt (Chỉ cho mode Special Top)");
             GUILayout.EndHorizontal();
         }
 
@@ -1711,6 +2010,10 @@ public class RuntimeLevelEditorManager : MonoBehaviour
         if (GUILayout.Button("Chèn (Insert)", GUILayout.Height(40)))
         {
             InsertLevel();
+        }
+        if (GUILayout.Button("Xóa (Delete)", GUILayout.Height(40)))
+        {
+            DeleteLevel();
         }
         GUILayout.EndHorizontal();
         

@@ -7,13 +7,13 @@ public class UICountdownController : MonoBehaviour
     [Header("Settings")]
     [SerializeField] float countdownTime = 10f; // Thời gian đếm ngược tổng cộng
 
-    private Image _image;// Tỷ lệ fill của Image (0 = đóng, 1 = mở hoàn toàn)
+    [SerializeField] private Image _image;// Tỷ lệ fill của Image (0 = đóng, 1 = mở hoàn toàn)
     private float _currentTime;
     private bool _isRunning = false;    
     void Awake()
     {
         // Lấy Image và Material để điều khiển
-        _image = GetComponent<Image>();
+        // _image = GetComponent<Image>();
     }
 
     void Update()

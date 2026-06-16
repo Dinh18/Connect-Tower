@@ -15,8 +15,6 @@ public class SafeAreaFitter : MonoBehaviour
         rectTransform = GetComponent<RectTransform>();
         Rect safeArea = Screen.safeArea;
 
-        
-
         // Chuyển đổi tọa độ Pixel của Safe Area thành tọa độ Anchor tỉ lệ (0 đến 1)
         Vector2 anchorMin = safeArea.position;
         Vector2 anchorMax = safeArea.position + safeArea.size;
@@ -30,8 +28,8 @@ public class SafeAreaFitter : MonoBehaviour
         rectTransform.anchorMin = anchorMin;
         rectTransform.anchorMax = anchorMax;
 
-        // rectTransform.offsetMin = Vector2.zero;
-        // rectTransform.offsetMax = Vector2.zero;
+        rectTransform.offsetMin = Vector2.zero;
+        rectTransform.offsetMax = Vector2.zero;
     }
 
     #if UNITY_EDITOR

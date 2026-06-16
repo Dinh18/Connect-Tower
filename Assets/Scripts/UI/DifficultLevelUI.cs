@@ -7,7 +7,8 @@ using UnityEngine.UI;
 public class DifficultLevel : MonoBehaviour
 {
     // Mở comment dimImage để làm tối background nhé
-    [SerializeField] private Image dimImage; 
+    [SerializeField] private Image bgImage; 
+    [SerializeField] private GameObject dimImage;
     [SerializeField] private Transform hard_NPC_Image;
     [SerializeField] private Transform textHolder;
     [SerializeField] private Image bgTextImage;
@@ -34,7 +35,7 @@ public class DifficultLevel : MonoBehaviour
     {
         if(difficultLevel == LevelLoader.GameDifficult.Hard)
         {
-            dimImage.color = hardBgColor;
+            bgImage.color = hardBgColor;
             bgTextImage.color = hardbgTextColor;
             difficultLevelText.text = "HARD LEVEL";
             shadowText.text = "HARD LEVEL";
@@ -44,7 +45,7 @@ public class DifficultLevel : MonoBehaviour
         }
         else if(difficultLevel == LevelLoader.GameDifficult.VeryHard)
         {
-            dimImage.color = spHardBgColor;
+            bgImage.color = spHardBgColor;
             bgTextImage.color = spHardBgTextColor;
             difficultLevelText.text = "SUPER HARD";
             shadowText.text = "SUPER HARD";
@@ -52,6 +53,7 @@ public class DifficultLevel : MonoBehaviour
             // GameEventBus.Publish(new RequestChangeAnimationBoss { newState = BossState.SuperHard });
         }
         this.gameObject.SetActive(true);
+        dimImage.SetActive(true);
 
         // 1. Cài đặt trạng thái ban đầu trước khi chạy Animation
         textHolder.localScale = Vector3.zero;
@@ -60,12 +62,12 @@ public class DifficultLevel : MonoBehaviour
         // Kéo NPC tụt xuống một đoạn để lát nữa làm hiệu ứng nhảy lên
         hard_NPC_Image.localPosition = new Vector3(hard_NPC_Image.localPosition.x, npcOriginalPosY - 150f, 0); 
 
-        if (dimImage != null)
+        if (bgImage != null)
         {
-            dimImage.gameObject.SetActive(true);
-            Color dimColor = dimImage.color;
+            bgImage.gameObject.SetActive(true);
+            Color dimColor = bgImage.color;
             dimColor.a = 0f; // Bắt đầu với alpha = 0 (trong suốt)
-            dimImage.color = dimColor; // Trong suốt
+            bgImage.color = dimColor; // Trong suốt
         }
 
         Sequence sequence = DOTween.Sequence();
@@ -73,8 +75,8 @@ public class DifficultLevel : MonoBehaviour
         // 2. Kịch bản Animation
         
         // Tối màn hình dần dần
-        if (dimImage != null)
-            sequence.Append(dimImage.DOFade(0.7f, 0.3f));
+        if (bgImage != null)
+            sequence.Append(bgImage.DOFade(0.7f, 0.3f));
 
         // Banner đập ra và rung nhẹ tạo cảm giác chấn động
         sequence.Append(textHolder.DOScale(Vector3.one, 0.4f).SetEase(Ease.OutBack));
@@ -115,9 +117,13 @@ public class DifficultLevel : MonoBehaviour
         sequence.Append(textHolder.DOScale(Vector3.zero, 0.3f).SetEase(Ease.InBack));
 
         // Cuối cùng nhả sáng màn hình và tắt gameobject
-        if (dimImage != null)
-            sequence.Join(dimImage.DOFade(0f, 0.3f));
+        if (bgImage != null)
+            sequence.Join(bgImage.DOFade(0f, 0.3f));
 
-        sequence.OnComplete(() => this.gameObject.SetActive(false));
+        sequence.OnComplete(() =>
+        {
+            this.gameObject.SetActive(false);
+            dimImage.SetActive(false);
+        });
     }
 }

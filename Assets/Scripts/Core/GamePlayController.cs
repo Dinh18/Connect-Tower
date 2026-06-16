@@ -83,6 +83,27 @@ public class GamePlayController : MonoBehaviour
     {
         if(CoreServices.Get<GameManager>().GetCurrState() != GameManager.GameState.Playing) return;
 
+        int pendingMoves = CoreServices.Get<GameManager>().GetPendingMoves();
+        
+        if (!CoreServices.Get<GameManager>().IsInfiniteMovesActive())
+        {
+            if (CoreServices.Get<GameManager>().GetCurrentMoves() - pendingMoves <= 0)
+            {
+                return;
+            }
+        }
+
+        foreach (var s in CoreServices.Get<SlotsManager>().GetAllSlots())
+        {
+            if (s.slotType == SlotController.SlotType.Bomb && s.isRevealed && s.gameObject.activeInHierarchy && !s.isFinished)
+            {
+                if (s.GetCurrentBombMove() - pendingMoves <= 0)
+                {
+                    return;
+                }
+            }
+        }
+
         // Bỏ qua xử lý logic game nếu Tutorial đang chạy
         var tutorialService = CoreServices.Get<TutorialService>();
         if (tutorialService != null && tutorialService.IsTutorialActive())
@@ -110,13 +131,13 @@ public class GamePlayController : MonoBehaviour
         {
             if(slot.SelectToRecive(selectedSlot))
             {
-                
+                CoreServices.Get<GameManager>().IncrementPendingMoves();
                 // undoStack.Push(new MoveInfo(selectedSlot, slot, slot.NumsOfBlocksToMove(selectedSlot)));
                 ResetSelection();
             }
             else
             {
-                MoveFail();
+                MoveFail(slot);
             }
         }
         else if(hasSelected && slot == selectedSlot)
@@ -127,14 +148,23 @@ public class GamePlayController : MonoBehaviour
             }
         }
     }
-    private void MoveFail()
+    private void MoveFail(SlotController slot)
     {
-        GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.MoveFail});
-        foreach(var block in selectedSlot.blocks)
+        if (slot.CanSelectToMove())
         {
-            if(block.GetCurrState() == BlockController.BlockState.Selected)
+            selectedSlot.UnSelect();
+            slot.SelectToMove();
+            selectedSlot = slot;
+        }
+        else
+        {
+            GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.MoveFail});
+            foreach(var block in selectedSlot.blocks)
             {
-                block.PlayErrorShake(block.SelectedEffect);
+                if(block.GetCurrState() == BlockController.BlockState.Selected)
+                {
+                    block.PlayErrorShake(block.SelectedEffect);
+                }
             }
         }
     }

@@ -4,9 +4,12 @@ using UnityEngine;
 
 
 
+public enum GameMode { Normal, SpecialTop }
+
 [CreateAssetMenu(fileName = "Level_", menuName = "Scriptable Objects/Create Level")]
 public class LevelDataSO : ScriptableObject
 {
+    public GameMode gameMode = GameMode.Normal;
     public int level;
     public int numsTopic;
     public int difficult;
@@ -25,6 +28,7 @@ public class SlotSetupData
     public Vector3 position;
     // [ShowIf("slotType", SlotController.SlotType.Hide)]
     public BlockTopic questionTopic;
+    public int bombMoveLimit = 20;
     public List<BlockSetupData> blocks= new List<BlockSetupData>();
 
 }
@@ -34,4 +38,5 @@ public class BlockSetupData
     public BlockController.BlockType typeBlock;
     public BlockTopic blockTopic;
     public int indexSprite;
+    public bool isSpecialBlock;
 }

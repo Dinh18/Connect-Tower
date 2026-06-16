@@ -18,6 +18,13 @@ public class LevelLoader : MonoBehaviour
     public static bool isPlaytestingTempLevel = false;
     public static LevelDataSO playtestLevelData = null;
 
+    public GameMode gameMode;
+
+    public LevelDataSO GetCurrentLevelDataSO()
+    {
+        return levelDatas[CoreServices.Get<DataManager>().GetCurrentLevel()];
+    }
+
     public void Init(SlotsManager slotsM, BlocksManager blocksM, GameManager gameM, DataManager dataM)
     {
         this.slotsManager = slotsM;
@@ -49,15 +56,24 @@ public class LevelLoader : MonoBehaviour
         LevelDataSO levelData = isPlaytestingTempLevel && playtestLevelData != null ? playtestLevelData : levelDatas[dataManager.GetCurrentLevel()];
         numsTopic = levelData.numsTopic;
         gameDifficult = (GameDifficult)levelData.difficult;
+        gameMode = levelData.gameMode;
 
         slots = new List<SlotController>();
         slotsManager.SlotsGenerate(levelData.row1, levelData.row2, slots, levelData.slots, numsTopic);
         blocksManager.BlocksGenerate(levelData.slots, slots);
         gameManager.SetupLevel(levelData.moves);
+        CoreServices.Get<HeatManager>().Setup(slots);
         
         foreach(SlotController slot in slots) slot.SetupIceSlot();
         
         GameEventBus.Publish(new LevelLoadedEvent { levelIndex = isPlaytestingTempLevel ? -1 : dataManager.GetCurrentLevel() });
+    }
+
+    public void ClearLevel()
+    {
+        if (blocksManager != null) blocksManager.ClearBlocks();
+        if (slotsManager != null) slotsManager.ClearSlots();
+        if (slots != null) slots.Clear();
     }
 
     public int GetCurrentLevelReward()

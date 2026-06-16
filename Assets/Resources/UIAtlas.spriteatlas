@@ -1,0 +1,88 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: UIAtlas
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings: []
+    packingSettings:
+      serializedVersion: 2
+      padding: 2
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 0
+      enableTightPacking: 0
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 2800000, guid: 10cd5339de906164f84b3efb74392971, type: 3}
+    - {fileID: 2800000, guid: 73a6b06051cbbcb44b64750c8b2ff66a, type: 3}
+    - {fileID: 2800000, guid: bd246a336271174428d5902535da052d, type: 3}
+    - {fileID: 2800000, guid: 81d8e9275e7ca764ebddcee7cc38ba1a, type: 3}
+    - {fileID: 2800000, guid: 4300004f11814ca468d9c7990e85e394, type: 3}
+    - {fileID: 2800000, guid: 8dc3a96e2b2e6204698e3a7ef2e5b8db, type: 3}
+    - {fileID: 2800000, guid: 53e495209e6436c458d43cc4b9383014, type: 3}
+    - {fileID: 2800000, guid: df74fa23b3ae2674e9d867d43a486e74, type: 3}
+    - {fileID: 2800000, guid: 8ab91d712b335b94b8191b41539a0eaa, type: 3}
+    - {fileID: 2800000, guid: 0be676892b51ee34d883d0f4979dda82, type: 3}
+    - {fileID: 2800000, guid: 8c402d49d5a7e0b45adc0d7c25877a87, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+    packedSpriteRenderDataKeys:
+    - 53e495209e6436c458d43cc4b9383014: 21300000
+    - 73a6b06051cbbcb44b64750c8b2ff66a: 21300000
+    - 8ab91d712b335b94b8191b41539a0eaa: 21300000
+    - df74fa23b3ae2674e9d867d43a486e74: 21300000
+    - bd246a336271174428d5902535da052d: 21300000
+    - 81d8e9275e7ca764ebddcee7cc38ba1a: 21300000
+    - 10cd5339de906164f84b3efb74392971: 21300000
+    - 8c402d49d5a7e0b45adc0d7c25877a87: 21300000
+    - 0be676892b51ee34d883d0f4979dda82: 21300000
+    - 8dc3a96e2b2e6204698e3a7ef2e5b8db: 21300000
+    - 4300004f11814ca468d9c7990e85e394: 21300000
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: 53e495209e6436c458d43cc4b9383014, type: 3}
+  - {fileID: 21300000, guid: 73a6b06051cbbcb44b64750c8b2ff66a, type: 3}
+  - {fileID: 21300000, guid: 8ab91d712b335b94b8191b41539a0eaa, type: 3}
+  - {fileID: 21300000, guid: df74fa23b3ae2674e9d867d43a486e74, type: 3}
+  - {fileID: 21300000, guid: bd246a336271174428d5902535da052d, type: 3}
+  - {fileID: 21300000, guid: 81d8e9275e7ca764ebddcee7cc38ba1a, type: 3}
+  - {fileID: 21300000, guid: 10cd5339de906164f84b3efb74392971, type: 3}
+  - {fileID: 21300000, guid: 8c402d49d5a7e0b45adc0d7c25877a87, type: 3}
+  - {fileID: 21300000, guid: 0be676892b51ee34d883d0f4979dda82, type: 3}
+  - {fileID: 21300000, guid: 8dc3a96e2b2e6204698e3a7ef2e5b8db, type: 3}
+  - {fileID: 21300000, guid: 4300004f11814ca468d9c7990e85e394, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - PROGRESS_BAR_SLIDER
+  - Undo_Icon
+  - PROGRESS_BAR_SUPERHARD_SLIDER
+  - PROGRESS_BAR_HARD_SLIDER
+  - SHUFFLE_BOOSTER_ICON
+  - ADD_MOVE_BOOSTER_ICON
+  - HINT_BOOSTER_ICON
+  - GAMEPLAY_UI_SLIDER
+  - GAMEPLAY_UI
+  - BOOSTER_UI
+  - SETTINGS_ICON
+  m_RenderDataMap: {}
+  m_Tag: UIAtlas
+  m_IsVariant: 0

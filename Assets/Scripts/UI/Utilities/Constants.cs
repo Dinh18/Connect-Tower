@@ -16,6 +16,8 @@ public static class Constants
     public const string MATERIAL_COLOR_8_PATH = "Material/Type_8";
     public const string MATERIAL_COLOR_9_PATH = "Material/Type_9";
     public const string MATERIAL_COLOR_W_PATH = "Material/Type_W";
+    public const string MATERIAL_Special_PATH = "Material/Special_Block";
+
     public const string MATERIAL_COLOR_HIDE_PATH = "Material/Ground";
     public const string MATERIAL_BASE_PATH = "Material/New_Pole_Mat";
     public const string MATERIAL_ICE_PATH = "Material/Ice_Obstacle_MAT";
@@ -49,10 +51,10 @@ public static class Constants
 
     // Slot
     public static readonly Vector3 POSITION_FIRST_SLOT = new Vector3(0,0,0);
-    public static float SLOT_WIDTH = 1.07f;
-    public static float SLOT_HEIGHT = 4.052984f;
+    public static float SLOT_WIDTH = 0.95f;
+    public static float SLOT_HEIGHT = 4.052984f;    
     // Block
-    public static float BLOCK_HEIGHT = 0.65f;
+    public static float BLOCK_HEIGHT = 0.72f;
     // Data Level
     public const string LEVELS_PATH = "Data/Levels";
     // // Scene Name

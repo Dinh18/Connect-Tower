@@ -8,6 +8,7 @@ Shader "UI/TransparentHole"
         _HoleSize ("Hole Size", Vector) = (0.1, 0.1, 0, 0)
         _Softness ("Edge Softness", Float) = 0.05
         _AspectRatio ("Aspect Ratio (Width/Height)", Float) = 1.0
+        _IsCircle ("Is Circle", Float) = 0.0
     }
     SubShader
     {
@@ -53,6 +54,7 @@ Shader "UI/TransparentHole"
             float4 _HoleSize;
             float _Softness;
             float _AspectRatio;
+            float _IsCircle;
 
             v2f vert(appdata_t IN)
             {
@@ -72,9 +74,12 @@ Shader "UI/TransparentHole"
                 uv.x *= _AspectRatio;
                 center.x *= _AspectRatio;
 
-                // Tính khoảng cách tương đối tới tâm theo 2 trục của elip
+                // Tính khoảng cách tương đối tới tâm theo 2 trục của elip/chữ nhật
                 float2 diff = uv - center;
-                float dist = length(float2(diff.x / max(0.001, _HoleSize.x), diff.y / max(0.001, _HoleSize.y)));
+                float2 normDiff = float2(abs(diff.x) / max(0.001, _HoleSize.x), abs(diff.y) / max(0.001, _HoleSize.y));
+                float distCircle = length(normDiff);
+                float distRect = max(normDiff.x, normDiff.y);
+                float dist = lerp(distRect, distCircle, _IsCircle);
 
                 fixed4 c = tex2D(_MainTex, IN.texcoord) * IN.color;
 

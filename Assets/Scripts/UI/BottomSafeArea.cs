@@ -5,6 +5,7 @@ public class BottomSafeArea : MonoBehaviour
 {
     private RectTransform rectTransform;
 
+
     void Awake()
     {
         rectTransform = GetComponent<RectTransform>();

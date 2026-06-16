@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Frame_0
   m_EditorClassIdentifier: Assembly-CSharp::FrameDataSO
   id: 0
-  itemSprite: {fileID: 21300000, guid: 72d2aa808f3fab84fa64ee6b316ec0d1, type: 3}
+  itemSprite: {fileID: 21300000, guid: a9a6dc7ff83c08a449349fbe206176bf, type: 3}

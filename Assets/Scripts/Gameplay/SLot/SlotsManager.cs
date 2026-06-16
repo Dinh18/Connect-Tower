@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+using System.Collections;
 
 
 public class SlotsManager : MonoBehaviour
@@ -15,6 +16,8 @@ public class SlotsManager : MonoBehaviour
     private Stack<GameObject> slotPool = new Stack<GameObject>();
     private GameObject slotPrefab;
     private bool levelCompleted;
+    private int initialSpecialBlocks;
+    public int unsolvedSpecialBlocks { get; private set; }
     // Event handled by GameEventBus
     void Awake()
     {
@@ -27,10 +30,40 @@ public class SlotsManager : MonoBehaviour
     void OnEnable()
     {
         SlotController.OnSlotCompleted += CheckLevelComplete;
+        SlotController.OnMoveFisnished += CheckSpecialTopWinCondition;
+        GameEventBus.Subscribe<RequestExplore>(ExploreBoard);
+        GameEventBus.Subscribe<LevelLoadedEvent>(OnLevelLoaded);
     }
     void OnDisable()
     {
         SlotController.OnSlotCompleted -= CheckLevelComplete;
+        SlotController.OnMoveFisnished -= CheckSpecialTopWinCondition;
+        GameEventBus.UnSubscribe<RequestExplore>(ExploreBoard);
+        GameEventBus.UnSubscribe<LevelLoadedEvent>(OnLevelLoaded);
+    }
+
+    private void OnLevelLoaded(LevelLoadedEvent e)
+    {
+        if (levelLoader.gameMode == GameMode.SpecialTop)
+        {
+            initialSpecialBlocks = 0;
+            foreach(var slot in levelLoader.slots)
+            {
+                foreach(var block in slot.blocks)
+                {
+                    if (block.isSpecialBlock) initialSpecialBlocks++;
+                }
+            }
+            unsolvedSpecialBlocks = initialSpecialBlocks;
+            GameEventBus.Publish(new SpecialBlocksUpdatedEvent { 
+                specialBlocksRemaining = unsolvedSpecialBlocks,
+                totalSpecialBlocks = initialSpecialBlocks
+            });
+
+            DG.Tweening.DOVirtual.DelayedCall(0.5f, () => {
+                CheckSpecialTopWinCondition(false);
+            });
+        }
     }
     public void PoolSlot(int numsSlot)
     {
@@ -48,6 +81,7 @@ public class SlotsManager : MonoBehaviour
     public void SlotsGenerate(int row1, int row2, List<SlotController> slots, List<SlotSetupData> slotSetup, int numsTopic)
     {
         finishedTopic = 0;
+        unsolvedSpecialBlocks = 0;
         this.numsTopic = numsTopic;
         GameEventBus.Publish(new FinishedSlotsUpdatedEvent { finishedSlots = finishedTopic, totalSlots = numsTopic });
         foreach(Transform child in gridRoot.transform)
@@ -76,10 +110,10 @@ public class SlotsManager : MonoBehaviour
                 slot.SetActive(true);
             }
             slot.name = "Slot_0_" + i;
-            slot.transform.localPosition = new Vector3(startX_Row1 + (i * Constants.SLOT_WIDTH), 0, 0);
+            slot.transform.localPosition = new Vector3(startX_Row1 + (i * Constants.SLOT_WIDTH), 0);
             SlotController s = slot.GetComponent<SlotController>();
             if(slotSetup[j] == null) return;
-            s.Setup(slotSetup[j].slotType, 0,slotSetup[j].questionTopic ? slotSetup[j].questionTopic : null);
+            s.Setup(slotSetup[j].slotType, 0,slotSetup[j].questionTopic ? slotSetup[j].questionTopic : null, slotSetup[j].bombMoveLimit);
             slot.SetActive(true);
             slots.Add(s);
             j++;
@@ -101,15 +135,27 @@ public class SlotsManager : MonoBehaviour
             }
             slot.name = "Slot_1_" + i;
 
-            slot.transform.localPosition = new Vector3(startX_Row2 + (i * Constants.SLOT_WIDTH), Constants.SLOT_HEIGHT, 0);
+            slot.transform.localPosition = new Vector3(startX_Row2 + (i * Constants.SLOT_WIDTH), Constants.SLOT_HEIGHT, 1.5f);
 
             SlotController s = slot.GetComponent<SlotController>();
-            s.Setup(slotSetup[j].slotType, 1,slotSetup[j].questionTopic ? slotSetup[j].questionTopic : null);
+            s.Setup(slotSetup[j].slotType, 1,slotSetup[j].questionTopic ? slotSetup[j].questionTopic : null, slotSetup[j].bombMoveLimit);
             slots.Add(s);
             slot.SetActive(true);
             j++;
         }
         levelCompleted = false;
+    }
+
+    public void ClearSlots()
+    {
+        foreach(Transform child in gridRoot.transform)
+        {
+            if(child.gameObject.activeSelf)
+            {
+                child.gameObject.SetActive(false);
+                slotPool.Push(child.gameObject);
+            }
+        }
     }
 
     private void CheckLevelComplete(int topicID)
@@ -124,11 +170,14 @@ public class SlotsManager : MonoBehaviour
 
         foreach(SlotController slot in levelLoader.slots)
         {
-            if(!slot.isRevealed && slot.blockTopic.topicID == topicID){
+            if(!slot.isRevealed && slot.blockTopic != null && slot.blockTopic.topicID == topicID){
                 slot.Reveal();
                 return;
             }
         }
+
+        if (levelLoader.gameMode == GameMode.SpecialTop) return;
+
         foreach(SlotController slot in levelLoader.slots)
         {
             if(!slot.isFinished && slot.blocks.Count > 0){
@@ -142,6 +191,118 @@ public class SlotsManager : MonoBehaviour
             CoreServices.Get<GameManager>().ChangeState(GameManager.GameState.Win);
             levelLoader.LevelUp();
         });
+    }
+
+    private void CheckSpecialTopWinCondition(bool isMoving)
+    {
+        if (isMoving) return;
+        if (levelCompleted) return;
+        if (levelLoader.gameMode != GameMode.SpecialTop) return;
+
+        Vector3 targetWorldPos = Vector3.zero;
+        bool hasTarget = false;
+        Transform uiTargetTransform = null;
+        var uiManager = CoreServices.Get<UIManager>();
+        if (uiManager != null)
+        {
+            var inGameMenu = uiManager.GetMenu<InGameMenu>() as InGameMenu;
+            if (inGameMenu != null)
+            {
+                uiTargetTransform = inGameMenu.GetHeaderPanel()?.GetSpecialBlockIconTransform();
+                if (uiTargetTransform != null)
+                {
+                    Camera mainCam = Camera.main;
+                    Canvas canvas = uiTargetTransform.GetComponentInParent<Canvas>();
+                    Camera canvasCam = (canvas != null && canvas.renderMode == RenderMode.ScreenSpaceOverlay) ? null : canvas?.worldCamera;
+                    
+                    Vector2 screenPos = RectTransformUtility.WorldToScreenPoint(canvasCam, uiTargetTransform.position);
+                    float distance = Mathf.Abs(mainCam.transform.position.z - transform.position.z);
+                    targetWorldPos = mainCam.ScreenToWorldPoint(new Vector3(screenPos.x, screenPos.y, distance));
+                    hasTarget = true;
+                }
+            }
+        }
+
+        bool anySpecialBlockRemoved = false;
+
+        foreach(var slot in levelLoader.slots)
+        {
+            while (slot.blocks.Count > 0 && slot.blocks.Peek().isSpecialBlock && slot.blocks.Peek().isRevealed)
+            {
+                var topBlock = slot.blocks.Pop();
+                
+                topBlock.transform.DOKill();
+                if (hasTarget)
+                {
+                    Vector3 peakPos = slot.arcPeak.position;
+                    peakPos.z -= 2f; // adjust so it doesn't clip with other blocks
+                    
+                    Sequence seq = DOTween.Sequence();
+                    // 1. Nhấc ra đến vị trí của arcPeak, giữ nguyên scale
+                    seq.Append(topBlock.transform.DOMove(peakPos, 0.25f).SetEase(Ease.OutQuad));
+                    
+                    // 2. Bay đến vị trí của specialBlockIcon mượt mà hơn
+                    seq.Append(topBlock.transform.DOMove(targetWorldPos, 0.4f).SetEase(Ease.InQuad));
+                    seq.Join(topBlock.transform.DOScale(Vector3.zero, 0.4f).SetEase(Ease.InQuad));
+                    
+                    seq.OnComplete(() => {
+                        topBlock.gameObject.SetActive(false);
+                        CoreServices.Get<HapticManager>()?.PlayHaptic();
+                        if (uiTargetTransform != null)
+                        {
+                            uiTargetTransform.DOKill(false);
+                            uiTargetTransform.localScale = Vector3.one;
+                            uiTargetTransform.DOPunchScale(Vector3.one * 0.3f, 0.3f, 5, 0.5f);
+                            uiTargetTransform.DOShakeRotation(0.3f, new Vector3(0, 0, 15f), 10, 90f);
+                        }
+                    });
+                }
+                else
+                {
+                    topBlock.transform.DOScale(Vector3.zero, 0.3f).OnComplete(() => {
+                        topBlock.gameObject.SetActive(false);
+                    });
+                }
+                
+                GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.PopMoved1});
+                anySpecialBlockRemoved = true;
+
+                if (slot.blocks.Count > 0 && !slot.blocks.Peek().isRevealed)
+                {
+                    slot.blocks.Peek().Reveal();
+                }
+            }
+        }
+
+        int specialBlocksRemaining = 0;
+        int totalBlocksRemaining = 0;
+        foreach(var slot in levelLoader.slots)
+        {
+            totalBlocksRemaining += slot.blocks.Count;
+            foreach(var block in slot.blocks)
+            {
+                if (block.isSpecialBlock)
+                {
+                    specialBlocksRemaining++;
+                }
+            }
+        }
+
+        unsolvedSpecialBlocks = specialBlocksRemaining;
+        GameEventBus.Publish(new SpecialBlocksUpdatedEvent { 
+            specialBlocksRemaining = unsolvedSpecialBlocks,
+            totalSpecialBlocks = initialSpecialBlocks
+        });
+
+        // Win if no special blocks are left
+        if (specialBlocksRemaining == 0 && anySpecialBlockRemoved)
+        {
+            levelCompleted = true;
+            DOVirtual.DelayedCall(1.1f, () => {
+                CoreServices.Get<GameManager>().ChangeState(GameManager.GameState.Win);
+                levelLoader.LevelUp();
+            });
+        }
     }
 
     public bool GetLevelComleted() => levelCompleted;
@@ -356,6 +517,28 @@ public class SlotsManager : MonoBehaviour
 
         // Đã thử hết mọi nước đi khả thi nhưng không tạo ra được progress nào => Deadlock
         return false;
+    }
+
+    private void ExploreBoard(RequestExplore evt)
+    {
+        StartCoroutine(PlayExploreVFX());
+        
+    }
+
+    private IEnumerator PlayExploreVFX()
+    {
+        int index = 0;
+        foreach(SlotController slot in CoreServices.Get<LevelLoader>().slots)
+        {
+            if(slot.slotType == SlotController.SlotType.Bomb && !slot.isDisposal)
+            {
+                slot.BombExplore();
+                index++;
+                yield return new WaitForSeconds(0.2f * index);
+            }
+        }
+        yield return new WaitForSeconds(1);
+        CoreServices.Get<GameManager>().ChangeState(GameManager.GameState.Lose);
     }
 }
 

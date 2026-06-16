@@ -77,6 +77,8 @@ public class TutorialService : MonoBehaviour
             gamePlayController.CancelSelection();
         }
 
+        GameEventBus.Publish(new RequestChangeAnimationNPC { newState = NPCState.Idle });
+
         currentSequence = sequence;
         currentSequence.OnSequenceComplete += () => 
         {

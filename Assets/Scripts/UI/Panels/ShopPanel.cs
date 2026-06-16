@@ -1,10 +1,11 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class ShopPanel : Panel
 {
     [SerializeField] private Button closeButton;
-    [SerializeField] private Text coinCountText;
+    [SerializeField] private TextMeshProUGUI coinCountText;
     private MainMenu mainMenu;
     void OnEnable()
     {

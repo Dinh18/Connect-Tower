@@ -44,6 +44,7 @@ public class BackgroundButton : MonoBehaviour
         
         icon.anchoredPosition = originPosIcon;
         icon.DOAnchorPosY(originPosIcon.y + 40f, 0.5f).SetEase(Ease.OutBack);
+        icon.DOScale(new Vector3(1.3f,1.3f,1.3f), 0.5f).SetEase(Ease.OutBack);
     }
 
     public void UnSelect()
@@ -61,6 +62,7 @@ public class BackgroundButton : MonoBehaviour
         // Khôi phục lại TOÀN BỘ vị trí gốc (Bao gồm cả background)
         background.anchoredPosition = originPosBackground;
         icon.anchoredPosition = originPosIcon;
+        icon.localScale = Vector3.one;
 
         background.gameObject.SetActive(false);
         text.SetActive(false);

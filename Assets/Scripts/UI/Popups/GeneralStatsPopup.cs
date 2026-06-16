@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,9 +8,9 @@ public class GeneralStatsPopup : Popup
     [SerializeField] private Button editProfile;
     [SerializeField] private Image frameImage;
     [SerializeField] private Image avatarImage;
-    [SerializeField] private Text nameText;
-    [SerializeField] private Text currStreakText;
-    [SerializeField] private Text maxStreakText;
+    [SerializeField] private TextMeshProUGUI nameText;
+    [SerializeField] private TextMeshProUGUI currStreakText;
+    [SerializeField] private TextMeshProUGUI maxStreakText;
     
     void OnEnable()
     {

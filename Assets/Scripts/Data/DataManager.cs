@@ -19,6 +19,7 @@ public class DataManager : MonoBehaviour
     public GameConfigSO gameConfig;
     private FirebaseFirestore db;
     private string userId;
+    public string UserId => userId;
     private string saveFilePath;
     public bool dataReady = false;
     public int sessionUndoCount = 5;

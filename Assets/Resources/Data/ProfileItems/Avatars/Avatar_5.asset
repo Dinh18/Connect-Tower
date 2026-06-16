@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: Avatar_5
   m_EditorClassIdentifier: Assembly-CSharp::AvatarDataSO
   id: 5
-  itemSprite: {fileID: 21300000, guid: 3e813a9020fa34fd7ad547d2c1278ec8, type: 3}
+  itemSprite: {fileID: 1472397217, guid: 30a1c2d55c6e4c04998c71cd778c9890, type: 3}

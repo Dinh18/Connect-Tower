@@ -61,8 +61,8 @@ public class InGameMenu : Menu
         }
         if (headerPanel != null) headerPanel.Show();
         if (bottomPanel != null) bottomPanel.Show();
+        CameraFitter.FitBoardOrtho(Camera.main, levelLoader.slots, bottomPanel.GetComponent<RectTransform>(), headerPanel.GetComponent<RectTransform>());
     }
-
     public void Setup()
     {
         if (headerPanel != null) headerPanel.Setup();

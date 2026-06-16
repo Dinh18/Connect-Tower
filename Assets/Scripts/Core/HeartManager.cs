@@ -1,12 +1,13 @@
 using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class HeartManager : MonoBehaviour
 {
     [SerializeField] int restoreDuration = 120;
-    [SerializeField] private Text timerTextMainMenu;
-    [SerializeField] private Text timerTextAddHeardPopup;
+    [SerializeField] private TextMeshProUGUI timerTextMainMenu;
+    [SerializeField] private TextMeshProUGUI timerTextAddHeardPopup;
     private DateTime nextHeartTime;
     private DateTime lastHeartTime;
     private DataManager dataManager;

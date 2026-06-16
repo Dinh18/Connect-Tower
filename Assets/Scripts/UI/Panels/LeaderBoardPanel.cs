@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Firebase.Extensions;
 using Firebase.Firestore;
 using UnityEngine;
@@ -7,7 +9,8 @@ public class LeaderBoardPanel : Panel
     [Header("UI References")]
     [SerializeField] private RankItem rankItemPrefab;
     [SerializeField] private Transform top100Container;
-    [SerializeField] private Transform curr_Player_Rank;
+    [SerializeField] private TopPlayerItem[] top3Items;
+    // [SerializeField] private Transform curr_Player_Rank;
     private FirebaseFirestore db;
     void Start()
     {
@@ -22,7 +25,27 @@ public class LeaderBoardPanel : Panel
             Destroy(child.gameObject);
         }
         FetchTop100();
-        FetchExactMyRank();
+        FetchTop3Players((top3List) => 
+        {
+            if (top3List != null && top3Items != null)
+            {
+                for (int i = 0; i < top3Items.Length; i++)
+                {
+                    if (top3Items[i] != null)
+                    {
+                        if (i < top3List.Count)
+                        {
+                            top3Items[i].Setup(top3List[i]);
+                        }
+                        else
+                        {
+                            top3Items[i].Setup(null);
+                        }
+                    }
+                }
+            }
+        });
+        // FetchExactMyRank();
     }
 
     public override void Show()
@@ -37,10 +60,10 @@ public class LeaderBoardPanel : Panel
     }
     public void FetchTop100()
     {
-        // 1. Tạo câu truy vấn: Vào bảng Users -> Sắp xếp Level giảm dần -> Lấy 100 người
+        // 1. Tạo câu truy vấn: Vào bảng Users -> Sắp xếp Level giảm dần -> Lấy 10 người
         Query top100Query = db.Collection("Users")
                               .OrderByDescending("currentLevel") 
-                              .Limit(100);
+                              .Limit(10);
 
         // 2. Thực thi tải dữ liệu
         top100Query.GetSnapshotAsync().ContinueWithOnMainThread(task =>
@@ -59,12 +82,16 @@ public class LeaderBoardPanel : Panel
             {
                 if (doc.Exists)
                 {
-                    // Tự động ép kiểu JSON trên mạng về class PlayerData của bạn
-                    PlayerData player = doc.ConvertTo<PlayerData>();
-                    
-                    RankItem rankPlayer = Instantiate(rankItemPrefab, top100Container);
+                    if (rank >= 4 && rank <= 10)
+                    {
+                        // Tự động ép kiểu JSON trên mạng về class PlayerData của bạn
+                        PlayerData player = doc.ConvertTo<PlayerData>();
+                        
+                        RankItem rankPlayer = Instantiate(rankItemPrefab, top100Container);
 
-                    rankPlayer.Setup(rank, player);
+                        bool isCurrPlayer = doc.Id == CoreServices.Get<DataManager>().UserId;
+                        rankPlayer.Setup(rank, player, isCurrPlayer);
+                    }
 
                     rank++;
                 }
@@ -72,29 +99,60 @@ public class LeaderBoardPanel : Panel
         });
     }
 
-    public void FetchExactMyRank()
+    public void FetchTop3Players(Action<List<PlayerData>> onCallback)
     {
-        int myLevel = CoreServices.Get<DataManager>().GetCurrentLevel();
+        Query top3Query = db.Collection("Users")
+                            .OrderByDescending("currentLevel") 
+                            .Limit(3);
 
-        // Đếm những người có level cao hơn mình
-        Query countQuery = db.Collection("Users").WhereGreaterThan("currentLevel", myLevel);
-
-        // AggregateQuery.Count() rất rẻ, đếm 1000 người cũng chỉ tính bằng 1 lượt Read
-        countQuery.Count.GetSnapshotAsync(AggregateSource.Server).ContinueWithOnMainThread(task =>
+        top3Query.GetSnapshotAsync().ContinueWithOnMainThread(task =>
         {
-            if (task.IsFaulted) return;
+            if (task.IsFaulted)
+            {
+                Debug.LogError("Lỗi tải Top 3: " + task.Exception);
+                onCallback?.Invoke(null);
+                return;
+            }
 
-            // Số người giỏi hơn mình
-            long peopleBetterThanMe = task.Result.Count; 
+            QuerySnapshot snapshot = task.Result;
+            List<PlayerData> top3List = new List<PlayerData>();
 
-            // Hạng của mình = Số người giỏi hơn + 1
-            long myExactRank = peopleBetterThanMe + 1;
+            foreach (DocumentSnapshot doc in snapshot.Documents)
+            {
+                if (doc.Exists)
+                {
+                    PlayerData player = doc.ConvertTo<PlayerData>();
+                    top3List.Add(player);
+                }
+            }
 
-            PlayerData myLocalData = CoreServices.Get<DataManager>().playerData; 
-
-            RankItem currPlayer =  Instantiate(rankItemPrefab, curr_Player_Rank);
-
-            currPlayer.Setup((int)myExactRank, myLocalData,true);
+            onCallback?.Invoke(top3List);
         });
     }
+
+    // public void FetchExactMyRank()
+    // {
+    //     int myLevel = CoreServices.Get<DataManager>().GetCurrentLevel();
+
+    //     // Đếm những người có level cao hơn mình
+    //     Query countQuery = db.Collection("Users").WhereGreaterThan("currentLevel", myLevel);
+
+    //     // AggregateQuery.Count() rất rẻ, đếm 1000 người cũng chỉ tính bằng 1 lượt Read
+    //     countQuery.Count.GetSnapshotAsync(AggregateSource.Server).ContinueWithOnMainThread(task =>
+    //     {
+    //         if (task.IsFaulted) return;
+
+    //         // Số người giỏi hơn mình
+    //         long peopleBetterThanMe = task.Result.Count; 
+
+    //         // Hạng của mình = Số người giỏi hơn + 1
+    //         long myExactRank = peopleBetterThanMe + 1;
+
+    //         PlayerData myLocalData = CoreServices.Get<DataManager>().playerData; 
+
+    //         RankItem currPlayer =  Instantiate(rankItemPrefab, curr_Player_Rank);
+
+    //         currPlayer.Setup((int)myExactRank, myLocalData,true);
+    //     });
+    // }
 }   

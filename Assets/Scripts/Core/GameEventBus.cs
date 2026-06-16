@@ -29,6 +29,8 @@ public static class GameEventBus
     public static void UnSubscribe<T>(Action<T> listener) where T : IGameEvent
     {
         Type eventType = typeof(T);
+        if(!_eventListeners.ContainsKey(eventType)) return;
+        
         var currentDelegate = _eventListeners[eventType];
         var newDelegate = Delegate.Remove(currentDelegate, listener);
         if(newDelegate == null)
@@ -201,4 +203,20 @@ public struct RequestUnlockBoosterEvent  : IGameEvent
 public struct BoosterAnimationStateEvent : IGameEvent
 {
     public bool isAnimating;
+}
+
+public struct MoveFinished : IGameEvent
+{
+    
+}
+
+public struct RequestExplore : IGameEvent
+{
+    
+}
+
+public struct SpecialBlocksUpdatedEvent : IGameEvent
+{
+    public int specialBlocksRemaining;
+    public int totalSpecialBlocks;
 }

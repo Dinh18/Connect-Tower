@@ -69,11 +69,12 @@ public class BlocksManager : MonoBehaviour
                 
                 // Gọi Setup trực tiếp, không cần GetComponentInChildren nữa
                 b.Setup(this, 
-                    slotSetups[i].blocks[j].blockTopic.blockColor, 
+                    slotSetups[i].blocks[j].blockTopic != null ? (int)slotSetups[i].blocks[j].blockTopic.blockColor : 0, 
                     slotSetups[i].blocks[j].blockTopic, 
                     slotSetups[i].blocks[j].typeBlock,
-                    slotSetups[i].blocks[j].blockTopic.blocksSprite[slotSetups[i].blocks[j].indexSprite],
-                    slots[i]);
+                    (slotSetups[i].blocks[j].blockTopic != null && slotSetups[i].blocks[j].blockTopic.blocksSprite.Count > 0) ? slotSetups[i].blocks[j].blockTopic.blocksSprite[slotSetups[i].blocks[j].indexSprite] : null,
+                    slots[i],
+                    slotSetups[i].blocks[j].isSpecialBlock);
                     
                 if(blocksByTopicID.ContainsKey(b.GetTopicID()))
                 {
@@ -87,6 +88,19 @@ public class BlocksManager : MonoBehaviour
                 }
                 
                 slots[i].blocks.Push(b);
+            }
+        }
+    }
+
+    public void ClearBlocks()
+    {
+        blocksByTopicID.Clear();
+        foreach(Transform child in this.transform)
+        {
+            if(child.gameObject.activeSelf)
+            {    
+                child.gameObject.SetActive(false);
+                blockPool.Push(child.GetComponent<BlockController>());
             }
         }
     }

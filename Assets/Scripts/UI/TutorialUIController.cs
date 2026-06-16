@@ -3,12 +3,13 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using TMPro;
 
 public class TutorialUIController : MonoBehaviour
 {
     [SerializeField] private GameObject handImage;
-    [SerializeField] private Text tutorialText;
-    [SerializeField] private Text closeText;
+    [SerializeField] private TextMeshProUGUI tutorialText;
+    [SerializeField] private TextMeshProUGUI closeText;
     [SerializeField] private GameObject dimImage;
     [SerializeField] private GameObject tutorialCanvas;
     [SerializeField] private Image mechanicImage;
@@ -147,7 +148,14 @@ public class TutorialUIController : MonoBehaviour
         }
         else
         {
-            Vector3 screenPoint = Camera.main.WorldToScreenPoint(target.transform.position);
+            Vector3 targetCenter = target.transform.position;
+            Renderer rend = target.GetComponentInChildren<Renderer>();
+            if (rend != null && target.GetComponent<SlotController>() == null)
+            {
+                targetCenter = rend.bounds.center;
+            }
+
+            Vector3 screenPoint = Camera.main.WorldToScreenPoint(targetCenter);
             if (handImage != null) handImage.transform.position = screenPoint;
             if (dimImg != null) dimImg.raycastTarget = false; // Bỏ chặn click cho object 3D
             
@@ -177,6 +185,7 @@ public class TutorialUIController : MonoBehaviour
 
             matInst.SetVector("_HoleCenter", new Vector4(uvCenter.x, uvCenter.y, 0, 0));
             matInst.SetFloat("_AspectRatio", dimRect.rect.width / dimRect.rect.height);
+            matInst.SetFloat("_IsCircle", forceCircle ? 1f : 0f);
 
             float targetRadiusX = 0f;
             float targetRadiusY = 0f;
@@ -197,7 +206,7 @@ public class TutorialUIController : MonoBehaviour
                     }
                     else
                     {
-                        Vector3 center = rend.bounds.center;
+                        Vector3 center = target.GetComponent<SlotController>() != null ? target.transform.position : rend.bounds.center;
                         Vector3 extents = rend.bounds.extents;
                         
                         Vector3[] corners = new Vector3[8];

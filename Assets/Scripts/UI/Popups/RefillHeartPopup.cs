@@ -1,4 +1,5 @@
 
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,7 +8,7 @@ public class RefillHeartPopup : Popup
     [SerializeField] private Button closeButton;
     [SerializeField] private Button watchVideo;
     [SerializeField] private Button refillButton;
-    [SerializeField] private Text heardCountText;
+    [SerializeField] private TextMeshProUGUI heardCountText;
 
     private void ClosePopup()
     {

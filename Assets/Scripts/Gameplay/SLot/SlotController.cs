@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using TMPro;
 using UnityEngine;
 using UnityEngine.U2D.Animation;
 using UnityEngine.UI;
@@ -12,7 +13,9 @@ public class SlotController : MonoBehaviour
     {
         Normal,
         Hide,
-        Ice
+        Ice,
+        Fire,
+        Bomb
     }
     public Stack<BlockController> blocks{get; private set;}
     public GameObject blockPrefab;
@@ -21,8 +24,10 @@ public class SlotController : MonoBehaviour
     
     [Header("Movement Settings")]
     [SerializeField] public float height = 0.7f;
-    [SerializeField] private float moveDuration = 0.5f;
+    
+    private float moveDuration = 0.5f;
     [SerializeField] private float selectDuration = 0.1f;
+    [SerializeField] private float separateOffset = 0.08f;
     public bool isFinished = false;
     public SlotType slotType;
     private int movingBlocksCount = 0;
@@ -40,6 +45,8 @@ public class SlotController : MonoBehaviour
     [SerializeField] private Image itemImage;
     public bool isRevealed;
     public BlockTopic blockTopic = null;
+    [Header("Fire Slot Settings")]
+    [SerializeField] private GameObject fireVFX;
 
     public GameObject GetQuestionTopicImageObject() => itemImage != null ? itemImage.gameObject : null;
     
@@ -62,6 +69,19 @@ public class SlotController : MonoBehaviour
     private static Mesh baseMeshCache;
     private static Material baseMaterialCache;
     // ------------------------------------
+    // --- SETTING BOMB SLOT --------------
+    public GameObject bombImage;
+    public GameObject bombHolder;
+    public TextMeshProUGUI countDownText;
+    public bool isDisposal;
+    private int currenBombMove;
+    public int GetCurrentBombMove() => currenBombMove;
+    [SerializeField] private GameObject exploreVFX;
+    private Vector3 initialBombLocalPos;
+    private Vector3 initialBombLocalScale;
+    private Quaternion initialBombLocalRot;
+    private Color initialCountDownTextColor = Color.white;
+    private Tween blinkTween;
 
     private MeshFilter baseMeshFilter;
     private MeshRenderer baseMeshRenderer;
@@ -74,6 +94,19 @@ public class SlotController : MonoBehaviour
             baseMeshFilter = BaseSlot.GetComponent<MeshFilter>();
             baseMeshRenderer = BaseSlot.GetComponent<MeshRenderer>();
         }
+
+        if (bombImage != null)
+        {
+            initialBombLocalPos = bombImage.transform.localPosition;
+            initialBombLocalScale = bombImage.transform.localScale;
+            initialBombLocalRot = bombImage.transform.localRotation;
+        }
+
+        if (countDownText != null)
+        {
+            initialCountDownTextColor = countDownText.color;
+        }
+
         // Chuyển đổi toàn bộ tên string sang dạng Hash ID (số nguyên) khi bắt đầu
         animationHashes = new int[animationStates.Length];
         for (int i = 0; i < animationStates.Length; i++)
@@ -87,23 +120,38 @@ public class SlotController : MonoBehaviour
         gameManager = CoreServices.Get<GameManager>();
     }
 
-    public void Setup(SlotType slotType, int row, BlockTopic blockTopic = null)
+    void OnDisable()
+    {
+        if(slotType == SlotType.Bomb) GameEventBus.UnSubscribe<MoveFinished>(UpdateBombMove);
+        if(exploreVFX != null) exploreVFX.SetActive(false);
+        if(blinkTween != null) blinkTween.Kill();
+    }
+
+    public void Setup(SlotType slotType, int row, BlockTopic blockTopic = null, int bombMoveLimit = 20)
     {
         this.row = row;
         blocks = new Stack<BlockController>();
         this.slotType = slotType;
         isFinished = false;
+        isDisposal = true;
         iceVFX.SetActive(false);
+        if (bombHolder != null) bombHolder.SetActive(false);
+        hiddenSlotAnimator.gameObject.SetActive(false);
+        
         if(iceRod != null) 
         {
             iceRod.transform.DOKill();
             iceRod.SetActive(false);
         }
-        
+        if(fireVFX != null)
+        {
+            fireVFX.SetActive(false);
+        }
 
         if(blockTopic != null) this.blockTopic = blockTopic;
         if(header != null) header.Setup(this);
         if(slotVFX != null) slotVFX.Setup();
+        if(exploreVFX != null) exploreVFX.SetActive(false);
         
         if (slotType != SlotType.Ice)
         {
@@ -126,6 +174,37 @@ public class SlotController : MonoBehaviour
             hiddenSlotAnimator.GetComponent<SpriteSkin>().rootBone.localPosition = Vector3.zero; // Reset vị trí rootBone để tránh bị lệch
             if (itemImage != null && blockTopic != null && blockTopic.blocksSprite.Count > 0) itemImage.sprite = blockTopic.blocksSprite[0];
         } 
+        else if(slotType == SlotType.Fire)
+        {
+            isRevealed = true;
+            if (fireVFX != null) fireVFX.SetActive(true);
+            if (hiddenSlotAnimator != null) hiddenSlotAnimator.gameObject.SetActive(false);
+        }
+        else if(slotType == SlotType.Bomb)
+        {
+            isRevealed = true;
+            isDisposal = false;
+            if(bombImage != null) 
+            {
+                bombImage.transform.DOKill();
+                bombImage.transform.localPosition = initialBombLocalPos;
+                bombImage.transform.localRotation = initialBombLocalRot;
+                bombImage.transform.localScale = initialBombLocalScale;
+            }
+            if (bombHolder != null) bombHolder.SetActive(true);
+            currenBombMove = bombMoveLimit;
+            countDownText.text = currenBombMove.ToString();
+            
+            if (blinkTween != null) blinkTween.Kill();
+            if (countDownText != null) countDownText.color = initialCountDownTextColor;
+            if (currenBombMove < 5 && currenBombMove >= 0 && countDownText != null)
+            {
+                blinkTween = DOTween.To(() => countDownText.color, x => countDownText.color = x, Color.red, 0.5f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
+            }
+
+            exploreVFX.SetActive(false);
+            GameEventBus.Subscribe<MoveFinished>(UpdateBombMove);
+        }
         else 
         {
             isRevealed = true;
@@ -148,7 +227,7 @@ public class SlotController : MonoBehaviour
 
              if(blocks.Count > 0)
             {
-                iceRod.transform.position = new Vector3(iceRod.transform.position.x, blocks.Count * Constants.BLOCK_HEIGHT + Constants.BLOCK_HEIGHT + Constants.SLOT_HEIGHT * row, iceRod.transform.position.z);
+                iceRod.transform.position = new Vector3(iceRod.transform.position.x, blocks.Count * Constants.BLOCK_HEIGHT + Constants.BLOCK_HEIGHT - 0.2f + Constants.SLOT_HEIGHT * row, iceRod.transform.position.z);
             }
             else
             {
@@ -157,22 +236,37 @@ public class SlotController : MonoBehaviour
         }
     }
 
-    public bool SelectToMove()
+    public bool CanSelectToMove()
     {
         if(isMoving || isFinished || gameManager.GetCurrState() == GameManager.GameState.Pause
         || gameManager.GetCurrState() == GameManager.GameState.Lose
         || !isRevealed || slotType == SlotType.Ice) return false;
         
-        if (blocks.Count > 0 && !blocks.Peek().isRevealed) return false;
+        if (blocks.Count == 0 || !blocks.Peek().isRevealed) return false;
+
+        return true;
+    }
+
+    public bool SelectToMove()
+    {
+        if (!CanSelectToMove()) return false;
 
         int topicID = blocks.Peek().GetTopicID();
-        int i = 0;
+        
+        int numSelected = 0;
+        foreach(BlockController block in blocks)
+        {
+            if(block.GetTopicID() != topicID || !block.isRevealed) break;
+            numSelected++;
+        }
 
+        int i = 0;
         foreach(BlockController block in blocks)
         {
             if(block.GetTopicID() != topicID || !block.isRevealed) break;
             block.ChangeState(BlockController.BlockState.Selected);
-            Vector3 targetPosition = new Vector3(stackAnchor.position.x, stackAnchor.position.y + (blocks.Count - i) * Constants.BLOCK_HEIGHT, stackAnchor.position.z);
+            float additionalOffset = (numSelected - 1 - i) * separateOffset;
+            Vector3 targetPosition = new Vector3(stackAnchor.position.x, stackAnchor.position.y + (blocks.Count - i) * Constants.BLOCK_HEIGHT + additionalOffset, stackAnchor.position.z);
             block.transform.DOKill();
             block.transform.DOMove(targetPosition, selectDuration).SetEase(Ease.OutQuad);
             i++;
@@ -231,7 +325,7 @@ public class SlotController : MonoBehaviour
         }
         GameEventBus.Publish(new MovedBlocksEvent{sourceSlot = otherSlot, targetSlot = this, numsBlock = blocksToMove});
         
-        float startY = (blocks.Count == 0) ? stackAnchor.position.y : blocks.Peek().transform.position.y + height;
+        float startY = (blocks.Count == 0) ? stackAnchor.position.y : blocks.Peek().transform.position.y + Constants.BLOCK_HEIGHT;
 
         for(int i = 0;i < blocksToMove; i++)
         {
@@ -252,14 +346,14 @@ public class SlotController : MonoBehaviour
 
     public List<Vector3> PathToMoveBlock(SlotController sourceSlot, int index, float startY)
     {
-        float zOffset = -2.0f; // Di chuyển block tiến về phía camera để không bị che bởi slot khác
+        float zOffset = 0f; // Di chuyển block tiến về phía camera để không bị che bởi slot khác
         
         float finalPeakX = (sourceSlot.arcPeak.position.y < this.arcPeak.position.y) ? sourceSlot.arcPeak.position.x : this.arcPeak.position.x;
         float finalPeakY = Mathf.Max(sourceSlot.arcPeak.position.y, this.arcPeak.position.y);
         float finalPeakZ = ((sourceSlot.arcPeak.position.y < this.arcPeak.position.y) ? sourceSlot.arcPeak.position.z : this.arcPeak.position.z) + zOffset;
         Vector3 finalPeak = new Vector3(finalPeakX, finalPeakY, finalPeakZ); 
 
-        Vector3 finalDestination = new Vector3(this.stackAnchor.position.x, startY + height * index, this.stackAnchor.position.z);    
+        Vector3 finalDestination = new Vector3(this.stackAnchor.position.x, startY + Constants.BLOCK_HEIGHT * index, this.stackAnchor.position.z);    
         
         Vector3 sourcePeak = sourceSlot.arcPeak.position;
         sourcePeak.z += zOffset;
@@ -327,6 +421,13 @@ public class SlotController : MonoBehaviour
         }
         
         isFinished = true;
+        if(slotType == SlotType.Bomb) 
+        {
+            
+            GameEventBus.UnSubscribe<MoveFinished>(UpdateBombMove);
+            PlayeBombDisposalAnim();
+        }
+        
         // AudioManager.Instance.PlaySlotFinishedAudio();
         GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.SlotFinished});
         
@@ -353,10 +454,31 @@ public class SlotController : MonoBehaviour
         }
         header.Show();
         slotVFX.PlayVFX();
-        PlayCompletedVFX();
+        if(CoreServices.Get<LevelLoader>().gameMode == GameMode.Normal) PlayCompletedVFX();
         Debug.Log("Slot Completed");
         OnSlotCompleted?.Invoke(blocks.Peek().GetTopicID());
         CoreServices.Get<GamePlayController>().ResetUndoStack();
+    }
+
+    public void PlayeBombDisposalAnim()
+    {
+        if (bombImage == null) return;
+
+        isDisposal = true;
+
+        float originY = bombImage.transform.position.y;
+        Sequence seq = DOTween.Sequence();
+        
+        // Quả bom nảy lên và văng ra ngoài (trục Z)
+        // Thay vì dùng DOJump (khiến vận tốc bị sai lệch ở điểm nối tiếp),
+        // ta tách ra thành DOMoveY (đi lên) và DOMoveZ (văng ra) để tạo đường cong mượt mà.
+        seq.Append(bombImage.transform.DOMoveY(originY + 4f, 0.3f).SetEase(Ease.OutQuad));
+        seq.Join(bombImage.transform.DOMoveZ(bombImage.transform.position.z - 3f, 0.3f).SetEase(Ease.OutQuad));
+        seq.Join(bombImage.transform.DOScale(new Vector3(1.3f, 1.3f, 1.3f), 0.3f));
+        
+        // Rơi tuột xuống dưới
+        // Nối tiếp bằng Ease.InQuad (bắt đầu từ vận tốc 0 ở đỉnh parabol và tăng tốc dần xuống dưới)
+        seq.Append(bombImage.transform.DOMoveY(originY - 20f, 0.6f).SetEase(Ease.InQuad));
     }
 
     private void PlayCompletedVFX()
@@ -456,30 +578,42 @@ public class SlotController : MonoBehaviour
                 {
                     if(block.GetTopicID() != topicID || !block.isRevealed) break;
                     block.ChangeState(BlockController.BlockState.Collde);
-                    block.FallEffect(i);
+                    if (slotType == SlotType.Ice && blocks.Count < 4)
+                    {
+                        block.IceShakeEffect(i);
+                        Debug.Log("Ice BLock");
+                    }
+                    else
+                    {
+                        block.FallEffect(i);
+                    }
                     i++;
                 }
-                SoundID sID;
-                switch(i)
+                if(slotType != SlotType.Ice || (slotType == SlotType.Ice && blocks.Count >= 4))
                 {
-                    case 1: 
-                        sID = SoundID.PopMoved1;
-                        break;
-                    case 2: 
-                        sID = SoundID.PopMoved2;
-                        break;
-                    case 3: 
-                        sID = SoundID.PopMoved3;
-                        break;
-                    case 4: 
-                        sID = SoundID.PopMoved4;
-                        break;
-                    default:
-                        sID = SoundID.None;
-                        break;
-                    
+                    SoundID sID;
+                    switch(i)
+                    {
+                        case 1: 
+                            sID = SoundID.PopMoved1;
+                            break;
+                        case 2: 
+                            sID = SoundID.PopMoved2;
+                            break;
+                        case 3: 
+                            sID = SoundID.PopMoved3;
+                            break;
+                        case 4: 
+                            sID = SoundID.PopMoved4;
+                            break;
+                        default:
+                            sID = SoundID.None;
+                            break;
+                        
+                    }
+                    GameEventBus.Publish(new RequestPlaySFX{soundID = sID});
                 }
-                GameEventBus.Publish(new RequestPlaySFX{soundID = sID});
+                
             } 
             else
             {
@@ -500,7 +634,7 @@ public class SlotController : MonoBehaviour
             {
                 iceRod.transform.DOKill();
                 iceRod.transform.DOMove(new Vector3(iceRod.transform.position.x,
-                                        blocks.Count * Constants.BLOCK_HEIGHT + Constants.BLOCK_HEIGHT + Constants.SLOT_HEIGHT * row, 
+                                        blocks.Count * Constants.BLOCK_HEIGHT + Constants.BLOCK_HEIGHT - 0.2f + Constants.SLOT_HEIGHT * row, 
                                         iceRod.transform.position.z), 0.5f);
                 // AudioManager.Instance.PlayFreezeUpAudio();
                 GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.FreezeUp});
@@ -534,6 +668,80 @@ public class SlotController : MonoBehaviour
         GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.Cloth});
     }
 
+    public void UpdateBombMove(MoveFinished evt)
+    {
+        currenBombMove--;
+        if (countDownText != null) countDownText.text = currenBombMove.ToString();
+
+        if (currenBombMove < 5 && currenBombMove >= 0 && countDownText != null)
+        {
+            if (blinkTween == null || !blinkTween.IsActive())
+            {
+                blinkTween = DOTween.To(() => countDownText.color, x => countDownText.color = x, Color.red, 0.5f).SetLoops(-1, LoopType.Yoyo).SetEase(Ease.InOutSine);
+            }
+        }
+
+        if (bombImage != null)
+        {
+            bombImage.transform.DOKill(true);
+            
+            // Reset về trạng thái ban đầu để tránh sai lệch khi gọi liên tục
+            bombImage.transform.localPosition = initialBombLocalPos;
+            bombImage.transform.localRotation = initialBombLocalRot;
+            bombImage.transform.localScale = initialBombLocalScale;
+
+            Sequence seq = DOTween.Sequence();
+            // Nảy lên rồi rơi xuống (sử dụng LocalMove để an toàn không bị ảnh hưởng bởi toạ độ World)
+            seq.Append(bombImage.transform.DOLocalMoveY(initialBombLocalPos.y + 0.3f, 0.15f).SetEase(Ease.OutQuad));
+            seq.Append(bombImage.transform.DOLocalMoveY(initialBombLocalPos.y, 0.15f).SetEase(Ease.InQuad));
+            
+            // Lắc lư nhẹ và hơi đàn hồi (PunchScale)
+            seq.Insert(0, bombImage.transform.DOShakeRotation(0.3f, new Vector3(0, 0, 20f), 15, 90f));
+            seq.Insert(0, bombImage.transform.DOPunchScale(new Vector3(0.15f, -0.15f, 0.1f), 0.3f, 3, 0.5f));
+        }
+
+        if(currenBombMove <= 0)
+        {
+            GameEventBus.Publish(new RequestExplore());
+        }
+    }
+
+    public void BombExplore()
+    {
+        if (blinkTween != null) blinkTween.Kill();
+
+        if (bombImage != null)
+        {
+            bombImage.transform.DOKill();
+            Sequence seq = DOTween.Sequence();
+            
+            // Phóng to lên 1.5 lần và lắc qua lắc lại trong 0.5s
+            seq.Append(bombImage.transform.DOScale(initialBombLocalScale * 1.5f, 0.5f).SetEase(Ease.OutBack));
+            seq.Join(bombImage.transform.DOShakeRotation(0.5f, new Vector3(0, 0, 30f), 30, 90f));
+            seq.Join(bombImage.transform.DOShakePosition(0.5f, new Vector3(0.1f, 0.1f, 0), 30, 90f));
+            
+            seq.OnComplete(() => {
+                if(exploreVFX != null) exploreVFX.SetActive(true);
+                GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.Explosion});
+                
+                // Thu nhỏ quả bom lại trước khi tắt hoàn toàn
+                bombImage.transform.DOScale(Vector3.zero, 0.2f).SetEase(Ease.InBack).OnComplete(() => {
+                    // bombImage.SetActive(false);
+                    if (bombHolder != null) bombHolder.SetActive(false);
+                });
+            });
+        }
+        else
+        {
+            if(exploreVFX != null)
+            {
+                exploreVFX.SetActive(true);
+                GameEventBus.Publish(new RequestPlaySFX{soundID = SoundID.Explosion});
+            } 
+                
+        }
+    }
+
     private IEnumerator WaitAndDisableAnimator()
     {
         yield return null; // Đợi 1 frame để Animator cập nhật sang state mới
@@ -558,7 +766,7 @@ public class SlotController : MonoBehaviour
         while(blocks.Count > 0)
         {
             BlockController block = blocks.Pop();
-            if(!block.isRevealed)
+            if(!block.isRevealed || block.isSpecialBlock)
             {
                 blocks.Push(block);
                 break;

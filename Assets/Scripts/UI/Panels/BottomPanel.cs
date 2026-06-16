@@ -34,10 +34,10 @@ public class BottomPanel : MonoBehaviour
     {
         this.gameObject.SetActive(true);
         
-        RectTransform rect = GetComponent<RectTransform>();
-        rect.DOKill();
-        rect.anchoredPosition = new Vector2(originPos.x, originPos.y - 500f);
-        rect.DOAnchorPosY(originPos.y, 0.5f).SetEase(Ease.OutBack);   
+        // RectTransform rect = GetComponent<RectTransform>();
+        // rect.DOKill();
+        // rect.anchoredPosition = new Vector2(originPos.x, originPos.y - 500f);
+        // rect.DOAnchorPosY(originPos.y, 0.5f).SetEase(Ease.OutBack);   
     }
 
     public void Setup()

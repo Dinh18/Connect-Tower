@@ -8,6 +8,7 @@ public class MainMenu : Menu
 {
     enum MainMenuPanel
     {
+        None,
         Shop = 0,
         Home = 1,
         LeaderBoard = 2,
@@ -23,6 +24,7 @@ public class MainMenu : Menu
     [SerializeField] private SlidingMenuManager slidingMenu;
     [SerializeField] private Panel[] panels;
     [SerializeField] private GameObject bottomHolder;
+    private MainMenuPanel currPanel = MainMenuPanel.None;
 
     void Awake()
     {
@@ -47,6 +49,8 @@ public class MainMenu : Menu
 
     private void ShowPanel(MainMenuPanel panel)
     {
+        if(panel == currPanel) return;
+        currPanel = panel;
         shopBackGround.UnSelect();
         homeBackGround.UnSelect();
         cupBackGround.UnSelect();

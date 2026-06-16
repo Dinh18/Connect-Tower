@@ -27,7 +27,8 @@ public enum SoundID
     SelectSlot,
     MoveFail,
     FireWork,
-    Ting
+    Ting,
+    Explosion
 }
 
 [CreateAssetMenu(fileName = "AudioDatabase", menuName = "Scriptable Objects/AudioDatabase")]

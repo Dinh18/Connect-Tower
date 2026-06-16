@@ -105,11 +105,16 @@ public class ShowMechanicStep : TutorialStep
                         targetObject = block.gameObject;
                         break;
                     }
+                    else if (mechanicName.Contains("special") && block.isSpecialBlock)
+                    {
+                        targetObject = block.gameObject;
+                        break;
+                    }
                 }
                 if (targetObject != null) break;
             }
         }
-        else if (mechanicName.Contains("slot"))
+        else if (mechanicName.Contains("slot") || mechanicName.Contains("bomb"))
         {
             foreach (var slot in levelLoader.slots)
             {
@@ -123,12 +128,17 @@ public class ShowMechanicStep : TutorialStep
                     targetObject = slot.gameObject;
                     break;
                 }
+                else if (mechanicName.Contains("bomb") && slot.slotType == SlotController.SlotType.Bomb)
+                {
+                    targetObject = slot.gameObject;
+                    break;
+                }
             }
         }
 
         if (targetObject != null)
         {
-            tutorialUI.StartTutorial(targetObject, instruction, true);
+            tutorialUI.StartTutorial(targetObject, instruction, false);
         }
         else
         {

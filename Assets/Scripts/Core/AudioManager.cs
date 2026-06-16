@@ -6,7 +6,7 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioSource sfxSource;
     [SerializeField] private AudioSource bgSource;
     [SerializeField] private AudioSource mixSource;
-    private AudioSO[] audios;
+    [SerializeField]private AudioSO[] audios;
     [SerializeField] private AudioClip tingClip;
     [SerializeField] private AudioClip ingameBGClip;
     [SerializeField] private AudioClip mainMenuBGClip;

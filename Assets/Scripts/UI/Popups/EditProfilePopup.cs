@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,7 +14,7 @@ public class EditProfilePopup : Popup
     [Header("UI References")]
     [SerializeField] private Button closeButton;
     [SerializeField] private Button saveButton;
-    [SerializeField] private InputField editNameText;
+    [SerializeField] private TMP_InputField editNameText;
     [SerializeField] private Image avatarImage;
     [SerializeField] private Image frameImage;
     [Header("Item holder")]
@@ -31,16 +32,16 @@ public class EditProfilePopup : Popup
     private FrameDataSO originalFrame;
     private AvatarDataSO originalAvatar;
     private string originalName;
-    void Start()
-    {
-        Setup();
-    }
+    private bool isSetup = false;
+
     private void ClosePopup()
     {
         CoreServices.Get<UIManager>().PopUI();
     }
     void OnEnable()
     {
+        Setup();
+
         closeButton.onClick.AddListener(ClosePopup);
         saveButton.onClick.AddListener(OnClickSave);
         editNameText.onValueChanged.AddListener(OnNameChanged);
@@ -48,9 +49,10 @@ public class EditProfilePopup : Popup
         avatarTab.onValueChanged.RemoveAllListeners();
         frameTab.onValueChanged.RemoveAllListeners();
 
-        ConfigContent();
+        frameTab.isOn = true;
+        avatarTab.isOn = false;
 
-        OnTabChanged(ProfileType.Frame,true);
+        ConfigContent();
 
         frameTab.onValueChanged.AddListener((isOn) => OnTabChanged(ProfileType.Frame, isOn));
         avatarTab.onValueChanged.AddListener((isOn) => OnTabChanged(ProfileType.Avatar, isOn));
@@ -64,6 +66,9 @@ public class EditProfilePopup : Popup
 
     private void Setup()
     {
+        if (isSetup) return;
+        isSetup = true;
+
         DataManager dataManager = CoreServices.Get<DataManager>();
         allFramesUI = new List<ProfileItemUI>();
         allAvatarsUI = new List<ProfileItemUI>();
@@ -85,7 +90,6 @@ public class EditProfilePopup : Popup
             profileItem.GetComponent<Toggle>().onValueChanged.AddListener((isOn) => OnChangeProfile(ProfileType.Frame, profileItem.itemData, isOn));
             allFramesUI.Add(profileItem);
         }
-        OnTabChanged(ProfileType.Frame,true);
     }
 
     private void ConfigContent()
@@ -115,6 +119,10 @@ public class EditProfilePopup : Popup
             if(currItem.id == profileItem.itemData.id)
             {
                 profileItem.selectedToggle.isOn = true;
+            }
+            else
+            {
+                profileItem.selectedToggle.isOn = false;
             }
         }
     }

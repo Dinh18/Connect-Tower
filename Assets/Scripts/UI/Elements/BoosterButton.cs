@@ -94,9 +94,12 @@ public class BoosterButton : MonoBehaviour
             return;
         }
 
-        
-
         if(CoreServices.Get<GameManager>().GetCurrState() == GameManager.GameState.Pause) return;
+
+        if (!booster.CanExecute())
+        {
+            return;
+        }
 
         GameEventBus.Publish(new BoosterAnimationStateEvent { isAnimating = true });
         CoreServices.Get<InputManager>().SetInputBlocked(true);

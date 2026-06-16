@@ -1,13 +1,13 @@
 using System.Collections;
 using DG.Tweening;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Screen = UnityEngine.Screen;
 
 public class HomePanel : Panel
 {
     [SerializeField] private Button playButton;
-    [SerializeField] private Text playText;
+    [SerializeField] private TextMeshProUGUI playText;
     [SerializeField] private Transform playHolder;
     [SerializeField] private ParticleSystem finishParticle; 
     [Header("Profile References")]
@@ -16,12 +16,12 @@ public class HomePanel : Panel
     [SerializeField] private Image frameImage;
     [Header("Coins References")]
     [SerializeField] private Button addCoins;
-    [SerializeField] private Text coinText;
+    [SerializeField] private TextMeshProUGUI coinText;
     [Header("Setting References")]
     [SerializeField] private Button setting;
     private int oldCoins;
     [Header("Heart References")]
-    [SerializeField] private Text heartCountText;
+    [SerializeField] private TextMeshProUGUI heartCountText;
     [SerializeField] private Image heartIcon;
     [SerializeField] private Button addHeartButton;
     [Header("Button Play Setting")]

@@ -20,6 +20,11 @@ public class GameManager : MonoBehaviour
     private int maxMoves;
     private bool isInfiniteMovesActive = false;
     public bool isRestarting = false;
+    private int pendingMoves = 0;
+
+    public int GetPendingMoves() => pendingMoves;
+    public void IncrementPendingMoves() => pendingMoves++;
+    public bool IsInfiniteMovesActive() => isInfiniteMovesActive;
 
     // Dependencies injected via Init
     private CameraController cameraController;
@@ -70,10 +75,12 @@ public class GameManager : MonoBehaviour
     {
         this.moves = maxMoves;
         this.maxMoves = maxMoves;
+        this.pendingMoves = 0;
         OnChangeMoves?.Invoke(moves);
         GameEventBus.Publish(new MovesUpdatedEvent { currentMoves = this.moves });
         CoreServices.Get<DataManager>().ResetSessionUndo();
-        cameraController.FitCamera(slotsManager.row1, slotsManager.row2);
+        // cameraController.FitCamera(slotsManager.row1, slotsManager.row2);
+        // CameraFitter.FitBoardOrtho(Camera.main, 2, )
     }
 
     private Coroutine noMovesCoroutine;
@@ -82,6 +89,8 @@ public class GameManager : MonoBehaviour
 
     public void Move(bool isMoving)
     {
+        if (pendingMoves > 0) pendingMoves--;
+        GameEventBus.Publish(new MoveFinished());
         if(isInfiniteMovesActive) return;
         if(!isMoving)
         {
@@ -244,6 +253,14 @@ public class GameManager : MonoBehaviour
 
         prevState = currState;
         currState = newState;
+
+        if (currState == GameState.MainMenu)
+        {
+            if (levelLoader != null)
+            {
+                levelLoader.ClearLevel();
+            }
+        }
 
         if(currState == GameState.Playing && prevState != GameState.Pause && prevState != GameState.Lose)
         {
